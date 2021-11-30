@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pando", "Pando\Pando.csproj", "{BE71BDD9-530E-4B43-9A04-7B311B34534E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTests", "PandoTests\PandoTests.csproj", "{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndianBitConverter", "EndianBitConverter\EndianBitConverter.csproj", "{4F505E40-D21C-43A0-BC74-1A9F146193C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndianBitConverterTests", "EndianBitConverterTests\EndianBitConverterTests.csproj", "{B877BC33-EA08-47D1-8263-4120FEFA8CB2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTreeExamples", "PandoTreeExamples\PandoTreeExamples.csproj", "{A873C170-E3D7-4D7A-BE28-967931B88F05}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE71BDD9-530E-4B43-9A04-7B311B34534E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE71BDD9-530E-4B43-9A04-7B311B34534E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE71BDD9-530E-4B43-9A04-7B311B34534E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE71BDD9-530E-4B43-9A04-7B311B34534E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F505E40-D21C-43A0-BC74-1A9F146193C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F505E40-D21C-43A0-BC74-1A9F146193C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F505E40-D21C-43A0-BC74-1A9F146193C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F505E40-D21C-43A0-BC74-1A9F146193C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B877BC33-EA08-47D1-8263-4120FEFA8CB2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B877BC33-EA08-47D1-8263-4120FEFA8CB2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B877BC33-EA08-47D1-8263-4120FEFA8CB2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B877BC33-EA08-47D1-8263-4120FEFA8CB2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A873C170-E3D7-4D7A-BE28-967931B88F05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A873C170-E3D7-4D7A-BE28-967931B88F05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A873C170-E3D7-4D7A-BE28-967931B88F05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A873C170-E3D7-4D7A-BE28-967931B88F05}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
