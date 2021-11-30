@@ -7,13 +7,7 @@ bin/
 obj/
 
 # Rider Files
-.idea/**/dictionaries
-.idea/**/shelf
-
-.idea/**/workspace.xml
-.idea/**/tasks.xml
-.idea/**/usage.statistics.xml
-.idea/**/contentModel.xml
+.idea/
 
 # Visual Studio Files
 .vs/
