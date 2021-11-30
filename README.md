@@ -131,5 +131,5 @@ itself.
 To effectively author a Pando node serializer, you should have some knowledge of how data is stored in the repository.
 See the section on [how data is stored in the repository](#storage-in-the-repository).
 
-Also see `PandoTreeExamples/README.md` for some guidelines on creating tree hierarchies that will play well with Pando
-and its serialization model.
+Also see `docs/PandoTreeExamples/README.md` for some guidelines on creating tree hierarchies that will play well with
+Pando and its serialization model.
