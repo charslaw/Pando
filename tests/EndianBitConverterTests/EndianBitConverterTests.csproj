@@ -4,9 +4,9 @@
 
 		<IsPackable>false</IsPackable>
 
-		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
-
 		<LangVersion>10</LangVersion>
+
+		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
