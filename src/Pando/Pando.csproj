@@ -16,4 +16,8 @@
 		<ProjectReference Include="..\EndianBitConverter\EndianBitConverter.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<InternalsVisibleTo Include="$(AssemblyName)Tests" />
+	</ItemGroup>
+
 </Project>
