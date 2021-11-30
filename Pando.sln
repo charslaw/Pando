@@ -1,14 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pando", "Pando\Pando.csproj", "{BE71BDD9-530E-4B43-9A04-7B311B34534E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pando", "src\Pando\Pando.csproj", "{BE71BDD9-530E-4B43-9A04-7B311B34534E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTests", "PandoTests\PandoTests.csproj", "{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTests", "tests\PandoTests\PandoTests.csproj", "{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndianBitConverter", "EndianBitConverter\EndianBitConverter.csproj", "{4F505E40-D21C-43A0-BC74-1A9F146193C5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndianBitConverter", "src\EndianBitConverter\EndianBitConverter.csproj", "{4F505E40-D21C-43A0-BC74-1A9F146193C5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndianBitConverterTests", "EndianBitConverterTests\EndianBitConverterTests.csproj", "{B877BC33-EA08-47D1-8263-4120FEFA8CB2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EndianBitConverterTests", "tests\EndianBitConverterTests\EndianBitConverterTests.csproj", "{B877BC33-EA08-47D1-8263-4120FEFA8CB2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTreeExamples", "PandoTreeExamples\PandoTreeExamples.csproj", "{A873C170-E3D7-4D7A-BE28-967931B88F05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTreeExamples", "docs\PandoTreeExamples\PandoTreeExamples.csproj", "{A873C170-E3D7-4D7A-BE28-967931B88F05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
