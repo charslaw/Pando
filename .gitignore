@@ -1,0 +1,33 @@
+# User Settings
+*.user
+*.userprefs
+
+# Output
+bin/
+obj/
+
+# Rider Files
+.idea/**/dictionaries
+.idea/**/shelf
+
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/contentModel.xml
+
+# Visual Studio Files
+.vs/
+
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+
+# VS Code Files
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+.history/
