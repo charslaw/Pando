@@ -6,66 +6,65 @@ using Pando.Exceptions;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
 
-namespace Pando
+namespace Pando;
+
+public class PandoSaver<T> : IPandoSaver<T>
 {
-	public class PandoSaver<T> : IPandoSaver<T>
+	private readonly IPandoRepository _repository;
+	private readonly IPandoNodeSerializer<T> _serializer;
+
+	// preallocate delegate to avoid making an allocation every time we deserialize a node.
+	private readonly SpanVisitor<byte, T> _deserializeDelegate;
+	private T Deserialize(ReadOnlySpan<byte> bytes) => _serializer.Deserialize(bytes, _repository);
+
+	private ulong _currentSnapshot;
+
+	public PandoSaver(IPandoRepository repository, IPandoNodeSerializer<T> serializer)
 	{
-		private readonly IPandoRepository _repository;
-		private readonly IPandoNodeSerializer<T> _serializer;
+		_repository = repository;
+		_serializer = serializer;
+		_deserializeDelegate = Deserialize;
+		_currentSnapshot = repository.LatestSnapshot;
+	}
 
-		// preallocate delegate to avoid making an allocation every time we deserialize a node.
-		private readonly SpanVisitor<byte, T> _deserializeDelegate;
-		private T Deserialize(ReadOnlySpan<byte> bytes) => _serializer.Deserialize(bytes, _repository);
+	public ulong SaveSnapshot(T tree)
+	{
+		var nodeHash = _serializer.Serialize(tree, _repository);
+		_currentSnapshot = _repository.AddSnapshot(_currentSnapshot, nodeHash);
+		return _currentSnapshot;
+	}
 
-		private ulong _currentSnapshot;
+	public T GetSnapshot(ulong hash)
+	{
+		var nodeHash = _repository.GetSnapshotRootNode(hash);
+		return _repository.GetNode(nodeHash, _deserializeDelegate);
+	}
 
-		public PandoSaver(IPandoRepository repository, IPandoNodeSerializer<T> serializer)
+	public SnapshotChain<T> GetFullSnapshotChain()
+	{
+		var snapshotEntries = _repository.GetAllSnapshotEntries().ToArray();
+
+		foreach (var entry in snapshotEntries)
 		{
-			_repository = repository;
-			_serializer = serializer;
-			_deserializeDelegate = Deserialize;
-			_currentSnapshot = repository.LatestSnapshot;
+			if (entry.ParentHash == 0) return BuildSnapshotLink(entry, snapshotEntries);
 		}
 
-		public ulong SaveSnapshot(T tree)
+		throw new NoRootSnapshotException();
+	}
+
+	private SnapshotChain<T> BuildSnapshotLink(SnapshotEntry thisSnapshot, SnapshotEntry[] entries)
+	{
+		var (hash, _, _) = thisSnapshot;
+
+		var children = new List<SnapshotChain<T>>();
+		// ReSharper disable once LoopCanBeConvertedToQuery
+		foreach (var entry in entries)
 		{
-			var nodeHash = _serializer.Serialize(tree, _repository);
-			_currentSnapshot = _repository.AddSnapshot(_currentSnapshot, nodeHash);
-			return _currentSnapshot;
+			if (entry.ParentHash != hash) continue;
+
+			children.Add(BuildSnapshotLink(entry, entries));
 		}
 
-		public T GetSnapshot(ulong hash)
-		{
-			var nodeHash = _repository.GetSnapshotRootNode(hash);
-			return _repository.GetNode(nodeHash, _deserializeDelegate);
-		}
-
-		public SnapshotChain<T> GetFullSnapshotChain()
-		{
-			var snapshotEntries = _repository.GetAllSnapshotEntries().ToArray();
-
-			foreach (var entry in snapshotEntries)
-			{
-				if (entry.ParentHash == 0) return BuildSnapshotLink(entry, snapshotEntries);
-			}
-
-			throw new NoRootSnapshotException();
-		}
-
-		private SnapshotChain<T> BuildSnapshotLink(SnapshotEntry thisSnapshot, SnapshotEntry[] entries)
-		{
-			var (hash, _, _) = thisSnapshot;
-
-			var children = new List<SnapshotChain<T>>();
-			// ReSharper disable once LoopCanBeConvertedToQuery
-			foreach (var entry in entries)
-			{
-				if (entry.ParentHash != hash) continue;
-
-				children.Add(BuildSnapshotLink(entry, entries));
-			}
-
-			return new SnapshotChain<T>(hash, children.ToImmutableArray(), this);
-		}
+		return new SnapshotChain<T>(hash, children.ToImmutableArray(), this);
 	}
 }

@@ -1,21 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
 
 		<IsPackable>false</IsPackable>
+
+		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+
+		<LangVersion>10</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="FluentAssertions" Version="5.10.3"/>
-		<PackageReference Include="NUnit" Version="3.12.0"/>
-		<PackageReference Include="NUnit.Analyzers" Version="3.1.0"/>
-		<PackageReference Include="NUnit3TestAdapter" Version="3.16.1"/>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0"/>
+		<PackageReference Include="FluentAssertions" Version="5.10.3" />
+		<PackageReference Include="NUnit" Version="3.12.0" />
+		<PackageReference Include="NUnit.Analyzers" Version="3.1.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="3.16.1" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\EndianBitConverter\EndianBitConverter.csproj"/>
+		<ProjectReference Include="..\..\src\EndianBitConverter\EndianBitConverter.csproj" />
 	</ItemGroup>
 
 </Project>

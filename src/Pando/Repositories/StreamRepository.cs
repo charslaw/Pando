@@ -2,79 +2,78 @@ using System;
 using System.IO;
 using Pando.Repositories.Utils;
 
-namespace Pando.Repositories
+namespace Pando.Repositories;
+
+public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnapshotRepository, IDisposable
 {
-	public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnapshotRepository, IDisposable
+	private readonly Stream _snapshotIndexStream;
+	private readonly Stream _nodeIndexStream;
+	private readonly Stream _nodeDataStream;
+
+	/// Counts total number of bytes in the node data stream.
+	private long _nodeDataBytesCount;
+
+	public StreamRepository(Stream snapshotIndexStream, Stream nodeIndexStream, Stream nodeDataStream)
 	{
-		private readonly Stream _snapshotIndexStream;
-		private readonly Stream _nodeIndexStream;
-		private readonly Stream _nodeDataStream;
+		_snapshotIndexStream = snapshotIndexStream;
+		_nodeIndexStream = nodeIndexStream;
+		_nodeDataStream = nodeDataStream;
+		_nodeDataBytesCount = nodeDataStream.Length;
+	}
 
-		/// Counts total number of bytes in the node data stream.
-		private long _nodeDataBytesCount;
+	/// <remarks>The StreamRepository <i>does not</i> defend against duplicate nodes.
+	/// Before adding a node, you should ensure it is not a duplicate</remarks>
+	/// <inheritdoc/>
+	public ulong AddNode(ReadOnlySpan<byte> bytes)
+	{
+		var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
+		AddNodeWithHashUnsafe(hash, bytes);
+		return hash;
+	}
 
-		public StreamRepository(Stream snapshotIndexStream, Stream nodeIndexStream, Stream nodeDataStream)
-		{
-			_snapshotIndexStream = snapshotIndexStream;
-			_nodeIndexStream = nodeIndexStream;
-			_nodeDataStream = nodeDataStream;
-			_nodeDataBytesCount = nodeDataStream.Length;
-		}
+	/// Adds a new node indexed with the given hash, containing the given bytes
+	/// <remarks>
+	///     <para>This method is unsafe because the given hash and data might mismatch.
+	///     When calling this method, ensure the correct hash is given.</para>
+	///     <para>The StreamRepository <i>does not</i> defend against duplicate nodes.
+	///     Before adding a node, you should ensure it is not a duplicate.</para>
+	/// </remarks>
+	internal void AddNodeWithHashUnsafe(ulong hash, ReadOnlySpan<byte> bytes)
+	{
+		var start = _nodeDataBytesCount;
+		_nodeDataStream.Write(bytes.ToArray(), 0, bytes.Length);
+		_nodeDataBytesCount += bytes.Length;
 
-		/// <remarks>The StreamRepository <i>does not</i> defend against duplicate nodes.
-		/// Before adding a node, you should ensure it is not a duplicate</remarks>
-		/// <inheritdoc/>
-		public ulong AddNode(ReadOnlySpan<byte> bytes)
-		{
-			var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
-			AddNodeWithHashUnsafe(hash, bytes);
-			return hash;
-		}
+		PandoRepositoryIndexUtils.WriteNodeIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
+	}
 
-		/// Adds a new node indexed with the given hash, containing the given bytes
-		/// <remarks>
-		///     <para>This method is unsafe because the given hash and data might mismatch.
-		///     When calling this method, ensure the correct hash is given.</para>
-		///     <para>The StreamRepository <i>does not</i> defend against duplicate nodes.
-		///     Before adding a node, you should ensure it is not a duplicate.</para>
-		/// </remarks>
-		internal void AddNodeWithHashUnsafe(ulong hash, ReadOnlySpan<byte> bytes)
-		{
-			var start = _nodeDataBytesCount;
-			_nodeDataStream.Write(bytes.ToArray(), 0, bytes.Length);
-			_nodeDataBytesCount += bytes.Length;
+	/// <remarks>The StreamRepository <i>does not</i> defend against duplicate snapshots.
+	/// Before adding a snapshot, you should ensure it is not a duplicate.</remarks>
+	/// <inheritdoc/>
+	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
+	{
+		var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
+		AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
+		return hash;
+	}
 
-			PandoRepositoryIndexUtils.WriteNodeIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
-		}
+	/// Adds a new snapshot indexed with the given hash, containing the parent hash and node hash
+	/// <remarks>
+	///     <para>This method is unsafe because the given hash and data might mismatch.
+	///     When calling this method, ensure the correct hash is given.</para>
+	///     <para>The StreamRepository <i>does not</i> defend against duplicate snapshots.
+	///     Before adding a snapshot, you should ensure it is not a duplicate.</para>
+	/// </remarks>
+	internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
+	{
+		PandoRepositoryIndexUtils.WriteSnapshotIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
+	}
 
-		/// <remarks>The StreamRepository <i>does not</i> defend against duplicate snapshots.
-		/// Before adding a snapshot, you should ensure it is not a duplicate.</remarks>
-		/// <inheritdoc/>
-		public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
-		{
-			var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
-			AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
-			return hash;
-		}
-
-		/// Adds a new snapshot indexed with the given hash, containing the parent hash and node hash
-		/// <remarks>
-		///     <para>This method is unsafe because the given hash and data might mismatch.
-		///     When calling this method, ensure the correct hash is given.</para>
-		///     <para>The StreamRepository <i>does not</i> defend against duplicate snapshots.
-		///     Before adding a snapshot, you should ensure it is not a duplicate.</para>
-		/// </remarks>
-		internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
-		{
-			PandoRepositoryIndexUtils.WriteSnapshotIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
-		}
-
-		/// Disposes this StreamRepository and all contained streams
-		public void Dispose()
-		{
-			_snapshotIndexStream.Dispose();
-			_nodeIndexStream.Dispose();
-			_nodeDataStream.Dispose();
-		}
+	/// Disposes this StreamRepository and all contained streams
+	public void Dispose()
+	{
+		_snapshotIndexStream.Dispose();
+		_nodeIndexStream.Dispose();
+		_nodeDataStream.Dispose();
 	}
 }

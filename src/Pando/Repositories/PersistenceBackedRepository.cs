@@ -2,53 +2,52 @@ using System;
 using System.Collections.Generic;
 using Pando.Repositories.Utils;
 
-namespace Pando.Repositories
+namespace Pando.Repositories;
+
+public class PersistenceBackedRepository : IPandoRepository, IDisposable
 {
-	public class PersistenceBackedRepository : IPandoRepository, IDisposable
+	private readonly InMemoryRepository _mainRepository;
+	private readonly StreamRepository _persistentRepository;
+
+	public ulong LatestSnapshot => _mainRepository.LatestSnapshot;
+
+	public PersistenceBackedRepository(InMemoryRepository mainRepository, StreamRepository persistentRepository)
 	{
-		private readonly InMemoryRepository _mainRepository;
-		private readonly StreamRepository _persistentRepository;
-
-		public ulong LatestSnapshot => _mainRepository.LatestSnapshot;
-
-		public PersistenceBackedRepository(InMemoryRepository mainRepository, StreamRepository persistentRepository)
-		{
-			_mainRepository = mainRepository;
-			_persistentRepository = persistentRepository;
-		}
-
-		public ulong AddNode(ReadOnlySpan<byte> bytes)
-		{
-			var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
-
-			if (_mainRepository.HasNode(hash)) return hash;
-
-			_mainRepository.AddNodeWithHashUnsafe(hash, bytes);
-			_persistentRepository.AddNodeWithHashUnsafe(hash, bytes);
-			return hash;
-		}
-
-		public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
-		{
-			var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
-
-			if (_mainRepository.HasSnapshot(hash)) return hash;
-
-			_mainRepository.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
-			_persistentRepository.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
-			return hash;
-		}
-
-		public bool HasNode(ulong hash) => _mainRepository.HasNode(hash);
-		public bool HasSnapshot(ulong hash) => _mainRepository.HasSnapshot(hash);
-
-		public T GetNode<T>(ulong hash, SpanVisitor<byte, T> nodeDeserializer) => _mainRepository.GetNode(hash, nodeDeserializer);
-		public int GetSizeOfNode(ulong hash) => _mainRepository.GetSizeOfNode(hash);
-
-		public ulong GetSnapshotParent(ulong hash) => _mainRepository.GetSnapshotParent(hash);
-		public ulong GetSnapshotRootNode(ulong hash) => _mainRepository.GetSnapshotRootNode(hash);
-		public IEnumerable<SnapshotEntry> GetAllSnapshotEntries() => _mainRepository.GetAllSnapshotEntries();
-
-		public void Dispose() => _persistentRepository.Dispose();
+		_mainRepository = mainRepository;
+		_persistentRepository = persistentRepository;
 	}
+
+	public ulong AddNode(ReadOnlySpan<byte> bytes)
+	{
+		var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
+
+		if (_mainRepository.HasNode(hash)) return hash;
+
+		_mainRepository.AddNodeWithHashUnsafe(hash, bytes);
+		_persistentRepository.AddNodeWithHashUnsafe(hash, bytes);
+		return hash;
+	}
+
+	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
+	{
+		var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
+
+		if (_mainRepository.HasSnapshot(hash)) return hash;
+
+		_mainRepository.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
+		_persistentRepository.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
+		return hash;
+	}
+
+	public bool HasNode(ulong hash) => _mainRepository.HasNode(hash);
+	public bool HasSnapshot(ulong hash) => _mainRepository.HasSnapshot(hash);
+
+	public T GetNode<T>(ulong hash, SpanVisitor<byte, T> nodeDeserializer) => _mainRepository.GetNode(hash, nodeDeserializer);
+	public int GetSizeOfNode(ulong hash) => _mainRepository.GetSizeOfNode(hash);
+
+	public ulong GetSnapshotParent(ulong hash) => _mainRepository.GetSnapshotParent(hash);
+	public ulong GetSnapshotRootNode(ulong hash) => _mainRepository.GetSnapshotRootNode(hash);
+	public IEnumerable<SnapshotEntry> GetAllSnapshotEntries() => _mainRepository.GetAllSnapshotEntries();
+
+	public void Dispose() => _persistentRepository.Dispose();
 }

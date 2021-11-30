@@ -1,11 +1,10 @@
 using System;
 
-namespace Pando.Exceptions
-{
-	public class HashNotFoundException : Exception
-	{
-		public HashNotFoundException(string message) : base(message) { }
-	}
+namespace Pando.Exceptions;
 
-	public class NoRootSnapshotException : Exception { }
+public class HashNotFoundException : Exception
+{
+	public HashNotFoundException(string message) : base(message) { }
 }
+
+public class NoRootSnapshotException : Exception { }

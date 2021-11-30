@@ -1,11 +1,10 @@
 using System;
 using Pando.Repositories;
 
-namespace Pando
+namespace Pando;
+
+public interface IPandoNodeSerializer<T>
 {
-	public interface IPandoNodeSerializer<T>
-	{
-		public ulong Serialize(T obj, IWritablePandoNodeRepository repository);
-		public T Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository);
-	}
+	public ulong Serialize(T obj, IWritablePandoNodeRepository repository);
+	public T Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository);
 }
