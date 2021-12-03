@@ -27,37 +27,37 @@ public class InMemoryRepository : IPandoRepository
 		_nodeData = nodeData ?? new SpannableList<byte>();
 	}
 
-	public InMemoryRepository(Stream snapshotIndexStream, Stream nodeIndexStream, Stream nodeDataStream)
-		: this(snapshotIndexStream, nodeIndexStream, nodeDataStream, null, null, null) { }
+	public InMemoryRepository(Stream snapshotIndexSource, Stream nodeIndexSource, Stream nodeDataSource)
+		: this(snapshotIndexSource, nodeIndexSource, nodeDataSource, null, null, null) { }
 
 	internal InMemoryRepository(
-		Stream snapshotIndexStream, Stream nodeIndexStream, Stream nodeDataStream,
+		Stream snapshotIndexSource, Stream nodeIndexSource, Stream nodeDataSource,
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
 		Dictionary<ulong, DataSlice>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
 	)
 	{
 		_snapshotIndex = snapshotIndex
-			?? new Dictionary<ulong, SnapshotData>(PandoRepositoryIndexUtils.GetSnapshotIndexEntryCount(snapshotIndexStream));
+			?? new Dictionary<ulong, SnapshotData>(PandoRepositoryIndexUtils.GetSnapshotIndexEntryCount(snapshotIndexSource));
 		_nodeIndex = nodeIndex
-			?? new Dictionary<ulong, DataSlice>(PandoRepositoryIndexUtils.GetNodeIndexEntryCount(nodeIndexStream));
+			?? new Dictionary<ulong, DataSlice>(PandoRepositoryIndexUtils.GetNodeIndexEntryCount(nodeIndexSource));
 
-		snapshotIndexStream.Seek(0, SeekOrigin.Begin);
-		nodeIndexStream.Seek(0, SeekOrigin.Begin);
-		nodeDataStream.Seek(0, SeekOrigin.Begin);
+		snapshotIndexSource.Seek(0, SeekOrigin.Begin);
+		nodeIndexSource.Seek(0, SeekOrigin.Begin);
+		nodeDataSource.Seek(0, SeekOrigin.Begin);
 
-		while (PandoRepositoryIndexUtils.ReadNextSnapshotIndexEntry(snapshotIndexStream, out var hash, out var snapshotData))
+		while (PandoRepositoryIndexUtils.ReadNextSnapshotIndexEntry(snapshotIndexSource, out var hash, out var snapshotData))
 		{
 			AddSnapshotWithHashUnsafe(hash, snapshotData);
 		}
 
-		while (PandoRepositoryIndexUtils.ReadNextNodeIndexEntry(nodeIndexStream, out var hash, out var slice))
+		while (PandoRepositoryIndexUtils.ReadNextNodeIndexEntry(nodeIndexSource, out var hash, out var slice))
 		{
 			_nodeIndex.Add(hash, slice);
 		}
 
-		var buffer = new byte[nodeDataStream.Length];
-		nodeDataStream.Read(buffer, 0, (int)nodeDataStream.Length);
+		var buffer = new byte[nodeDataSource.Length];
+		nodeDataSource.Read(buffer, 0, (int)nodeDataSource.Length);
 
 		if (nodeData is not null)
 		{
