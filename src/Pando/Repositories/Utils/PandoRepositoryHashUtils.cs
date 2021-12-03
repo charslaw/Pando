@@ -1,5 +1,4 @@
 using System;
-using System.Buffers.Binary;
 using Standart.Hash.xxHash;
 
 namespace Pando.Repositories.Utils;
@@ -15,8 +14,8 @@ internal static class PandoRepositoryHashUtils
 	public static ulong ComputeSnapshotHash(ulong parentHash, ulong rootNodeHash)
 	{
 		Span<byte> buffer = stackalloc byte[SIZE_OF_SNAPSHOT_BUFFER];
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer[..END_OF_PARENT_HASH], parentHash);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer[END_OF_PARENT_HASH..END_OF_ROOT_NODE_HASH], rootNodeHash);
+		ByteConverter.CopyBytes(parentHash, buffer[..END_OF_PARENT_HASH]);
+		ByteConverter.CopyBytes(rootNodeHash, buffer[END_OF_PARENT_HASH..END_OF_ROOT_NODE_HASH]);
 		return xxHash64.ComputeHash(buffer, SIZE_OF_SNAPSHOT_BUFFER);
 	}
 }

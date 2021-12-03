@@ -1,6 +1,5 @@
 using System.IO;
 using FluentAssertions;
-using MiscUtil.Conversion;
 using NUnit.Framework;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
@@ -10,14 +9,12 @@ namespace PandoTests.Repositories.InMemoryRepositoryTests;
 
 public class ReconstitutionTests
 {
-	private static readonly EndianBitConverter bitConverter = EndianBitConverter.Little;
-
 	[Test]
 	public void Should_have_node_after_being_reconstituted()
 	{
 		// Test Data
 		var nodeHash = 123UL;
-		var nodeIndex = ArrayX.Concat(bitConverter.GetBytes(nodeHash), new byte[8]);
+		var nodeIndex = ArrayX.Concat(ByteConverter.GetBytes(nodeHash), new byte[8]);
 
 		// Arrange/Act
 		var nodeIndexStream = new MemoryStream(nodeIndex.CreateCopy());
@@ -35,12 +32,12 @@ public class ReconstitutionTests
 		var hash2 = 4567UL;
 		var nodeData = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 };
 		var nodeIndexEntry = ArrayX.Concat(
-			bitConverter.GetBytes(hash1),
-			bitConverter.GetBytes(0),
-			bitConverter.GetBytes(4),
-			bitConverter.GetBytes(hash2),
-			bitConverter.GetBytes(4),
-			bitConverter.GetBytes(4)
+			ByteConverter.GetBytes(hash1),
+			ByteConverter.GetBytes(0),
+			ByteConverter.GetBytes(4),
+			ByteConverter.GetBytes(hash2),
+			ByteConverter.GetBytes(4),
+			ByteConverter.GetBytes(4)
 		);
 
 		// Arrange/Act
@@ -60,7 +57,7 @@ public class ReconstitutionTests
 	{
 		// Test Data
 		var hash = 123UL;
-		var snapshotIndex = ArrayX.Concat(bitConverter.GetBytes(hash), new byte[16]);
+		var snapshotIndex = ArrayX.Concat(ByteConverter.GetBytes(hash), new byte[16]);
 
 		// Arrange/Act
 		var snapshotIndexStream = new MemoryStream(snapshotIndex);
@@ -78,9 +75,9 @@ public class ReconstitutionTests
 		var parentHash = 5UL;
 		var rootNodeHash = 42UL;
 		var snapshotIndexEntry = ArrayX.Concat(
-			bitConverter.GetBytes(hash),
-			bitConverter.GetBytes(parentHash),
-			bitConverter.GetBytes(rootNodeHash)
+			ByteConverter.GetBytes(hash),
+			ByteConverter.GetBytes(parentHash),
+			ByteConverter.GetBytes(rootNodeHash)
 		);
 
 		// Arrange/Act
@@ -105,7 +102,7 @@ public class ReconstitutionTests
 			nodeData: nodeDataList
 		);
 
-		nodeDataList.Count.Should().Be(3);
+		AssertionExtensions.Should((int)nodeDataList.Count).Be(3);
 	}
 
 	[Test]
@@ -114,9 +111,9 @@ public class ReconstitutionTests
 		var hash1 = 1UL;
 		var hash2 = 2UL;
 		var snapshotIndex = ArrayX.Concat(
-			bitConverter.GetBytes(hash1),
+			ByteConverter.GetBytes(hash1),
 			new byte[16],
-			bitConverter.GetBytes(hash2),
+			ByteConverter.GetBytes(hash2),
 			new byte[16]
 		);
 

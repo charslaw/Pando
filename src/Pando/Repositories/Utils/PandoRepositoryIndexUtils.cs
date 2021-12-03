@@ -1,5 +1,4 @@
 using System;
-using System.Buffers.Binary;
 using System.IO;
 
 namespace Pando.Repositories.Utils;
@@ -18,9 +17,9 @@ internal static class PandoRepositoryIndexUtils
 	public static void WriteNodeIndexEntry(Stream stream, ulong hash, int dataStart, int dataLength)
 	{
 		Span<byte> buffer = stackalloc byte[SIZE_OF_NODE_INDEX_ENTRY];
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer[..NODE_HASH_END], hash);
-		BinaryPrimitives.WriteInt32LittleEndian(buffer[NODE_HASH_END..NODE_DATA_START_END], dataStart);
-		BinaryPrimitives.WriteInt32LittleEndian(buffer[NODE_DATA_START_END..NODE_DATA_LEN_END], dataLength);
+		ByteConverter.CopyBytes(hash, buffer[..NODE_HASH_END]);
+		ByteConverter.CopyBytes(dataStart, buffer[NODE_HASH_END..NODE_DATA_START_END]);
+		ByteConverter.CopyBytes(dataLength, buffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
 		stream.Write(buffer);
 	}
 
@@ -39,9 +38,9 @@ internal static class PandoRepositoryIndexUtils
 				throw new IncompleteReadException("Could not read a full node index from the remaining bytes in the stream");
 		}
 
-		hash = BinaryPrimitives.ReadUInt64LittleEndian(buffer[..NODE_HASH_END]);
-		var start = BinaryPrimitives.ReadInt32LittleEndian(buffer[NODE_HASH_END..NODE_DATA_START_END]);
-		var length = BinaryPrimitives.ReadInt32LittleEndian(buffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
+		hash = ByteConverter.GetUInt64(buffer[..NODE_HASH_END]);
+		var start = ByteConverter.GetInt32(buffer[NODE_HASH_END..NODE_DATA_START_END]);
+		var length = ByteConverter.GetInt32(buffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
 		slice = new DataSlice(start, length);
 		return true;
 	}
@@ -58,9 +57,9 @@ internal static class PandoRepositoryIndexUtils
 	public static void WriteSnapshotIndexEntry(Stream stream, ulong hash, ulong parentHash, ulong rootNodeHash)
 	{
 		Span<byte> buffer = stackalloc byte[SIZE_OF_SNAPSHOT_INDEX_ENTRY];
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer[..SS_HASH_END], hash);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer[SS_HASH_END..SS_PARENT_HASH_END], parentHash);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer[SS_PARENT_HASH_END..SS_ROOT_HASH_END], rootNodeHash);
+		ByteConverter.CopyBytes(hash, buffer[..SS_HASH_END]);
+		ByteConverter.CopyBytes(parentHash, buffer[SS_HASH_END..SS_PARENT_HASH_END]);
+		ByteConverter.CopyBytes(rootNodeHash, buffer[SS_PARENT_HASH_END..SS_ROOT_HASH_END]);
 		stream.Write(buffer);
 	}
 
@@ -79,9 +78,9 @@ internal static class PandoRepositoryIndexUtils
 				throw new IncompleteReadException("Could not read a full snapshot index from the remaining bytes in the stream");
 		}
 
-		hash = BinaryPrimitives.ReadUInt64LittleEndian(buffer[..SS_HASH_END]);
-		var parentHash = BinaryPrimitives.ReadUInt64LittleEndian(buffer[SS_HASH_END..SS_PARENT_HASH_END]);
-		var rootNodeHash = BinaryPrimitives.ReadUInt64LittleEndian(buffer[SS_PARENT_HASH_END..SS_ROOT_HASH_END]);
+		hash = ByteConverter.GetUInt64(buffer[..SS_HASH_END]);
+		var parentHash = ByteConverter.GetUInt64(buffer[SS_HASH_END..SS_PARENT_HASH_END]);
+		var rootNodeHash = ByteConverter.GetUInt64(buffer[SS_PARENT_HASH_END..SS_ROOT_HASH_END]);
 		data = new SnapshotData(parentHash, rootNodeHash);
 		return true;
 	}

@@ -1,8 +1,8 @@
 using System.IO;
 using FluentAssertions;
-using MiscUtil.Conversion;
 using NUnit.Framework;
 using Pando.Repositories;
+using Pando.Repositories.Utils;
 using PandoTests.Utils;
 using Standart.Hash.xxHash;
 
@@ -10,8 +10,6 @@ namespace PandoTests.Repositories.StreamRepositoryTests;
 
 public class NodeOperations
 {
-	private static readonly EndianBitConverter bitConverter = EndianBitConverter.Little;
-
 	[Test]
 	[TestCase(new byte[] { 1 })]
 	[TestCase(new byte[] { 1, 2, 3 })]
@@ -21,9 +19,9 @@ public class NodeOperations
 		// Test Data
 		ulong hash = xxHash64.ComputeHash(nodeData);
 		var expected = ArrayX.Concat(
-			bitConverter.GetBytes(hash),
-			bitConverter.GetBytes(0),
-			bitConverter.GetBytes(nodeData.Length)
+			ByteConverter.GetBytes(hash),
+			ByteConverter.GetBytes(0),
+			ByteConverter.GetBytes(nodeData.Length)
 		);
 
 		// Arrange
@@ -49,16 +47,16 @@ public class NodeOperations
 			new byte[] { 8, 9, 10, 11, 12 }
 		};
 		var expected = ArrayX.Concat(
-			bitConverter.GetBytes(xxHash64.ComputeHash(nodeData[0], nodeData[0].Length)), // Node 0 hash           8 bytes    [0 ]
-			bitConverter.GetBytes(0),                                                     // Node 0 data start     4 bytes    [8 ]
-			bitConverter.GetBytes(nodeData[0].Length),                                    // Node 0 data length    4 bytes    [12]
-			bitConverter.GetBytes(xxHash64.ComputeHash(nodeData[1], nodeData[1].Length)), // Node 1 hash           8 bytes    [16]
-			bitConverter.GetBytes(nodeData[0].Length),                                    // Node 1 data start     4 bytes    [24]
-			bitConverter.GetBytes(nodeData[1].Length),                                    // Node 1 data length    4 bytes    [28]
-			bitConverter.GetBytes(xxHash64.ComputeHash(nodeData[2], nodeData[2].Length)), // Node 2 hash           8 bytes    [32]
-			bitConverter.GetBytes(nodeData[0].Length + nodeData[1].Length),               // Node 2 data start     4 bytes    [40]
-			bitConverter.GetBytes(nodeData[2].Length)                                     // Node 2 data length    4 bytes    [44]
-		);                                                                                // Total                 48 bytes
+			ByteConverter.GetBytes(xxHash64.ComputeHash(nodeData[0], nodeData[0].Length)), // Node 0 hash           8 bytes    [0 ]
+			ByteConverter.GetBytes(0),                                                     // Node 0 data start     4 bytes    [8 ]
+			ByteConverter.GetBytes(nodeData[0].Length),                                    // Node 0 data length    4 bytes    [12]
+			ByteConverter.GetBytes(xxHash64.ComputeHash(nodeData[1], nodeData[1].Length)), // Node 1 hash           8 bytes    [16]
+			ByteConverter.GetBytes(nodeData[0].Length),                                    // Node 1 data start     4 bytes    [24]
+			ByteConverter.GetBytes(nodeData[1].Length),                                    // Node 1 data length    4 bytes    [28]
+			ByteConverter.GetBytes(xxHash64.ComputeHash(nodeData[2], nodeData[2].Length)), // Node 2 hash           8 bytes    [32]
+			ByteConverter.GetBytes(nodeData[0].Length + nodeData[1].Length),               // Node 2 data start     4 bytes    [40]
+			ByteConverter.GetBytes(nodeData[2].Length)                                     // Node 2 data length    4 bytes    [44]
+		);                                                                                 // Total                 48 bytes
 
 		// Arrange
 		var nodeIndexStream = new MemoryStream();

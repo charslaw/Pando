@@ -1,16 +1,14 @@
 using System.IO;
 using FluentAssertions;
-using MiscUtil.Conversion;
 using NUnit.Framework;
 using Pando.Repositories;
+using Pando.Repositories.Utils;
 using Standart.Hash.xxHash;
 
 namespace PandoTests.Repositories.StreamRepositoryTests;
 
 public class SnapshotOperations
 {
-	private static readonly EndianBitConverter bitConverter = EndianBitConverter.Little;
-
 	[Test]
 	public void Should_output_snapshot_index_when_root_snapshot_added()
 	{
@@ -32,7 +30,7 @@ public class SnapshotOperations
 
 		// Assert
 		var snapshotIndex = snapshotIndexStream.ToArray();
-		var actualHash = bitConverter.ToUInt64(snapshotIndex, 0);
+		var actualHash = ByteConverter.GetUInt64(snapshotIndex);
 		var actualIndex = snapshotIndex[8..];
 		actualIndex.Should().Equal(expectedIndex);
 		actualHash.Should().Be(expectedHash);
@@ -60,7 +58,7 @@ public class SnapshotOperations
 
 		// Assert
 		var snapshotIndex = snapshotIndexStream.ToArray();
-		var actualHash = bitConverter.ToUInt64(snapshotIndex, 0);
+		var actualHash = ByteConverter.GetUInt64(snapshotIndex);
 		var actualIndex = snapshotIndex[8..];
 		actualIndex.Should().Equal(expectedIndex);
 		actualHash.Should().Be(expectedHash);
