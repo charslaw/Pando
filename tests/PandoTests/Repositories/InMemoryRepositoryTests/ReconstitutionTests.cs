@@ -102,7 +102,7 @@ public class ReconstitutionTests
 			nodeData: nodeDataList
 		);
 
-		AssertionExtensions.Should((int)nodeDataList.Count).Be(3);
+		nodeDataList.Count.Should().Be(3);
 	}
 
 	[Fact]
