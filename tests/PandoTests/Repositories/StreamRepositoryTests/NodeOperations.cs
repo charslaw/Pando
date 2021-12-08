@@ -1,19 +1,19 @@
 using System.IO;
 using FluentAssertions;
-using NUnit.Framework;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
 using PandoTests.Utils;
 using Standart.Hash.xxHash;
+using Xunit;
 
 namespace PandoTests.Repositories.StreamRepositoryTests;
 
 public class NodeOperations
 {
-	[Test]
-	[TestCase(new byte[] { 1 })]
-	[TestCase(new byte[] { 1, 2, 3 })]
-	[TestCase(new byte[] { 1, 2, 3, 4 })]
+	[Theory]
+	[InlineData(new byte[] { 1 })]
+	[InlineData(new byte[] { 1, 2, 3 })]
+	[InlineData(new byte[] { 1, 2, 3, 4 })]
 	public void Should_output_node_index_when_node_added(byte[] nodeData)
 	{
 		// Test Data
@@ -36,7 +36,7 @@ public class NodeOperations
 		nodeIndex.Should().Equal(expected);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_output_node_index_sequentially()
 	{
 		// Test Data
@@ -73,7 +73,7 @@ public class NodeOperations
 		nodeIndex.Should().Equal(expected);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_output_node_data_when_node_added()
 	{
 		// Test Data
@@ -91,7 +91,7 @@ public class NodeOperations
 		allNodeData.Should().Equal(nodeData);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_append_node_data_sequentially()
 	{
 		// Test Data

@@ -1,13 +1,13 @@
 using FluentAssertions;
-using NUnit.Framework;
 using Pando.Exceptions;
 using Pando.Repositories;
+using Xunit;
 
 namespace PandoTests.Repositories.InMemoryRepositoryTests;
 
 public class SnapshotOperations
 {
-	[Test]
+	[Fact]
 	public void Should_add_snapshot()
 	{
 		// Test Data
@@ -27,7 +27,7 @@ public class SnapshotOperations
 		actualRootNode.Should().Be(rootNodeHash);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_not_throw_on_duplicate_snapshot()
 	{
 		// Test Data
@@ -48,7 +48,7 @@ public class SnapshotOperations
 			.NotThrow();
 	}
 
-	[Test]
+	[Fact]
 	public void Should_throw_if_GetSnapshotParent_called_with_nonexistent_hash()
 	{
 		// Arrange
@@ -60,7 +60,7 @@ public class SnapshotOperations
 			.Throw<HashNotFoundException>();
 	}
 
-	[Test]
+	[Fact]
 	public void Should_throw_if_GetSnapshotRootNode_called_with_nonexistent_hash()
 	{
 		// Arrange
@@ -72,7 +72,7 @@ public class SnapshotOperations
 			.Throw<HashNotFoundException>();
 	}
 
-	[Test]
+	[Fact]
 	public void Should_have_zero_latest_snapshot_before_any_snapshots_have_been_added()
 	{
 		var repository = new InMemoryRepository();
@@ -80,7 +80,7 @@ public class SnapshotOperations
 		repository.LatestSnapshot.Should().Be(0);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_set_latest_snapshot_when_adding_snapshot()
 	{
 		// Arrange
@@ -92,7 +92,7 @@ public class SnapshotOperations
 		repository.LatestSnapshot.Should().Be(hash2);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_get_all_snapshot_hashes()
 	{
 		// Arrange

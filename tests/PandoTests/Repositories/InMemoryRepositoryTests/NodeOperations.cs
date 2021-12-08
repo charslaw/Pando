@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using FluentAssertions;
-using NUnit.Framework;
 using Pando.Exceptions;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
 using PandoTests.Utils;
 using Standart.Hash.xxHash;
+using Xunit;
 
 namespace PandoTests.Repositories.InMemoryRepositoryTests;
 
 public class NodeOperations
 {
-	[Test]
+	[Fact]
 	public void Should_add_node()
 	{
 		// Test Data
@@ -33,7 +33,7 @@ public class NodeOperations
 		nodeDataList.Count.Should().Be(4);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_get_added_node()
 	{
 		// Test Data
@@ -51,7 +51,7 @@ public class NodeOperations
 		actual.Should().Equal(nodeData);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_not_throw_on_duplicate_node()
 	{
 		// Test Data
@@ -71,7 +71,7 @@ public class NodeOperations
 			.NotThrow();
 	}
 
-	[Test]
+	[Fact]
 	public void Should_not_add_duplicate_node_to_data_collection()
 	{
 		// Test Data
@@ -92,7 +92,7 @@ public class NodeOperations
 		deltaNodeDataListBytes.Should().Be(0);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_return_correct_data_when_multiple_nodes_exist()
 	{
 		// Test Data
@@ -114,7 +114,7 @@ public class NodeOperations
 		actual.Should().Equal(nodeData2);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_throw_if_GetNodeData_called_with_nonexistent_hash()
 	{
 		// Arrange
