@@ -1,15 +1,15 @@
 using System.IO;
 using FluentAssertions;
-using NUnit.Framework;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
 using PandoTests.Utils;
+using Xunit;
 
 namespace PandoTests.Repositories.InMemoryRepositoryTests;
 
 public class ReconstitutionTests
 {
-	[Test]
+	[Fact]
 	public void Should_have_node_after_being_reconstituted()
 	{
 		// Test Data
@@ -24,7 +24,7 @@ public class ReconstitutionTests
 		repository.HasNode(nodeHash).Should().BeTrue();
 	}
 
-	[Test]
+	[Fact]
 	public void Should_return_correct_node_data_after_being_reconstituted()
 	{
 		// Test Data
@@ -52,7 +52,7 @@ public class ReconstitutionTests
 		result2.Should().Equal(nodeData[4..8]);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_have_snapshot_after_being_reconstituted()
 	{
 		// Test Data
@@ -67,7 +67,7 @@ public class ReconstitutionTests
 		repository.HasSnapshot(hash).Should().BeTrue();
 	}
 
-	[Test]
+	[Fact]
 	public void Should_return_correct_snapshot_after_being_reconstituted()
 	{
 		// Test Data
@@ -91,7 +91,7 @@ public class ReconstitutionTests
 		actualRootNodeHash.Should().Be(rootNodeHash);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_not_overallocate_node_data_list()
 	{
 		var nodeDataStream = new MemoryStream(8);
@@ -105,7 +105,7 @@ public class ReconstitutionTests
 		AssertionExtensions.Should((int)nodeDataList.Count).Be(3);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_set_latest_snapshot_when_reconstituted()
 	{
 		var hash1 = 1UL;

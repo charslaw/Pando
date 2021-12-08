@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using FluentAssertions;
-using NUnit.Framework;
 using Pando;
 using Pando.Exceptions;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
 using PandoTests.PandoSave.TestStateTrees;
+using Xunit;
 
 namespace PandoTests.PandoSave;
 
@@ -30,7 +30,7 @@ public class PandoSaveTests
 		return new TestTree(NAME, new TestTree.A(AGE), new TestTree.B(date, CENTS));
 	}
 
-	[Test]
+	[Fact]
 	public void Should_save_state_tree()
 	{
 		// Test Data
@@ -52,7 +52,7 @@ public class PandoSaveTests
 			.And.BeEquivalentTo(tree);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_create_a_new_snapshot_even_if_state_tree_is_equivalent()
 	{
 		// Test Data
@@ -73,7 +73,7 @@ public class PandoSaveTests
 		snapshotHash1.Should().NotBe(snapshotHash2);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_not_create_duplicate_blobs_when_equivalent_state_tree_is_added()
 	{
 		// Test Data
@@ -100,7 +100,7 @@ public class PandoSaveTests
 		dataArraySnapshot1.Length.Should().Be(dataArraySnapshot2.Length);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_get_snapshot_chain_with_correct_chain_structure()
 	{
 		// Test Data
@@ -125,7 +125,7 @@ public class PandoSaveTests
 		snapshot2.Children.Length.Should().Be(0);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_get_snapshot_chain_with_correct_tree()
 	{
 		// Test Data
@@ -150,7 +150,7 @@ public class PandoSaveTests
 		snapshot2.GetTreeRoot().Should().BeEquivalentTo(tree2);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_throw_if_GetFullSnapshotChain_called_when_no_root_snapshot_exists()
 	{
 		var saver = new PandoSaver<TestTree>(

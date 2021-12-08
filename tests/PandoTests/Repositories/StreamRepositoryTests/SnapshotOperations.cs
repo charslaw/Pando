@@ -1,15 +1,15 @@
 using System.IO;
 using FluentAssertions;
-using NUnit.Framework;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
 using Standart.Hash.xxHash;
+using Xunit;
 
 namespace PandoTests.Repositories.StreamRepositoryTests;
 
 public class SnapshotOperations
 {
-	[Test]
+	[Fact]
 	public void Should_output_snapshot_index_when_root_snapshot_added()
 	{
 		// Test Data
@@ -36,7 +36,7 @@ public class SnapshotOperations
 		actualHash.Should().Be(expectedHash);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_output_snapshot_index_when_snapshot_added()
 	{
 		// Test Data

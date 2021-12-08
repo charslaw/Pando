@@ -1,14 +1,14 @@
 using System.IO;
 using FluentAssertions;
-using NUnit.Framework;
 using Pando.Repositories;
 using PandoTests.Utils;
+using Xunit;
 
 namespace PandoTests.Repositories;
 
 public class PersistenceBackedRepositoryTests
 {
-	[Test]
+	[Fact]
 	public void Should_not_output_duplicate_node_to_stream_repository()
 	{
 		// Test Data
@@ -35,7 +35,7 @@ public class PersistenceBackedRepositoryTests
 		actualData.Length.Should().Be(expectedDataLength);
 	}
 
-	[Test]
+	[Fact]
 	public void Should_not_output_duplicate_snapshot_to_stream_repository()
 	{
 		// Test Data
