@@ -8,7 +8,7 @@ using PandoTests.Utils;
 using Standart.Hash.xxHash;
 using Xunit;
 
-namespace PandoTests.Repositories;
+namespace PandoTests.Tests.Repositories;
 
 public class InMemoryRepositoryTests
 {

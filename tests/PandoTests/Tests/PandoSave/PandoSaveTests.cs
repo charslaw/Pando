@@ -5,10 +5,10 @@ using Pando;
 using Pando.Exceptions;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
-using PandoTests.PandoSave.TestStateTrees;
+using PandoTests.Tests.PandoSave.TestStateTrees;
 using Xunit;
 
-namespace PandoTests.PandoSave;
+namespace PandoTests.Tests.PandoSave;
 
 public class PandoSaveTests
 {

@@ -4,7 +4,7 @@ using Pando.Repositories;
 using PandoTests.Utils;
 using Xunit;
 
-namespace PandoTests.Repositories;
+namespace PandoTests.Tests.Repositories;
 
 public class PersistenceBackedRepositoryTests
 {

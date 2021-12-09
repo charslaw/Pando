@@ -4,7 +4,7 @@ using Pando;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
 
-namespace PandoTests.PandoSave.TestStateTrees;
+namespace PandoTests.Tests.PandoSave.TestStateTrees;
 
 internal class TestTreeSerializer : IPandoNodeSerializer<TestTree>
 {
