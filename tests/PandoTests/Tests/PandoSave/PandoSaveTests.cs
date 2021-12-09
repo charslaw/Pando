@@ -6,6 +6,7 @@ using Pando.Exceptions;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
 using PandoTests.Tests.PandoSave.TestStateTrees;
+using PandoTests.Utils;
 using Xunit;
 
 namespace PandoTests.Tests.PandoSave;
@@ -92,10 +93,10 @@ public class PandoSaveTests
 
 			// Act
 			saver.SaveSnapshot(tree);
-			var dataArraySnapshot1 = nodeData.VisitSpan(0, nodeData.Count, bytes => bytes.ToArray());
+			var dataArraySnapshot1 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
 			saver.SaveSnapshot(tree2);
-			var dataArraySnapshot2 = nodeData.VisitSpan(0, nodeData.Count, bytes => bytes.ToArray());
+			var dataArraySnapshot2 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
 			// Assert
 			nodeIndex.Count.Should().Be(4, "because a TestTree has 4 blobs");

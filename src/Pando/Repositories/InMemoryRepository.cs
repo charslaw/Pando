@@ -121,11 +121,12 @@ public class InMemoryRepository : IPandoRepository
 
 	public bool HasSnapshot(ulong hash) => _snapshotIndex.ContainsKey(hash);
 
-	public T GetNode<T>(ulong hash, SpanVisitor<byte, T> nodeDeserializer)
+	public T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer)
 	{
 		CheckNodeHash(hash);
 		var (start, dataLength) = _nodeIndex[hash];
-		return _nodeData.VisitSpan(start, dataLength, nodeDeserializer);
+		var visitor = new RepositorySpanVisitor<T>(nodeDeserializer, this);
+		return _nodeData.VisitSpan<RepositorySpanVisitor<T>, T>(start, dataLength, in visitor);
 	}
 
 	public int GetSizeOfNode(ulong hash)
@@ -170,5 +171,19 @@ public class InMemoryRepository : IPandoRepository
 		{
 			throw new HashNotFoundException($"The store does not contain a snapshot with the requested hash {hash}");
 		}
+	}
+
+	private readonly struct RepositorySpanVisitor<T> : ISpanVisitor<byte, T>
+	{
+		private readonly IPandoNodeDeserializer<T> _deserializer;
+		private readonly IPandoRepository _repository;
+
+		public RepositorySpanVisitor(IPandoNodeDeserializer<T> deserializer, IPandoRepository repository)
+		{
+			_deserializer = deserializer;
+			_repository = repository;
+		}
+
+		public T Visit(ReadOnlySpan<byte> span) => _deserializer.Deserialize(span, _repository);
 	}
 }

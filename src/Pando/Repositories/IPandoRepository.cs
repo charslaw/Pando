@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Pando.Exceptions;
-using Pando.Repositories.Utils;
 
 namespace Pando.Repositories;
 
@@ -28,7 +27,7 @@ public interface IReadablePandoNodeRepository
 	/// then delegates deserialization to the given <paramref name="nodeDeserializer"/>, then returns the result.
 	/// <exception cref="HashNotFoundException">thrown if there is no node identified by the given hash.</exception>
 	/// <returns>The deserialized object, as returned by the <paramref name="nodeDeserializer"/></returns>
-	T GetNode<T>(ulong hash, SpanVisitor<byte, T> nodeDeserializer);
+	T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer);
 
 	/// Gets the size in bytes of the node identified by the given hash.
 	int GetSizeOfNode(ulong hash);

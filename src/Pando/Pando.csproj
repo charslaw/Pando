@@ -8,12 +8,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Standart.Hash.xxHash" Version="3.1.0"/>
-		<PackageReference Include="System.Collections.Immutable" Version="5.0.0"/>
+		<PackageReference Include="Standart.Hash.xxHash" Version="3.1.0" />
+		<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<InternalsVisibleTo Include="PandoTests"/>
+		<InternalsVisibleTo Include="PandoTests" />
 	</ItemGroup>
 
 </Project>

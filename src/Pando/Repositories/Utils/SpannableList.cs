@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.Contracts;
 
 namespace Pando.Repositories.Utils;
 
@@ -52,5 +53,17 @@ internal class SpannableList<T>
 
 	/// Allows an external consumer to access a span of the list without leaking the span.
 	/// <remarks>Don't call this method concurrently with <see cref="SpannableList{T}.AddSpan"/></remarks>
-	public TResult VisitSpan<TResult>(int start, int length, SpanVisitor<T, TResult> spanVisitor) => spanVisitor(_array.AsSpan(start, length));
+	public TResult VisitSpan<TResult>(int start, int length, ISpanVisitor<T, TResult> spanVisitor) => spanVisitor.Visit(_array.AsSpan(start, length));
+
+	/// <inheritdoc cref="VisitSpan{TResult}"/>
+	/// <summary><para>This generic version of the <c>VisitSpan</c> method exists to avoid boxing struct implementations of
+	/// <see cref="ISpanVisitor{T,TResult}"/></para></summary>
+	public TResult VisitSpan<TSpanVisitor, TResult>(int start, int length, in TSpanVisitor spanVisitor)
+		where TSpanVisitor : struct, ISpanVisitor<T, TResult> => spanVisitor.Visit(_array.AsSpan(start, length));
+}
+
+internal interface ISpanVisitor<T, out TResult>
+{
+	[Pure]
+	public TResult Visit(ReadOnlySpan<T> span);
 }
