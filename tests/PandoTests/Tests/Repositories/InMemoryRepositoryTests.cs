@@ -92,7 +92,7 @@ public class InMemoryRepositoryTests
 			repository.AddNode(nodeData.CreateCopy());
 
 			// Act
-			var actual = repository.GetNode(hash, bytes => bytes.ToArray());
+			var actual = repository.GetNode(hash, new ToArrayDeserializer());
 
 			// Assert
 			actual.Should().Equal(nodeData);
@@ -114,7 +114,7 @@ public class InMemoryRepositoryTests
 			repository.AddNode(nodeData3.CreateCopy());
 
 			// Act
-			var actual = repository.GetNode(hash, bytes => bytes.ToArray());
+			var actual = repository.GetNode(hash, new ToArrayDeserializer());
 
 			// Assert
 			actual.Should().Equal(nodeData2);
@@ -127,7 +127,7 @@ public class InMemoryRepositoryTests
 			var repository = new InMemoryRepository();
 
 			// Assert
-			repository.Invoking(ts => ts.GetNode<object?>(0, _ => null))
+			repository.Invoking(ts => ts.GetNode<object?>(0, new ToArrayDeserializer()))
 				.Should()
 				.Throw<HashNotFoundException>();
 		}
@@ -326,8 +326,8 @@ public class InMemoryRepositoryTests
 			var repository = new InMemoryRepository(Stream.Null, nodeIndexStream, nodeDataStream);
 
 			// Assert
-			var result1 = repository.GetNode(hash1, bytes => bytes.ToArray());
-			var result2 = repository.GetNode(hash2, bytes => bytes.ToArray());
+			var result1 = repository.GetNode(hash1, new ToArrayDeserializer());
+			var result2 = repository.GetNode(hash2, new ToArrayDeserializer());
 			result1.Should().Equal(nodeData[..4]);
 			result2.Should().Equal(nodeData[4..8]);
 		}

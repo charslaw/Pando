@@ -1,29 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Pando.Exceptions;
 using Pando.Repositories;
-using Pando.Repositories.Utils;
 
 namespace Pando;
 
 public class PandoSaver<T> : IPandoSaver<T>
 {
 	private readonly IPandoRepository _repository;
-	private readonly IPandoNodeSerializer<T> _serializer;
-
-	// preallocate delegate to avoid making an allocation every time we deserialize a node.
-	private readonly SpanVisitor<byte, T> _deserializeDelegate;
-	private T Deserialize(ReadOnlySpan<byte> bytes) => _serializer.Deserialize(bytes, _repository);
+	private readonly IPandoNodeSerializerDeserializer<T> _serializer;
 
 	private ulong _currentSnapshot;
 
-	public PandoSaver(IPandoRepository repository, IPandoNodeSerializer<T> serializer)
+	public PandoSaver(IPandoRepository repository, IPandoNodeSerializerDeserializer<T> serializer)
 	{
 		_repository = repository;
 		_serializer = serializer;
-		_deserializeDelegate = Deserialize;
 		_currentSnapshot = repository.LatestSnapshot;
 	}
 
@@ -37,7 +30,7 @@ public class PandoSaver<T> : IPandoSaver<T>
 	public T GetSnapshot(ulong hash)
 	{
 		var nodeHash = _repository.GetSnapshotRootNode(hash);
-		return _repository.GetNode(nodeHash, _deserializeDelegate);
+		return _repository.GetNode(nodeHash, _serializer);
 	}
 
 	public SnapshotChain<T> GetFullSnapshotChain()
