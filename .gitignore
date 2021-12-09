@@ -25,3 +25,6 @@ obj/
 *.code-workspace
 
 .history/
+
+# Test Results
+TestResults/
