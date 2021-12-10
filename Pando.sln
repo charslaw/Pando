@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pando", "src\Pando\Pando.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTests", "tests\PandoTests\PandoTests.csproj", "{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTreeExamples", "docs\PandoTreeExamples\PandoTreeExamples.csproj", "{A873C170-E3D7-4D7A-BE28-967931B88F05}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTreeGuidelines", "docs\PandoTreeGuidelines\PandoTreeGuidelines.csproj", "{A873C170-E3D7-4D7A-BE28-967931B88F05}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
