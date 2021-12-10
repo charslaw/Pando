@@ -6,7 +6,7 @@ using Pando.Repositories.Utils;
 
 namespace PandoTests.Tests.PandoSave.TestStateTrees;
 
-internal class TestTreeSerializer : IPandoNodeSerializerDeserializer<TestTree>
+internal readonly struct TestTreeSerializer : IPandoNodeSerializerDeserializer<TestTree>
 {
 	private readonly IPandoNodeSerializerDeserializer<string> _nameSerializer;
 	private readonly IPandoNodeSerializerDeserializer<TestTree.A> _aSerializer;
@@ -64,7 +64,7 @@ internal class TestTreeSerializer : IPandoNodeSerializerDeserializer<TestTree>
 	}
 }
 
-internal class StringSerializer : IPandoNodeSerializerDeserializer<string>
+internal readonly struct StringSerializer : IPandoNodeSerializerDeserializer<string>
 {
 	public ulong Serialize(string str, IWritablePandoNodeRepository repository)
 	{
@@ -80,7 +80,7 @@ internal class StringSerializer : IPandoNodeSerializerDeserializer<string>
 	}
 }
 
-internal class DoubleTreeASerializer : IPandoNodeSerializerDeserializer<TestTree.A>
+internal readonly struct DoubleTreeASerializer : IPandoNodeSerializerDeserializer<TestTree.A>
 {
 	private const int AGE_SIZE = sizeof(int);
 
@@ -98,7 +98,7 @@ internal class DoubleTreeASerializer : IPandoNodeSerializerDeserializer<TestTree
 	}
 }
 
-internal class DoubleTreeBSerializer : IPandoNodeSerializerDeserializer<TestTree.B>
+internal readonly struct DoubleTreeBSerializer : IPandoNodeSerializerDeserializer<TestTree.B>
 {
 	private const int TIME_END = sizeof(long);
 	private const int CENTS_END = TIME_END + sizeof(int);
