@@ -6,8 +6,8 @@ These guidelines serve to help you create state trees that will work nicely with
 necessary, however they keep things consistent, and are required if you're using `Pando.SerializerSourceGenerator` to
 generate Serializer/Deserializers for your state tree.
 
-For examples of valid and invalid state trees in accordance with these guidelines, see
-the [Guidelines page](Guidelines.md) and the [Guidelines examples](GuidelinesExamples).
+For a more detailed description of these guidelines, the [Guidelines page](Guidelines.md). For examples of valid and
+invalid state trees in accordance with these guidelines, see the [Guidelines examples](GuidelinesExamples).
 
 0. A Pando state tree node is *either* a branch or a blob.
 1. A branch should only contain other nodes.
