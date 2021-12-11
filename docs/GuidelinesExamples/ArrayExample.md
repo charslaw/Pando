@@ -34,6 +34,8 @@ You could also write a custom serializer for a ASCII only string, etc.
 └──┴──┴──┴──┴──┴──┴──┴───┴──┘
 ```
 
+*Where `N` is the number of characters in the string, and `M` is the number of bytes (in this case 2 per character).*
+
 ### `EmployeeNames`
 
 ```
@@ -42,3 +44,5 @@ You could also write a custom serializer for a ASCII only string, etc.
 │00│01│02│03│04│05│06│07│08│09│10│11│12│13│14│15│..│N*8│N*8+7│
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴───┴─────┘
 ```
+
+*Where `N` is the number of names in the list.*
