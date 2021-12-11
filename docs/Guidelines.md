@@ -39,6 +39,9 @@ Examples of invalid data types to store in a blob:
 
 When represented internally, the node data for a blob will consist of the byte representation of its data.
 
+If you can guarantee that an array/string is of a fixed length, it may be ok to include it in a blob. However, this
+array/string should probably be wrapped in a custom struct and would require a custom Serializer/Deserializer.
+
 ## (3) An array of primitive value types is a blob
 
 When an array contains a primitive value types, it can be serialized as a blob itself. This includes things such
