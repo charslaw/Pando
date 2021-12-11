@@ -17,8 +17,9 @@ public enum Gender { Male, Female, Nonbinary, Unspecified }
 public enum EyeColor { Blue, Green, Brown, Hazel, Black, Other }
 ```
 
-This example creates a contradiction because `Person` can neither be a branch nor a blob. It contains strings, which are
-blobs themselves, so it must be a branch, but it also contains raw data, so it must be a blob.
+This example creates a contradiction because `Person` can be neither a branch nor a blob. `Person` contains raw data, so
+it must be a blob (guideline 2), but it also contains strings, which are blobs themselves (guideline 3), so it must be a
+branch (guideline 1).
 
 To resolve this contradiction, we can extract the raw data from person into its own blob node for `Person` to contain:
 
@@ -38,7 +39,7 @@ public record PersonDetails(
 ```
 
 This is a valid tree because `PersonDetails` is a blob: each of its members can be serialized to a single
-value. `PersonValid` is now a pure branch, because it only contains other nodes.
+value. `PersonFixed` is now a pure branch, because it only contains other nodes.
 
 ## Memory Layout
 
@@ -52,7 +53,7 @@ Internally, `PersonDetails` would most likely be arranged in the following way i
 └──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┘
 ```
 
-While `PersonValid` would be arranged thusly:
+While `PersonFixed` would be arranged thusly:
 
 ```
  ┌──── Name Hash ──────┐ ┌──── Email Hash ─────┐ ┌─── Details Hash ────┐
