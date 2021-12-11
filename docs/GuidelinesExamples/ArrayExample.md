@@ -3,9 +3,9 @@
 A simple example of an array in a pando state tree.
 
 ```csharp
-public record Company(         // Company is a branch
-    string CompanyName,        // CompanyName is a blob
-    List<string> EmployeeNames // EmployeeNames is a branch; each employee name is a blob
+public record Company(      // Company is a branch
+    string CompanyName,     // CompanyName is a blob
+    string[] EmployeeNames  // EmployeeNames is a branch; each employee name is a blob
 );
 ```
 
@@ -28,21 +28,21 @@ assume all of the characters are 2 bytes, however in a real-world scenario any U
 You could also write a custom serializer for a ASCII only string, etc.
 
 ```
- ┌[0]┐ ┌[1]┐ ┌[2]┐    ┌────┬─ [N]
-┌──┬──┬──┬──┬──┬──┬──┬───┬──┐
-│00│01│02│03│04│05│..│M-1│ M│
-└──┴──┴──┴──┴──┴──┴──┴───┴──┘
+ ┌[0]┐ ┌[1]┐     ┌──[N]──┐
+┌──┬──┬──┬──┬   ┬───┬─────┐
+│00│01│02│03│...│N*2│N*2+1│
+└──┴──┴──┴──┴   ┴───┴─────┘
 ```
 
-*Where `N` is the number of characters in the string, and `M` is the number of bytes (in this case 2 per character).*
+*Where `N` is the number of characters in the string and assuming 2 bytes per character.*
 
 ### `EmployeeNames`
 
 ```
- ┌──── [0] Hash ───────┐ ┌──── [2] Hash ───────┐    ┌───────┬─ [N] Hash
-┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬───┬─────┐
-│00│01│02│03│04│05│06│07│08│09│10│11│12│13│14│15│..│N*8│N*8+7│
-└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴───┴─────┘
+ ┌──── [0] Hash ───────┐ ┌──── [1] Hash ───────┐     ┌ [N] Hash ─┐
+┌──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬──┬   ┬───┬   ┬─────┐
+│00│01│02│03│04│05│06│07│08│09│10│11│12│13│14│15│...│N*8│...│N*8+7│
+└──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴   ┴───┴   ┴─────┘
 ```
 
 *Where `N` is the number of names in the list.*
