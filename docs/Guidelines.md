@@ -19,7 +19,7 @@ Branches can contain other branches, blobs, or any combination thereof, but it s
 
 When represented internally, the node data for a branch will consist of hashes of its child nodes
 
-## (2) A blob should not contain another node
+## (2) A blob should only contain raw data
 
 A blob is a "leaf" of the pando tree. A blob should only contain primitive types, or atomic data types that can be
 serialized as a primitive data type. A blob should not contain compound or variable size data types.

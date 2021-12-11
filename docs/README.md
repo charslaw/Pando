@@ -11,7 +11,7 @@ invalid state trees in accordance with these guidelines, see the [Guidelines exa
 
 0. A Pando state tree node is *either* a branch or a blob.
 1. A branch should only contain other nodes.
-2. A blob should not contain another node.
+2. A blob should only contain raw data.
 3. An array of primitive value types is a blob.
 4. An array of blobs is a branch.
 
