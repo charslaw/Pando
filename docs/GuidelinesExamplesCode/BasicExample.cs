@@ -2,7 +2,7 @@ using System;
 
 namespace GuidelinesExamplesCode;
 
-public record Person(
+internal record Person(
 	string Name,
 	string Email,
 	DateTime DateOfBirth,
@@ -11,17 +11,17 @@ public record Person(
 	short NumberOfFingers
 );
 
-public enum Gender { Male, Female, Nonbinary, Unspecified }
+internal enum Gender { Male, Female, Nonbinary, Unspecified }
 
-public enum EyeColor { Blue, Green, Brown, Hazel, Black, Other }
+internal enum EyeColor { Blue, Green, Brown, Hazel, Black, Other }
 
-public record PersonFixed(
+internal record PersonFixed(
 	string Name,
 	string Email,
 	PersonDetails Details
 );
 
-public record PersonDetails(
+internal record PersonDetails(
 	DateTime DateOfBirth,
 	Gender Gender,
 	EyeColor EyeColor,
