@@ -28,12 +28,12 @@ internal record BlackWhitePair<T>(
 	T WhiteValue  // -> Could be a branch node, blob node, or raw data
 );
 
-internal enum Player { Black, White }
+internal enum Player : byte { Black, White }
 
-internal enum Winner { None, Black, White }
+internal enum Winner : byte { None, Black, White }
 
-internal enum PieceType { King, Queen, Rook, Bishop, Knight, Pawn }
+internal enum PieceType : byte { King, Queen, Rook, Bishop, Knight, Pawn }
 
-internal enum Rank { One = 1, Two, Three, Four, Five, Six, Seven, Eight }
+internal enum Rank : byte { One = 1, Two, Three, Four, Five, Six, Seven, Eight }
 
-internal enum File { A, B, C, D, E, F, G, H }
+internal enum File : byte { A = (byte)'A', B, C, D, E, F, G, H }
