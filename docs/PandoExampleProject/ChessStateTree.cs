@@ -2,10 +2,10 @@ using System;
 
 namespace PandoExampleProject;
 
-internal record ChessGameState(             // Branch node
-	ChessPlayerState PlayerState,           // -> Blob node
-	BlackWhitePair<TimeSpan> RemainingTime, // -> Blob node (in this case, the BlackWhitePair contains raw data elements (TimeSpan)
-	ChessPiece[] Pieces                     // -> Branch node (array of blobs)
+internal record ChessGameState(               // Branch node
+	ChessPlayerState PlayerState,             // -> Blob node
+	BlackWhitePair<TimeSpan> RemainingTime,   // -> Blob node (in this case, the BlackWhitePair contains raw data elements (TimeSpan))
+	BlackWhitePair<ChessPiece[]> PlayerPieces // -> Branch node (in this case, the BlackWhitePair contains branch nodes)
 );
 
 internal record ChessPlayerState( // Blob node
