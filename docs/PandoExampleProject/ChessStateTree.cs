@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Immutable;
 
 namespace PandoExampleProject;
 
-internal record ChessGameState(               // Branch node
-	ChessPlayerState PlayerState,             // -> Blob node
-	BlackWhitePair<TimeSpan> RemainingTime,   // -> Blob node (in this case, the BlackWhitePair contains raw data elements (TimeSpan))
-	BlackWhitePair<ChessPiece[]> PlayerPieces // -> Branch node (in this case, the BlackWhitePair contains branch nodes)
+internal record ChessGameState(                             // Branch node
+	ChessPlayerState PlayerState,                           // -> Blob node
+	BlackWhitePair<TimeSpan> RemainingTime,                 // -> Blob node (in this case, the BlackWhitePair contains raw data elements (TimeSpan))
+	BlackWhitePair<ImmutableArray<ChessPiece>> PlayerPieces // -> Branch node (in this case, the BlackWhitePair contains branch nodes)
 );
 
 internal record struct ChessPlayerState( // Blob node
