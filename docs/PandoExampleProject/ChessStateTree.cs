@@ -14,11 +14,12 @@ internal record struct ChessPlayerState( // Blob node
 	Winner Winner                        // -> Raw data
 );
 
-internal record struct ChessPiece( // Blob node
-	Player Owner,                  // -> Raw data
-	PieceType Type,                // -> Raw data
-	Rank CurrentRank,              // -> Raw data
-	File CurrentFile               // -> Raw data
+internal record struct ChessPiece(                // Blob node
+	Player Owner,                                 // -> Raw data
+	PieceType Type,                               // -> Raw data
+	Rank CurrentRank,                             // -> Raw data
+	File CurrentFile,                             // -> Raw data
+	ChessPieceState State = ChessPieceState.Alive // -> Raw data
 );
 
 /// BlackWhitePair is a container for a type that should exist for both players
@@ -34,6 +35,8 @@ internal enum Player : byte { Black, White }
 internal enum Winner : byte { None, Black, White }
 
 internal enum PieceType : byte { King, Queen, Rook, Bishop, Knight, Pawn }
+
+internal enum ChessPieceState : byte { Alive, Captured }
 
 internal enum Rank : byte { One = 1, Two, Three, Four, Five, Six, Seven, Eight }
 
