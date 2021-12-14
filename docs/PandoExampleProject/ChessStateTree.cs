@@ -5,8 +5,8 @@ namespace PandoExampleProject;
 
 internal record ChessGameState(                             // Branch node
 	ChessPlayerState PlayerState,                           // -> Blob node
-	BlackWhitePair<TimeSpan> RemainingTime,                 // -> Blob node (in this case, the BlackWhitePair contains raw data elements (TimeSpan))
-	BlackWhitePair<ImmutableArray<ChessPiece>> PlayerPieces // -> Branch node (in this case, the BlackWhitePair contains branch nodes)
+	WhiteBlackPair<TimeSpan> RemainingTime,                 // -> Blob node (in this case, the BlackWhitePair contains raw data elements (TimeSpan))
+	WhiteBlackPair<ImmutableArray<ChessPiece>> PlayerPieces // -> Branch node (in this case, the BlackWhitePair contains branch nodes)
 );
 
 internal record struct ChessPlayerState( // Blob node
@@ -23,11 +23,11 @@ internal record struct ChessPiece(                // Blob node
 );
 
 /// BlackWhitePair is a container for a type that should exist for both players
-internal record BlackWhitePair<T>(
+internal record WhiteBlackPair<T>(
 	// Could be either a branch node or a blob node depending on the type of T.
 	// This will require a separate Serializer/Deserializer for each usage of BlackWhitePair with a different T.
-	T BlackValue, // -> Could be a branch node, blob node, or raw data
-	T WhiteValue  // -> Could be a branch node, blob node, or raw data
+	T WhiteValue, // -> Could be a branch node, blob node, or raw data
+	T BlackValue  // -> Could be a branch node, blob node, or raw data
 );
 
 internal enum Player : byte { Black, White }
