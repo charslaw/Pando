@@ -8,16 +8,16 @@ internal record ChessGameState(               // Branch node
 	BlackWhitePair<ChessPiece[]> PlayerPieces // -> Branch node (in this case, the BlackWhitePair contains branch nodes)
 );
 
-internal record ChessPlayerState( // Blob node
-	Player CurrentTurn,           // -> Raw data
-	Winner Winner                 // -> Raw data
+internal record struct ChessPlayerState( // Blob node
+	Player CurrentTurn,                  // -> Raw data
+	Winner Winner                        // -> Raw data
 );
 
-internal record ChessPiece( // Blob node
-	Player Owner,           // -> Raw data
-	PieceType Type,         // -> Raw data
-	Rank CurrentRank,       // -> Raw data
-	File CurrentFile        // -> Raw data
+internal record struct ChessPiece( // Blob node
+	Player Owner,                  // -> Raw data
+	PieceType Type,                // -> Raw data
+	Rank CurrentRank,              // -> Raw data
+	File CurrentFile               // -> Raw data
 );
 
 /// BlackWhitePair is a container for a type that should exist for both players
