@@ -10,8 +10,8 @@ internal record ChessGameState(                             // Branch node
 );
 
 internal record struct ChessPlayerState( // Blob node
-	Player CurrentTurn,                  // -> Raw data
-	Winner Winner                        // -> Raw data
+	Player CurrentTurn = Player.White,   // -> Raw data
+	Winner Winner = Winner.None          // -> Raw data
 );
 
 internal record struct ChessPiece(                // Blob node
