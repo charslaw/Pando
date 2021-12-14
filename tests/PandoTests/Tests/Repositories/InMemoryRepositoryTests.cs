@@ -294,7 +294,7 @@ public class InMemoryRepositoryTests
 		{
 			// Test Data
 			var nodeHash = 123UL;
-			var nodeIndex = ArrayX.Concat(ByteConverter.GetBytes(nodeHash), new byte[8]);
+			var nodeIndex = ArrayX.Concat(ByteEncoder.GetBytes(nodeHash), new byte[8]);
 
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndex.CreateCopy());
@@ -312,12 +312,12 @@ public class InMemoryRepositoryTests
 			var hash2 = 4567UL;
 			var nodeData = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 };
 			var nodeIndexEntry = ArrayX.Concat(
-				ByteConverter.GetBytes(hash1),
-				ByteConverter.GetBytes(0),
-				ByteConverter.GetBytes(4),
-				ByteConverter.GetBytes(hash2),
-				ByteConverter.GetBytes(4),
-				ByteConverter.GetBytes(4)
+				ByteEncoder.GetBytes(hash1),
+				ByteEncoder.GetBytes(0),
+				ByteEncoder.GetBytes(4),
+				ByteEncoder.GetBytes(hash2),
+				ByteEncoder.GetBytes(4),
+				ByteEncoder.GetBytes(4)
 			);
 
 			// Arrange/Act
@@ -337,7 +337,7 @@ public class InMemoryRepositoryTests
 		{
 			// Test Data
 			var hash = 123UL;
-			var snapshotIndex = ArrayX.Concat(ByteConverter.GetBytes(hash), new byte[16]);
+			var snapshotIndex = ArrayX.Concat(ByteEncoder.GetBytes(hash), new byte[16]);
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndex);
@@ -355,9 +355,9 @@ public class InMemoryRepositoryTests
 			var parentHash = 5UL;
 			var rootNodeHash = 42UL;
 			var snapshotIndexEntry = ArrayX.Concat(
-				ByteConverter.GetBytes(hash),
-				ByteConverter.GetBytes(parentHash),
-				ByteConverter.GetBytes(rootNodeHash)
+				ByteEncoder.GetBytes(hash),
+				ByteEncoder.GetBytes(parentHash),
+				ByteEncoder.GetBytes(rootNodeHash)
 			);
 
 			// Arrange/Act
@@ -391,9 +391,9 @@ public class InMemoryRepositoryTests
 			var hash1 = 1UL;
 			var hash2 = 2UL;
 			var snapshotIndex = ArrayX.Concat(
-				ByteConverter.GetBytes(hash1),
+				ByteEncoder.GetBytes(hash1),
 				new byte[16],
-				ByteConverter.GetBytes(hash2),
+				ByteEncoder.GetBytes(hash2),
 				new byte[16]
 			);
 

@@ -3,8 +3,8 @@ using System.Buffers.Binary;
 
 namespace Pando.Repositories.Utils;
 
-/// Utilities for converting to raw bytes (in little endian format)
-internal static class ByteConverter
+/// Utilities for converting to and from raw bytes (in little endian format)
+internal static class ByteEncoder
 {
 	public static byte[] GetBytes(ulong value)
 	{

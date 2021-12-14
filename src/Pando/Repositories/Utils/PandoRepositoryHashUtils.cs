@@ -14,8 +14,8 @@ internal static class PandoRepositoryHashUtils
 	public static ulong ComputeSnapshotHash(ulong parentHash, ulong rootNodeHash)
 	{
 		Span<byte> buffer = stackalloc byte[SIZE_OF_SNAPSHOT_BUFFER];
-		ByteConverter.CopyBytes(parentHash, buffer[..END_OF_PARENT_HASH]);
-		ByteConverter.CopyBytes(rootNodeHash, buffer[END_OF_PARENT_HASH..END_OF_ROOT_NODE_HASH]);
+		ByteEncoder.CopyBytes(parentHash, buffer[..END_OF_PARENT_HASH]);
+		ByteEncoder.CopyBytes(rootNodeHash, buffer[END_OF_PARENT_HASH..END_OF_ROOT_NODE_HASH]);
 		return xxHash64.ComputeHash(buffer, SIZE_OF_SNAPSHOT_BUFFER);
 	}
 }
