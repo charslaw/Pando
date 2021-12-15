@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using Pando;
 using Pando.Repositories;
 
-namespace PandoExampleProject;
+namespace PandoExampleProject.Serializers;
 
 /// This is a manually implemented serializer.
 /// Generally, this should probably be implemented by a source generator, with manual overrides where necessary.
