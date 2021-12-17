@@ -31,7 +31,7 @@ public class ChessTests
 
 		// Initial State
 		var initialState = ChessSetup.InitialGameState();
-		var initialHash = pandoSaver.SaveSnapshot(initialState);
+		var initialHash = pandoSaver.SaveRootSnapshot(initialState);
 
 		var initialExpected = TrimBoardLines(@"
 			♜♞♝♛♚♝♞♜ 8
@@ -51,7 +51,7 @@ public class ChessTests
 
 		// First move: e4
 		var firstMove = ChessPieceMover.MovePiece(initialState, Player.White, 4, Rank.Four, File.E);
-		var firstMoveHash = pandoSaver.SaveSnapshot(firstMove);
+		var firstMoveHash = pandoSaver.SaveSnapshot(firstMove, initialHash);
 
 		var firstMoveExpected = TrimBoardLines(@"
 			♜♞♝♛♚♝♞♜ 8
