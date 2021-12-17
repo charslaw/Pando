@@ -9,8 +9,6 @@ public class PersistenceBackedRepository : IPandoRepository, IDisposable
 	private readonly InMemoryRepository _mainRepository;
 	private readonly StreamRepository _persistentRepository;
 
-	public ulong LatestSnapshot => _mainRepository.LatestSnapshot;
-
 	public PersistenceBackedRepository(InMemoryRepository mainRepository, StreamRepository persistentRepository)
 	{
 		_mainRepository = mainRepository;

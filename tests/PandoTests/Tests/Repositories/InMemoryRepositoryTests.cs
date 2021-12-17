@@ -173,18 +173,6 @@ public class InMemoryRepositoryTests
 				.Should()
 				.NotThrow();
 		}
-
-		[Fact]
-		public void Should_set_latest_snapshot()
-		{
-			// Arrange
-			var repository = new InMemoryRepository();
-			var hash1 = repository.AddSnapshot(0, 1UL);
-			var hash2 = repository.AddSnapshot(hash1, 2UL);
-
-			// Assert
-			repository.LatestSnapshot.Should().Be(hash2);
-		}
 	}
 
 	public class GetSnapshotParent
@@ -248,17 +236,6 @@ public class InMemoryRepositoryTests
 			repository.Invoking(ts => ts.GetSnapshotRootNode(0))
 				.Should()
 				.Throw<HashNotFoundException>();
-		}
-	}
-
-	public class LatestSnapshot
-	{
-		[Fact]
-		public void Should_be_zero_before_any_snapshots_have_been_added()
-		{
-			var repository = new InMemoryRepository();
-
-			repository.LatestSnapshot.Should().Be(0);
 		}
 	}
 
@@ -383,24 +360,6 @@ public class InMemoryRepositoryTests
 			);
 
 			nodeDataList.Count.Should().Be(3);
-		}
-
-		[Fact]
-		public void Should_initialize_LatestSnapshot()
-		{
-			var hash1 = 1UL;
-			var hash2 = 2UL;
-			var snapshotIndex = ArrayX.Concat(
-				ByteEncoder.GetBytes(hash1),
-				new byte[16],
-				ByteEncoder.GetBytes(hash2),
-				new byte[16]
-			);
-
-			var snapshotIndexStream = new MemoryStream(snapshotIndex.CreateCopy());
-			var repository = new InMemoryRepository(snapshotIndexStream, Stream.Null, Stream.Null);
-
-			repository.LatestSnapshot.Should().Be(hash2);
 		}
 	}
 }
