@@ -10,9 +10,12 @@ internal record ChessGameState(                             // Branch node
 );
 
 internal record struct ChessPlayerState( // Blob node
-	Player CurrentTurn = Player.White,   // -> Raw data
-	Winner Winner = Winner.None          // -> Raw data
-);
+	Player CurrentTurn,                  // -> Raw data
+	Winner Winner                        // -> Raw data
+)
+{
+	public static ChessPlayerState Default => new(Player.White, Winner.None);
+}
 
 internal record struct ChessPiece(                // Blob node
 	Player Owner,                                 // -> Raw data
@@ -25,12 +28,13 @@ internal record struct ChessPiece(                // Blob node
 /// BlackWhitePair is a container for a type that should exist for both players
 internal record WhiteBlackPair<T>(
 	// Could be either a branch node or a blob node depending on the type of T.
-	// This will require a separate Serializer/Deserializer for each usage of BlackWhitePair with a different T.
+	// If this is a branch node (i.e. T represents another node type), it can be covered by a generic serializer.
+	// However for blobs (i.e. T is a primitive type), a unique serializer must be constructed for each T.
 	T WhiteValue, // -> Could be a branch node, blob node, or raw data
 	T BlackValue  // -> Could be a branch node, blob node, or raw data
 );
 
-internal enum Player : byte { Black, White }
+internal enum Player : byte { White, Black }
 
 internal enum Winner : byte { None, Black, White }
 
