@@ -12,8 +12,6 @@ public class InMemoryRepository : IPandoRepository
 	private readonly Dictionary<ulong, DataSlice> _nodeIndex = new();
 	private readonly SpannableList<byte> _nodeData = new();
 
-	public ulong LatestSnapshot { get; private set; }
-
 	public InMemoryRepository() { }
 
 	internal InMemoryRepository(
@@ -114,7 +112,6 @@ public class InMemoryRepository : IPandoRepository
 	private void AddSnapshotWithHashUnsafe(ulong hash, SnapshotData snapshotData)
 	{
 		_snapshotIndex.Add(hash, snapshotData);
-		LatestSnapshot = hash;
 	}
 
 	public bool HasNode(ulong hash) => _nodeIndex.ContainsKey(hash);

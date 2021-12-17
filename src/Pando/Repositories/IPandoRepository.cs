@@ -48,9 +48,6 @@ public interface IReadablePandoSnapshotRepository
 
 	/// Returns an enumerable of all of the added snapshots.
 	IEnumerable<SnapshotEntry> GetAllSnapshotEntries();
-
-	/// The hash of the most recent snapshot added to the repository.
-	ulong LatestSnapshot { get; }
 }
 
 /// Stores data Snapshots and Nodes

@@ -31,7 +31,7 @@ public class PandoSaveTests
 		return new TestTree(NAME, new TestTree.A(AGE), new TestTree.B(date, CENTS));
 	}
 
-	public class SaveSnapshot
+	public class SaveRootSnapshot
 	{
 		[Fact]
 		public void Should_save_state_tree()
@@ -46,34 +46,13 @@ public class PandoSaveTests
 			);
 
 			// Act
-			var snapshotHash = saver.SaveSnapshot(tree);
+			var snapshotHash = saver.SaveRootSnapshot(tree);
 			TestTree actual = saver.GetSnapshot(snapshotHash);
 
 			// Assert
 			actual.Should()
 				.NotBeSameAs(tree)
 				.And.BeEquivalentTo(tree);
-		}
-
-		[Fact]
-		public void Should_create_a_new_snapshot_even_if_state_tree_is_equivalent()
-		{
-			// Test Data
-			var tree1 = MakeTestTree1();
-			var tree1Copy = tree1 with { };
-
-			// Arrange
-			var saver = new PandoSaver<TestTree>(
-				new InMemoryRepository(),
-				TestTreeSerializer.Create()
-			);
-
-			// Act
-			var snapshotHash1 = saver.SaveSnapshot(tree1);
-			var snapshotHash2 = saver.SaveSnapshot(tree1Copy);
-
-			// Assert
-			snapshotHash1.Should().NotBe(snapshotHash2);
 		}
 
 		[Fact]
@@ -92,15 +71,39 @@ public class PandoSaveTests
 			);
 
 			// Act
-			saver.SaveSnapshot(tree);
+			saver.SaveRootSnapshot(tree);
 			var dataArraySnapshot1 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
-			saver.SaveSnapshot(tree2);
+			saver.SaveRootSnapshot(tree2);
 			var dataArraySnapshot2 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
 			// Assert
 			nodeIndex.Count.Should().Be(4, "because a TestTree has 4 blobs");
 			dataArraySnapshot1.Length.Should().Be(dataArraySnapshot2.Length);
+		}
+	}
+
+	public class SaveSnapshot
+	{
+		[Fact]
+		public void Should_create_a_new_snapshot_even_if_state_tree_is_equivalent()
+		{
+			// Test Data
+			var tree1 = MakeTestTree1();
+			var tree1Copy = tree1 with { };
+
+			// Arrange
+			var saver = new PandoSaver<TestTree>(
+				new InMemoryRepository(),
+				TestTreeSerializer.Create()
+			);
+
+			// Act
+			var snapshotHash1 = saver.SaveRootSnapshot(tree1);
+			var snapshotHash2 = saver.SaveSnapshot(tree1Copy, snapshotHash1);
+
+			// Assert
+			snapshotHash1.Should().NotBe(snapshotHash2);
 		}
 	}
 
@@ -118,8 +121,8 @@ public class PandoSaveTests
 				new InMemoryRepository(),
 				TestTreeSerializer.Create()
 			);
-			saver.SaveSnapshot(tree1);
-			saver.SaveSnapshot(tree2);
+			var rootHash = saver.SaveRootSnapshot(tree1);
+			saver.SaveSnapshot(tree2, rootHash);
 
 			// Act
 			var snapshotChain = saver.GetFullSnapshotChain();
@@ -143,8 +146,8 @@ public class PandoSaveTests
 				new InMemoryRepository(),
 				TestTreeSerializer.Create()
 			);
-			saver.SaveSnapshot(tree1);
-			saver.SaveSnapshot(tree2);
+			var rootHash = saver.SaveRootSnapshot(tree1);
+			saver.SaveSnapshot(tree2, rootHash);
 
 			// Act
 			var snapshotChain = saver.GetFullSnapshotChain();

@@ -11,20 +11,22 @@ public class PandoSaver<T> : IPandoSaver<T>
 	private readonly IPandoRepository _repository;
 	private readonly IPandoNodeSerializerDeserializer<T> _serializer;
 
-	private ulong _currentSnapshot;
-
 	public PandoSaver(IPandoRepository repository, IPandoNodeSerializerDeserializer<T> serializer)
 	{
 		_repository = repository;
 		_serializer = serializer;
-		_currentSnapshot = repository.LatestSnapshot;
 	}
 
-	public ulong SaveSnapshot(T tree)
+	public ulong SaveRootSnapshot(T tree)
 	{
 		var nodeHash = _serializer.Serialize(tree, _repository);
-		_currentSnapshot = _repository.AddSnapshot(_currentSnapshot, nodeHash);
-		return _currentSnapshot;
+		return _repository.AddSnapshot(0UL, nodeHash);
+	}
+
+	public ulong SaveSnapshot(T tree, ulong parentHash)
+	{
+		var nodeHash = _serializer.Serialize(tree, _repository);
+		return _repository.AddSnapshot(parentHash, nodeHash);
 	}
 
 	public T GetSnapshot(ulong hash)
