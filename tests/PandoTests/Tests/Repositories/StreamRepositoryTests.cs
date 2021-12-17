@@ -35,15 +35,15 @@ public class StreamRepositoryTests
 
 			// Assert
 			Span<byte> expected = stackalloc byte[48];
-			ByteConverter.CopyBytes(xxHash64.ComputeHash(nodeData[0], nodeData[0].Length), expected.Slice(0, 8));
-			ByteConverter.CopyBytes(0, expected.Slice(8, 4));
-			ByteConverter.CopyBytes(nodeData[0].Length, expected.Slice(12, 4));
-			ByteConverter.CopyBytes(xxHash64.ComputeHash(nodeData[1], nodeData[1].Length), expected.Slice(16, 8));
-			ByteConverter.CopyBytes(nodeData[0].Length, expected.Slice(24, 4));
-			ByteConverter.CopyBytes(nodeData[1].Length, expected.Slice(28, 4));
-			ByteConverter.CopyBytes(xxHash64.ComputeHash(nodeData[2], nodeData[2].Length), expected.Slice(32, 8));
-			ByteConverter.CopyBytes(nodeData[0].Length + nodeData[1].Length, expected.Slice(40, 4));
-			ByteConverter.CopyBytes(nodeData[2].Length, expected.Slice(44, 4));
+			ByteEncoder.CopyBytes(xxHash64.ComputeHash(nodeData[0], nodeData[0].Length), expected.Slice(0, 8));
+			ByteEncoder.CopyBytes(0, expected.Slice(8, 4));
+			ByteEncoder.CopyBytes(nodeData[0].Length, expected.Slice(12, 4));
+			ByteEncoder.CopyBytes(xxHash64.ComputeHash(nodeData[1], nodeData[1].Length), expected.Slice(16, 8));
+			ByteEncoder.CopyBytes(nodeData[0].Length, expected.Slice(24, 4));
+			ByteEncoder.CopyBytes(nodeData[1].Length, expected.Slice(28, 4));
+			ByteEncoder.CopyBytes(xxHash64.ComputeHash(nodeData[2], nodeData[2].Length), expected.Slice(32, 8));
+			ByteEncoder.CopyBytes(nodeData[0].Length + nodeData[1].Length, expected.Slice(40, 4));
+			ByteEncoder.CopyBytes(nodeData[2].Length, expected.Slice(44, 4));
 
 			nodeIndexStream.ToArray().Should().Equal(expected.ToArray());
 		}
@@ -94,7 +94,7 @@ public class StreamRepositoryTests
 
 			// Assert
 			var snapshotIndex = snapshotIndexStream.ToArray();
-			var actualHash = ByteConverter.GetUInt64(snapshotIndex);
+			var actualHash = ByteEncoder.GetUInt64(snapshotIndex);
 			var actualIndex = snapshotIndex[8..];
 			actualIndex.Should().Equal(expectedIndex);
 			actualHash.Should().Be(expectedHash);
@@ -122,7 +122,7 @@ public class StreamRepositoryTests
 
 			// Assert
 			var snapshotIndex = snapshotIndexStream.ToArray();
-			var actualHash = ByteConverter.GetUInt64(snapshotIndex);
+			var actualHash = ByteEncoder.GetUInt64(snapshotIndex);
 			var actualIndex = snapshotIndex[8..];
 			actualIndex.Should().Equal(expectedIndex);
 			actualHash.Should().Be(expectedHash);

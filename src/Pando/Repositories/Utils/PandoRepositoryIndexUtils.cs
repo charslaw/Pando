@@ -17,9 +17,9 @@ internal static class PandoRepositoryIndexUtils
 	public static void WriteNodeIndexEntry(Stream stream, ulong hash, int dataStart, int dataLength)
 	{
 		Span<byte> buffer = stackalloc byte[SIZE_OF_NODE_INDEX_ENTRY];
-		ByteConverter.CopyBytes(hash, buffer[..NODE_HASH_END]);
-		ByteConverter.CopyBytes(dataStart, buffer[NODE_HASH_END..NODE_DATA_START_END]);
-		ByteConverter.CopyBytes(dataLength, buffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
+		ByteEncoder.CopyBytes(hash, buffer[..NODE_HASH_END]);
+		ByteEncoder.CopyBytes(dataStart, buffer[NODE_HASH_END..NODE_DATA_START_END]);
+		ByteEncoder.CopyBytes(dataLength, buffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
 		stream.Write(buffer);
 	}
 
@@ -38,9 +38,9 @@ internal static class PandoRepositoryIndexUtils
 				throw new IncompleteReadException("Could not read a full node index from the remaining bytes in the stream");
 		}
 
-		hash = ByteConverter.GetUInt64(buffer[..NODE_HASH_END]);
-		var start = ByteConverter.GetInt32(buffer[NODE_HASH_END..NODE_DATA_START_END]);
-		var length = ByteConverter.GetInt32(buffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
+		hash = ByteEncoder.GetUInt64(buffer[..NODE_HASH_END]);
+		var start = ByteEncoder.GetInt32(buffer[NODE_HASH_END..NODE_DATA_START_END]);
+		var length = ByteEncoder.GetInt32(buffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
 		slice = new DataSlice(start, length);
 		return true;
 	}
@@ -57,9 +57,9 @@ internal static class PandoRepositoryIndexUtils
 	public static void WriteSnapshotIndexEntry(Stream stream, ulong hash, ulong parentHash, ulong rootNodeHash)
 	{
 		Span<byte> buffer = stackalloc byte[SIZE_OF_SNAPSHOT_INDEX_ENTRY];
-		ByteConverter.CopyBytes(hash, buffer[..SS_HASH_END]);
-		ByteConverter.CopyBytes(parentHash, buffer[SS_HASH_END..SS_PARENT_HASH_END]);
-		ByteConverter.CopyBytes(rootNodeHash, buffer[SS_PARENT_HASH_END..SS_ROOT_HASH_END]);
+		ByteEncoder.CopyBytes(hash, buffer[..SS_HASH_END]);
+		ByteEncoder.CopyBytes(parentHash, buffer[SS_HASH_END..SS_PARENT_HASH_END]);
+		ByteEncoder.CopyBytes(rootNodeHash, buffer[SS_PARENT_HASH_END..SS_ROOT_HASH_END]);
 		stream.Write(buffer);
 	}
 
@@ -78,9 +78,9 @@ internal static class PandoRepositoryIndexUtils
 				throw new IncompleteReadException("Could not read a full snapshot index from the remaining bytes in the stream");
 		}
 
-		hash = ByteConverter.GetUInt64(buffer[..SS_HASH_END]);
-		var parentHash = ByteConverter.GetUInt64(buffer[SS_HASH_END..SS_PARENT_HASH_END]);
-		var rootNodeHash = ByteConverter.GetUInt64(buffer[SS_PARENT_HASH_END..SS_ROOT_HASH_END]);
+		hash = ByteEncoder.GetUInt64(buffer[..SS_HASH_END]);
+		var parentHash = ByteEncoder.GetUInt64(buffer[SS_HASH_END..SS_PARENT_HASH_END]);
+		var rootNodeHash = ByteEncoder.GetUInt64(buffer[SS_PARENT_HASH_END..SS_ROOT_HASH_END]);
 		data = new SnapshotData(parentHash, rootNodeHash);
 		return true;
 	}
