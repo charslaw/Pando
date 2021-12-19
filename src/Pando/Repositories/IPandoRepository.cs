@@ -38,6 +38,9 @@ public interface IReadablePandoSnapshotRepository
 	/// Returns whether a snapshot identified by the given hash exists in the repository
 	bool HasSnapshot(ulong hash);
 
+	/// Returns whether this repository has any snapshots or is empty
+	bool HasAnySnapshot();
+
 	/// Returns the hash of the parent of the snapshot identified by the given hash.
 	/// <exception cref="HashNotFoundException">thrown if there is no snapshot node identified by the given hash.</exception>
 	ulong GetSnapshotParent(ulong hash);

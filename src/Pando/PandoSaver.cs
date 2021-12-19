@@ -19,6 +19,8 @@ public class PandoSaver<T> : IPandoSaver<T>
 
 	public ulong SaveRootSnapshot(T tree)
 	{
+		if (_repository.HasAnySnapshot()) throw new AlreadyHasRootSnapshotException();
+
 		var nodeHash = _serializer.Serialize(tree, _repository);
 		return _repository.AddSnapshot(0UL, nodeHash);
 	}

@@ -118,6 +118,8 @@ public class InMemoryRepository : IPandoRepository
 
 	public bool HasSnapshot(ulong hash) => _snapshotIndex.ContainsKey(hash);
 
+	public bool HasAnySnapshot() => _snapshotIndex.Count > 0;
+
 	public T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer)
 	{
 		CheckNodeHash(hash);

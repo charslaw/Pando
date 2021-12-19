@@ -71,15 +71,35 @@ public class PandoSaveTests
 			);
 
 			// Act
-			saver.SaveRootSnapshot(tree);
+			var rootHash = saver.SaveRootSnapshot(tree);
 			var dataArraySnapshot1 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
-			saver.SaveRootSnapshot(tree2);
+			saver.SaveSnapshot(tree2, rootHash);
 			var dataArraySnapshot2 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
 			// Assert
 			nodeIndex.Count.Should().Be(4, "because a TestTree has 4 blobs");
 			dataArraySnapshot1.Length.Should().Be(dataArraySnapshot2.Length);
+		}
+
+		[Fact]
+		public void Should_throw_if_a_root_snapshot_already_exists()
+		{
+			// Test Data
+			var tree = MakeTestTree1();
+			var tree2 = MakeTestTree2();
+
+			// Arrange
+			var saver = new PandoSaver<TestTree>(
+				new InMemoryRepository(),
+				TestTreeSerializer.Create()
+			);
+			saver.SaveRootSnapshot(tree);
+
+			// Assert
+			saver.Invoking(s => s.SaveRootSnapshot(tree2))
+				.Should()
+				.Throw<AlreadyHasRootSnapshotException>();
 		}
 	}
 
