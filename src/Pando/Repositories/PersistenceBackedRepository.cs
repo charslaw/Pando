@@ -17,7 +17,7 @@ public class PersistenceBackedRepository : IPandoRepository, IDisposable
 
 	public ulong AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
+		var hash = HashUtils.ComputeNodeHash(bytes);
 
 		if (_mainRepository.HasNode(hash)) return hash;
 
@@ -28,7 +28,7 @@ public class PersistenceBackedRepository : IPandoRepository, IDisposable
 
 	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
+		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
 
 		if (_mainRepository.HasSnapshot(hash)) return hash;
 

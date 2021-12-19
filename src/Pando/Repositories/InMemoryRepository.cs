@@ -36,20 +36,20 @@ public class InMemoryRepository : IPandoRepository
 	)
 	{
 		_snapshotIndex = snapshotIndex
-			?? new Dictionary<ulong, SnapshotData>(PandoRepositoryIndexUtils.GetSnapshotIndexEntryCount(snapshotIndexSource));
+			?? new Dictionary<ulong, SnapshotData>(SnapshotIndexUtils.GetIndexEntryCount(snapshotIndexSource));
 		_nodeIndex = nodeIndex
-			?? new Dictionary<ulong, DataSlice>(PandoRepositoryIndexUtils.GetNodeIndexEntryCount(nodeIndexSource));
+			?? new Dictionary<ulong, DataSlice>(NodeIndexUtils.GetIndexEntryCount(nodeIndexSource));
 
 		snapshotIndexSource.Seek(0, SeekOrigin.Begin);
 		nodeIndexSource.Seek(0, SeekOrigin.Begin);
 		nodeDataSource.Seek(0, SeekOrigin.Begin);
 
-		while (PandoRepositoryIndexUtils.ReadNextSnapshotIndexEntry(snapshotIndexSource, out var hash, out var snapshotData))
+		while (SnapshotIndexUtils.ReadNextIndexEntry(snapshotIndexSource, out var hash, out var snapshotData))
 		{
 			AddSnapshotWithHashUnsafe(hash, snapshotData);
 		}
 
-		while (PandoRepositoryIndexUtils.ReadNextNodeIndexEntry(nodeIndexSource, out var hash, out var slice))
+		while (NodeIndexUtils.ReadNextIndexEntry(nodeIndexSource, out var hash, out var slice))
 		{
 			_nodeIndex.Add(hash, slice);
 		}
@@ -72,7 +72,7 @@ public class InMemoryRepository : IPandoRepository
 	/// <inheritdoc/>
 	public ulong AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
+		var hash = HashUtils.ComputeNodeHash(bytes);
 		if (HasNode(hash)) return hash;
 
 		AddNodeWithHashUnsafe(hash, bytes);
@@ -95,7 +95,7 @@ public class InMemoryRepository : IPandoRepository
 
 	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
+		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
 		if (HasSnapshot(hash)) return hash;
 
 		AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);

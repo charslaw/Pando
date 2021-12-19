@@ -26,7 +26,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// <inheritdoc/>
 	public ulong AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
+		var hash = HashUtils.ComputeNodeHash(bytes);
 		AddNodeWithHashUnsafe(hash, bytes);
 		return hash;
 	}
@@ -44,7 +44,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 		_nodeDataStream.Write(bytes.ToArray(), 0, bytes.Length);
 		_nodeDataBytesCount += bytes.Length;
 
-		PandoRepositoryIndexUtils.WriteNodeIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
+		NodeIndexUtils.WriteIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
 	}
 
 	/// <remarks>The StreamRepository <i>does not</i> defend against duplicate snapshots.
@@ -52,7 +52,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// <inheritdoc/>
 	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
+		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
 		AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
 		return hash;
 	}
@@ -66,7 +66,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// </remarks>
 	internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
 	{
-		PandoRepositoryIndexUtils.WriteSnapshotIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
+		SnapshotIndexUtils.WriteIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
 	}
 
 	/// Disposes this StreamRepository and all contained streams
