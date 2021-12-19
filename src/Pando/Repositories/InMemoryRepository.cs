@@ -72,7 +72,7 @@ public class InMemoryRepository : IPandoRepository
 	/// <inheritdoc/>
 	public ulong AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
+		var hash = HashUtils.ComputeNodeHash(bytes);
 		if (HasNode(hash)) return hash;
 
 		AddNodeWithHashUnsafe(hash, bytes);
@@ -95,7 +95,7 @@ public class InMemoryRepository : IPandoRepository
 
 	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
+		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
 		if (HasSnapshot(hash)) return hash;
 
 		AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);

@@ -3,7 +3,7 @@ using Standart.Hash.xxHash;
 
 namespace Pando.Repositories.Utils;
 
-internal static class PandoRepositoryHashUtils
+internal static class HashUtils
 {
 	public static ulong ComputeNodeHash(ReadOnlySpan<byte> nodeData) => xxHash64.ComputeHash(nodeData, nodeData.Length);
 

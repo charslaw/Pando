@@ -26,7 +26,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// <inheritdoc/>
 	public ulong AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeNodeHash(bytes);
+		var hash = HashUtils.ComputeNodeHash(bytes);
 		AddNodeWithHashUnsafe(hash, bytes);
 		return hash;
 	}
@@ -52,7 +52,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// <inheritdoc/>
 	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
 	{
-		var hash = PandoRepositoryHashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
+		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
 		AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
 		return hash;
 	}
