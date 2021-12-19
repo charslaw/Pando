@@ -1,4 +1,4 @@
-namespace Pando.Repositories;
+namespace Pando;
 
 public readonly record struct SnapshotEntry(ulong Hash, ulong ParentHash, ulong RootNodeHash);
 
