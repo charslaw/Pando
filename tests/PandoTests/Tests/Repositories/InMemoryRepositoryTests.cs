@@ -240,31 +240,6 @@ public class InMemoryRepositoryTests
 		}
 	}
 
-	public class GetAllSnapshotHashes
-	{
-		[Fact]
-		public void Should_get_all_snapshot_hashes()
-		{
-			// Arrange
-			var repository = new InMemoryRepository();
-			var hash1 = repository.AddSnapshot(1UL, 2UL);
-			var hash2 = repository.AddSnapshot(3UL, 5UL);
-			var hash3 = repository.AddSnapshot(8UL, 13UL);
-
-			// Act
-			var actual = repository.GetAllSnapshotEntries();
-
-			// Assert
-			var expected = new SnapshotEntry[]
-			{
-				new(hash1, 1UL, 2U),
-				new(hash2, 3UL, 5UL),
-				new(hash3, 8UL, 13UL),
-			};
-			actual.Should().Equal(expected);
-		}
-	}
-
 	public class ReconstitutionConstructor
 	{
 		[Fact]

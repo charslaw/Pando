@@ -147,15 +147,6 @@ public class InMemoryRepository : IPandoRepository
 		return _snapshotIndex[hash].RootNodeHash;
 	}
 
-	public IEnumerable<SnapshotEntry> GetAllSnapshotEntries()
-	{
-		// ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-		foreach (var kvp in _snapshotIndex)
-		{
-			yield return new SnapshotEntry(kvp.Key, kvp.Value.ParentHash, kvp.Value.RootNodeHash);
-		}
-	}
-
 	private void CheckNodeHash(ulong hash)
 	{
 		if (!HasNode(hash))

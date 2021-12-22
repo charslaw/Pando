@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Pando.Exceptions;
 
 namespace Pando;
@@ -16,5 +17,7 @@ public interface IPandoSaver<T>
 	/// <exception cref="HashNotFoundException">Thrown if the given hash does not exist.</exception>
 	T GetSnapshot(ulong hash);
 
-	SnapshotChain<T> GetFullSnapshotChain();
+	SnapshotTree GetSnapshotTree();
 }
+
+public record SnapshotTree(ulong Hash, ImmutableArray<SnapshotTree>? Children = null);
