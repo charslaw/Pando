@@ -41,7 +41,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	internal void AddNodeWithHashUnsafe(ulong hash, ReadOnlySpan<byte> bytes)
 	{
 		var start = _nodeDataBytesCount;
-		_nodeDataStream.Write(bytes.ToArray(), 0, bytes.Length);
+		_nodeDataStream.Write(bytes);
 		_nodeDataBytesCount += bytes.Length;
 
 		NodeIndexUtils.WriteIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
