@@ -296,7 +296,12 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndex.CreateCopy());
-			var repository = new InMemoryRepository(Stream.Null, nodeIndexStream, Stream.Null);
+			var repository = new InMemoryRepository(
+				snapshotIndexSource: Stream.Null,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: nodeIndexStream,
+				nodeDataSource: Stream.Null
+			);
 
 			// Assert
 			repository.HasNode(nodeHash).Should().BeTrue();
@@ -321,7 +326,12 @@ public class InMemoryRepositoryTests
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndexEntry.CreateCopy());
 			var nodeDataStream = new MemoryStream(nodeData.CreateCopy());
-			var repository = new InMemoryRepository(Stream.Null, nodeIndexStream, nodeDataStream);
+			var repository = new InMemoryRepository(
+				snapshotIndexSource: Stream.Null,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: nodeIndexStream,
+				nodeDataSource: nodeDataStream
+			);
 
 			// Assert
 			var result1 = repository.GetNode(hash1, new ToArrayDeserializer());
@@ -339,7 +349,12 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndex);
-			var repository = new InMemoryRepository(snapshotIndexStream, Stream.Null, Stream.Null);
+			var repository = new InMemoryRepository(
+				snapshotIndexSource: snapshotIndexStream,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: Stream.Null,
+				nodeDataSource: Stream.Null
+			);
 
 			// Assert
 			repository.HasSnapshot(hash).Should().BeTrue();
@@ -360,7 +375,12 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndexEntry.CreateCopy());
-			var repository = new InMemoryRepository(snapshotIndexStream, Stream.Null, Stream.Null);
+			var repository = new InMemoryRepository(
+				snapshotIndexSource: snapshotIndexStream,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: Stream.Null,
+				nodeDataSource: Stream.Null
+			);
 
 			// Assert
 			var actualParentHash = repository.GetSnapshotParent(hash);
@@ -376,7 +396,10 @@ public class InMemoryRepositoryTests
 			nodeDataStream.Write(new byte[] { 1, 2, 3 });
 			var nodeDataList = new SpannableList<byte>();
 			var _ = new InMemoryRepository(
-				Stream.Null, Stream.Null, nodeDataStream,
+				snapshotIndexSource: Stream.Null,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: Stream.Null,
+				nodeDataSource: nodeDataStream,
 				nodeData: nodeDataList
 			);
 

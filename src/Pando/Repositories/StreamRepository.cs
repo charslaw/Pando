@@ -21,35 +21,10 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	{
 		_snapshotIndexStream = snapshotIndexStream;
 		_leafSnapshotsStream = leafSnapshotsStream;
-		_leafSnapshotHashSet = GetInitialLeafSnapshots(leafSnapshotsStream);
+		_leafSnapshotHashSet = StreamUtils.LeafSnapshotSet.PopulateLeafSnapshotsSet(leafSnapshotsStream);
 		_nodeIndexStream = nodeIndexStream;
 		_nodeDataStream = nodeDataStream;
 		_nodeDataBytesCount = nodeDataStream.Length;
-	}
-
-	private static HashSet<ulong> GetInitialLeafSnapshots(Stream leafSnapshotsStream)
-	{
-		leafSnapshotsStream.Seek(0, SeekOrigin.Begin);
-		if (leafSnapshotsStream.Length % 8 != 0)
-		{
-			throw new IncompleteReadException(
-				$"{nameof(leafSnapshotsStream)} has a wrong number of bytes: {leafSnapshotsStream.Length}." +
-				"Length must be a multiple of 8."
-			);
-		}
-
-		var totalHashesCount = (int)leafSnapshotsStream.Length / 8;
-		if (totalHashesCount == 0) return new HashSet<ulong>();
-
-		var set = new HashSet<ulong>(totalHashesCount);
-		Span<byte> hashBuffer = stackalloc byte[sizeof(ulong)];
-		for (int i = 0; i < totalHashesCount; i++)
-		{
-			leafSnapshotsStream.Read(hashBuffer);
-			set.Add(ByteEncoder.GetUInt64(hashBuffer));
-		}
-
-		return set;
 	}
 
 	/// <remarks>The StreamRepository <i>does not</i> defend against duplicate nodes.
@@ -75,7 +50,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 		_nodeDataStream.Write(bytes);
 		_nodeDataBytesCount += bytes.Length;
 
-		NodeIndexUtils.WriteIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
+		StreamUtils.NodeIndex.WriteIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
 	}
 
 	/// <remarks>The StreamRepository <i>does not</i> defend against duplicate snapshots.
@@ -97,7 +72,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// </remarks>
 	internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
 	{
-		SnapshotIndexUtils.WriteIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
+		StreamUtils.SnapshotIndex.WriteIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
 
 		_leafSnapshotHashSet.Remove(parentHash);
 		_leafSnapshotHashSet.Add(hash);

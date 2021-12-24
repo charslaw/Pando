@@ -9,12 +9,27 @@ namespace Pando.Repositories;
 
 public class InMemoryRepository : IPandoRepository
 {
-	private readonly Dictionary<ulong, SnapshotData> _snapshotIndex = new();
-	private readonly HashSet<ulong> _leafSnapshots = new();
-	private readonly Dictionary<ulong, DataSlice> _nodeIndex = new();
-	private readonly SpannableList<byte> _nodeData = new();
+	private readonly Dictionary<ulong, SnapshotData> _snapshotIndex;
+	private readonly HashSet<ulong> _leafSnapshots;
+	private readonly Dictionary<ulong, DataSlice> _nodeIndex;
+	private readonly SpannableList<byte> _nodeData;
 
-	public InMemoryRepository() { }
+	public InMemoryRepository()
+	{
+		_snapshotIndex = new Dictionary<ulong, SnapshotData>();
+		_leafSnapshots = new HashSet<ulong>();
+		_nodeIndex = new Dictionary<ulong, DataSlice>();
+		_nodeData = new SpannableList<byte>();
+	}
+
+	public InMemoryRepository(Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource)
+		: this(
+			snapshotIndexSource: snapshotIndexSource,
+			leafSnapshotsSource: leafSnapshotsSource,
+			nodeIndexSource: nodeIndexSource,
+			nodeDataSource: nodeDataSource,
+			null, null, null
+		) { }
 
 	internal InMemoryRepository(
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
@@ -23,51 +38,23 @@ public class InMemoryRepository : IPandoRepository
 	)
 	{
 		_snapshotIndex = snapshotIndex ?? new Dictionary<ulong, SnapshotData>();
+		_leafSnapshots = new HashSet<ulong>();
 		_nodeIndex = nodeIndex ?? new Dictionary<ulong, DataSlice>();
 		_nodeData = nodeData ?? new SpannableList<byte>();
 	}
 
-	public InMemoryRepository(Stream snapshotIndexSource, Stream nodeIndexSource, Stream nodeDataSource)
-		: this(snapshotIndexSource, nodeIndexSource, nodeDataSource, null, null, null) { }
 
 	internal InMemoryRepository(
-		Stream snapshotIndexSource, Stream nodeIndexSource, Stream nodeDataSource,
+		Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource,
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
 		Dictionary<ulong, DataSlice>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
 	)
 	{
-		_snapshotIndex = snapshotIndex
-			?? new Dictionary<ulong, SnapshotData>(SnapshotIndexUtils.GetIndexEntryCount(snapshotIndexSource));
-		_nodeIndex = nodeIndex
-			?? new Dictionary<ulong, DataSlice>(NodeIndexUtils.GetIndexEntryCount(nodeIndexSource));
-
-		snapshotIndexSource.Seek(0, SeekOrigin.Begin);
-		nodeIndexSource.Seek(0, SeekOrigin.Begin);
-		nodeDataSource.Seek(0, SeekOrigin.Begin);
-
-		while (SnapshotIndexUtils.ReadNextIndexEntry(snapshotIndexSource, out var hash, out var snapshotData))
-		{
-			AddSnapshotWithHashUnsafe(hash, snapshotData);
-		}
-
-		while (NodeIndexUtils.ReadNextIndexEntry(nodeIndexSource, out var hash, out var slice))
-		{
-			_nodeIndex.Add(hash, slice);
-		}
-
-		var buffer = new byte[nodeDataSource.Length];
-		nodeDataSource.Read(buffer, 0, (int)nodeDataSource.Length);
-
-		if (nodeData is not null)
-		{
-			_nodeData = nodeData;
-			_nodeData.AddSpan(buffer);
-		}
-		else
-		{
-			_nodeData = new SpannableList<byte>(buffer);
-		}
+		_snapshotIndex = StreamUtils.SnapshotIndex.PopulateSnapshotIndex(snapshotIndexSource, snapshotIndex);
+		_leafSnapshots = StreamUtils.LeafSnapshotSet.PopulateLeafSnapshotsSet(leafSnapshotsSource);
+		_nodeIndex = StreamUtils.NodeIndex.PopulateNodeIndex(nodeIndexSource, nodeIndex);
+		_nodeData = StreamUtils.NodeData.PopulateNodeData(nodeDataSource, nodeData);
 	}
 
 	/// <remarks>This implementation is guaranteed not to insert duplicate nodes.</remarks>
