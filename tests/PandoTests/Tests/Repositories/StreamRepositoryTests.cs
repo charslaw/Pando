@@ -217,13 +217,44 @@ public class StreamRepositoryTests
 			var actualHashes = GetHashesFromByteArray(leafSnapshotsRaw);
 			actualHashes.Should().BeEquivalentTo(new[] { childHash1, childHash2 });
 		}
+	}
 
-		private static IEnumerable<ulong> GetHashesFromByteArray(byte[] input)
+	public class ReonstitutionConstructor
+	{
+		[Fact]
+		public void Should_account_for_existing_leaf_snapshots()
 		{
-			for (int i = 0; i < input.Length; i += 8)
-			{
-				yield return ByteEncoder.GetUInt64(input.AsSpan(i, sizeof(ulong)));
-			}
+			// Test Data
+			var snapshot1Hash = 1UL;
+			var snapshot2Hash = 2UL;
+			var initialLeafSnapshots = new byte[sizeof(ulong) * 2];
+			ByteEncoder.CopyBytes(snapshot1Hash, initialLeafSnapshots.AsSpan(0, sizeof(ulong)));
+			ByteEncoder.CopyBytes(snapshot2Hash, initialLeafSnapshots.AsSpan(sizeof(ulong), sizeof(ulong)));
+
+			// Arrange
+			var leafSnapshotsStream = new MemoryStream(initialLeafSnapshots);
+			using var repository = new StreamRepository(
+				snapshotIndexStream: Stream.Null,
+				leafSnapshotsStream: leafSnapshotsStream,
+				nodeIndexStream: Stream.Null,
+				nodeDataStream: Stream.Null
+			);
+
+			// Act
+			var newSnapshot = repository.AddSnapshot(snapshot1Hash, 0);
+
+			// Assert
+			var actualHashes = GetHashesFromByteArray(leafSnapshotsStream.ToArray());
+			actualHashes.Should().BeEquivalentTo(new[] { newSnapshot, snapshot2Hash });
+		}
+	}
+
+
+	private static IEnumerable<ulong> GetHashesFromByteArray(byte[] input)
+	{
+		for (int i = 0; i < input.Length; i += 8)
+		{
+			yield return ByteEncoder.GetUInt64(input.AsSpan(i, sizeof(ulong)));
 		}
 	}
 }

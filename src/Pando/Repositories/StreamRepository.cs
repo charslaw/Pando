@@ -12,7 +12,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	private readonly Stream _nodeIndexStream;
 	private readonly Stream _nodeDataStream;
 
-	private readonly HashSet<ulong> _leafSnapshotHashes = new();
+	private readonly HashSet<ulong> _leafSnapshotHashSet;
 
 	/// Counts total number of bytes in the node data stream.
 	private long _nodeDataBytesCount;
@@ -21,9 +21,35 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	{
 		_snapshotIndexStream = snapshotIndexStream;
 		_leafSnapshotsStream = leafSnapshotsStream;
+		_leafSnapshotHashSet = GetInitialLeafSnapshots(leafSnapshotsStream);
 		_nodeIndexStream = nodeIndexStream;
 		_nodeDataStream = nodeDataStream;
 		_nodeDataBytesCount = nodeDataStream.Length;
+	}
+
+	private static HashSet<ulong> GetInitialLeafSnapshots(Stream leafSnapshotsStream)
+	{
+		leafSnapshotsStream.Seek(0, SeekOrigin.Begin);
+		if (leafSnapshotsStream.Length % 8 != 0)
+		{
+			throw new IncompleteReadException(
+				$"{nameof(leafSnapshotsStream)} has a wrong number of bytes: {leafSnapshotsStream.Length}." +
+				"Length must be a multiple of 8."
+			);
+		}
+
+		var totalHashesCount = (int)leafSnapshotsStream.Length / 8;
+		if (totalHashesCount == 0) return new HashSet<ulong>();
+
+		var set = new HashSet<ulong>(totalHashesCount);
+		Span<byte> hashBuffer = stackalloc byte[sizeof(ulong)];
+		for (int i = 0; i < totalHashesCount; i++)
+		{
+			leafSnapshotsStream.Read(hashBuffer);
+			set.Add(ByteEncoder.GetUInt64(hashBuffer));
+		}
+
+		return set;
 	}
 
 	/// <remarks>The StreamRepository <i>does not</i> defend against duplicate nodes.
@@ -73,14 +99,14 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	{
 		SnapshotIndexUtils.WriteIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
 
-		_leafSnapshotHashes.Add(hash);
-		_leafSnapshotHashes.Remove(parentHash);
+		_leafSnapshotHashSet.Remove(parentHash);
+		_leafSnapshotHashSet.Add(hash);
 
 		_leafSnapshotsStream.Seek(0, SeekOrigin.Begin);
 		_leafSnapshotsStream.SetLength(0);
-		Span<byte> buffer = stackalloc byte[_leafSnapshotHashes.Count * sizeof(ulong)];
+		Span<byte> buffer = stackalloc byte[_leafSnapshotHashSet.Count * sizeof(ulong)];
 		var i = 0;
-		foreach (var leafHash in _leafSnapshotHashes)
+		foreach (var leafHash in _leafSnapshotHashSet)
 		{
 			ByteEncoder.CopyBytes(leafHash, buffer.Slice(i * sizeof(ulong), sizeof(ulong)));
 			i++;
