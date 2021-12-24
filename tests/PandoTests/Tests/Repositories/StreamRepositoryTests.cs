@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
 using Pando.Repositories;
@@ -26,7 +27,12 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var nodeIndexStream = new MemoryStream();
-			using var repository = new StreamRepository(Stream.Null, nodeIndexStream, Stream.Null);
+			using var repository = new StreamRepository(
+				snapshotIndexStream: Stream.Null,
+				leafSnapshotsStream: Stream.Null,
+				nodeIndexStream: nodeIndexStream,
+				nodeDataStream: Stream.Null
+			);
 
 			// Act
 			repository.AddNode(nodeData[0]);
@@ -58,7 +64,12 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var nodeDataStream = new MemoryStream();
-			using var repository = new StreamRepository(Stream.Null, Stream.Null, nodeDataStream);
+			using var repository = new StreamRepository(
+				snapshotIndexStream: Stream.Null,
+				leafSnapshotsStream: Stream.Null,
+				nodeIndexStream: Stream.Null,
+				nodeDataStream: nodeDataStream
+			);
 
 			// Act
 			repository.AddNode(nodeData1);
@@ -87,7 +98,12 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			using var repository = new StreamRepository(snapshotIndexStream, Stream.Null, Stream.Null);
+			using var repository = new StreamRepository(
+				snapshotIndexStream: snapshotIndexStream,
+				leafSnapshotsStream: Stream.Null,
+				nodeIndexStream: Stream.Null,
+				nodeDataStream: Stream.Null
+			);
 
 			// Act
 			repository.AddSnapshot(0, rootNodeHash);
@@ -115,7 +131,12 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			using var repository = new StreamRepository(snapshotIndexStream, Stream.Null, Stream.Null);
+			using var repository = new StreamRepository(
+				snapshotIndexStream: snapshotIndexStream,
+				leafSnapshotsStream: Stream.Null,
+				nodeIndexStream: Stream.Null,
+				nodeDataStream: Stream.Null
+			);
 
 			// Act
 			repository.AddSnapshot(parentHash, rootNodeHash);
@@ -126,6 +147,83 @@ public class StreamRepositoryTests
 			var actualIndex = snapshotIndex[8..];
 			actualIndex.Should().Equal(expectedIndex);
 			actualHash.Should().Be(expectedHash);
+		}
+
+		[Fact]
+		public void Should_update_leaf_nodes_when_snapshot_added()
+		{
+			// Arrange
+			var leafSnapshotsStream = new MemoryStream();
+			using var repository = new StreamRepository(
+				snapshotIndexStream: Stream.Null,
+				leafSnapshotsStream: leafSnapshotsStream,
+				nodeIndexStream: Stream.Null,
+				nodeDataStream: Stream.Null
+			);
+
+			// Act
+			var snapshotHash = repository.AddSnapshot(0, 1);
+
+			// Assert
+			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
+			leafSnapshotsRaw.Length.Should().Be(8);
+			var actualHash = ByteEncoder.GetUInt64(leafSnapshotsRaw);
+			actualHash.Should().Be(snapshotHash);
+		}
+
+		[Fact]
+		public void Should_update_leaf_snapshot_stream_when_child_added()
+		{
+			// Arrange
+			var leafSnapshotsStream = new MemoryStream();
+			using var repository = new StreamRepository(
+				snapshotIndexStream: Stream.Null,
+				leafSnapshotsStream: leafSnapshotsStream,
+				nodeIndexStream: Stream.Null,
+				nodeDataStream: Stream.Null
+			);
+
+			// Act
+			var rootHash = repository.AddSnapshot(0, 1);
+			var childHash = repository.AddSnapshot(rootHash, 2);
+
+			// Assert
+			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
+			leafSnapshotsRaw.Length.Should().Be(8);
+			var actualHash = ByteEncoder.GetUInt64(leafSnapshotsRaw);
+			actualHash.Should().Be(childHash);
+		}
+
+		[Fact]
+		public void Should_update_stream_to_contain_leaf_nodes_of_all_branches()
+		{
+			// Arrange
+			var leafSnapshotsStream = new MemoryStream();
+			using var repository = new StreamRepository(
+				snapshotIndexStream: Stream.Null,
+				leafSnapshotsStream: leafSnapshotsStream,
+				nodeIndexStream: Stream.Null,
+				nodeDataStream: Stream.Null
+			);
+
+			// Act
+			var rootHash = repository.AddSnapshot(0, 1);
+			var childHash1 = repository.AddSnapshot(rootHash, 2);
+			var childHash2 = repository.AddSnapshot(rootHash, 3);
+
+			// Assert
+			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
+			leafSnapshotsRaw.Length.Should().Be(16);
+			var actualHashes = GetHashesFromByteArray(leafSnapshotsRaw);
+			actualHashes.Should().BeEquivalentTo(new[] { childHash1, childHash2 });
+		}
+
+		private static IEnumerable<ulong> GetHashesFromByteArray(byte[] input)
+		{
+			for (int i = 0; i < input.Length; i += 8)
+			{
+				yield return ByteEncoder.GetUInt64(input.AsSpan(i, sizeof(ulong)));
+			}
 		}
 	}
 }

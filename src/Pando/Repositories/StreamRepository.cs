@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Pando.Repositories.Utils;
 
@@ -7,15 +8,19 @@ namespace Pando.Repositories;
 public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnapshotRepository, IDisposable
 {
 	private readonly Stream _snapshotIndexStream;
+	private readonly Stream _leafSnapshotsStream;
 	private readonly Stream _nodeIndexStream;
 	private readonly Stream _nodeDataStream;
+
+	private readonly HashSet<ulong> _leafSnapshotHashes = new();
 
 	/// Counts total number of bytes in the node data stream.
 	private long _nodeDataBytesCount;
 
-	public StreamRepository(Stream snapshotIndexStream, Stream nodeIndexStream, Stream nodeDataStream)
+	public StreamRepository(Stream snapshotIndexStream, Stream leafSnapshotsStream, Stream nodeIndexStream, Stream nodeDataStream)
 	{
 		_snapshotIndexStream = snapshotIndexStream;
+		_leafSnapshotsStream = leafSnapshotsStream;
 		_nodeIndexStream = nodeIndexStream;
 		_nodeDataStream = nodeDataStream;
 		_nodeDataBytesCount = nodeDataStream.Length;
@@ -67,12 +72,28 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
 	{
 		SnapshotIndexUtils.WriteIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
+
+		_leafSnapshotHashes.Add(hash);
+		_leafSnapshotHashes.Remove(parentHash);
+
+		_leafSnapshotsStream.Seek(0, SeekOrigin.Begin);
+		_leafSnapshotsStream.SetLength(0);
+		Span<byte> buffer = stackalloc byte[_leafSnapshotHashes.Count * sizeof(ulong)];
+		var i = 0;
+		foreach (var leafHash in _leafSnapshotHashes)
+		{
+			ByteEncoder.CopyBytes(leafHash, buffer.Slice(i * sizeof(ulong), sizeof(ulong)));
+			i++;
+		}
+
+		_leafSnapshotsStream.Write(buffer);
 	}
 
 	/// Disposes this StreamRepository and all contained streams
 	public void Dispose()
 	{
 		_snapshotIndexStream.Dispose();
+		_leafSnapshotsStream.Dispose();
 		_nodeIndexStream.Dispose();
 		_nodeDataStream.Dispose();
 	}
