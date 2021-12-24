@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using Pando.Exceptions;
 using Pando.Repositories.Utils;
@@ -9,6 +10,7 @@ namespace Pando.Repositories;
 public class InMemoryRepository : IPandoRepository
 {
 	private readonly Dictionary<ulong, SnapshotData> _snapshotIndex = new();
+	private readonly HashSet<ulong> _leafSnapshots = new();
 	private readonly Dictionary<ulong, DataSlice> _nodeIndex = new();
 	private readonly SpannableList<byte> _nodeData = new();
 
@@ -112,6 +114,11 @@ public class InMemoryRepository : IPandoRepository
 	private void AddSnapshotWithHashUnsafe(ulong hash, SnapshotData snapshotData)
 	{
 		_snapshotIndex.Add(hash, snapshotData);
+
+		// If we're adding a new snapshot, it is by definition a leaf, so add it
+		_leafSnapshots.Add(hash);
+		// And if it has a parent, the parent is by definition no longer a leaf, so remove it (if it was already a leaf)
+		_leafSnapshots.Remove(snapshotData.ParentHash);
 	}
 
 	public bool HasNode(ulong hash) => _nodeIndex.ContainsKey(hash);
@@ -146,6 +153,8 @@ public class InMemoryRepository : IPandoRepository
 		CheckSnapshotHash(hash);
 		return _snapshotIndex[hash].RootNodeHash;
 	}
+
+	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _leafSnapshots.ToImmutableHashSet();
 
 	private void CheckNodeHash(ulong hash)
 	{

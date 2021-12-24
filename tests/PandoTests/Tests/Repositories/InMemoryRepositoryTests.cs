@@ -240,6 +240,51 @@ public class InMemoryRepositoryTests
 		}
 	}
 
+	public class GetLeafSnapshotHashes
+	{
+		[Fact]
+		public void Should_return_only_snapshot_hash()
+		{
+			// Arrange
+			var repository = new InMemoryRepository();
+
+			// Act
+			var snapshotHash = repository.AddSnapshot(0, 2);
+
+			// Assert
+			repository.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { snapshotHash });
+		}
+
+		[Fact]
+		public void Should_return_the_latest_snapshot_hash_in_a_branch()
+		{
+			// Arrange
+			var repository = new InMemoryRepository();
+
+			// Act
+			var rootHash = repository.AddSnapshot(0, 2);
+			var childHash = repository.AddSnapshot(rootHash, 3);
+
+			// Assert
+			repository.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { childHash });
+		}
+
+		[Fact]
+		public void Should_return_the_latest_snapshot_hash_in_all_branches()
+		{
+			// Arrange
+			var repository = new InMemoryRepository();
+
+			// Act
+			var rootHash = repository.AddSnapshot(0, 2);
+			var childHash1 = repository.AddSnapshot(rootHash, 3);
+			var childHash2 = repository.AddSnapshot(rootHash, 4);
+
+			// Assert
+			repository.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { childHash1, childHash2 });
+		}
+	}
+
 	public class ReconstitutionConstructor
 	{
 		[Fact]

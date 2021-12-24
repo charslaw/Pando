@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Immutable;
 using Pando.Repositories.Utils;
 
 namespace Pando.Repositories;
@@ -45,6 +46,8 @@ public class PersistenceBackedRepository : IPandoRepository, IDisposable
 
 	public ulong GetSnapshotParent(ulong hash) => _mainRepository.GetSnapshotParent(hash);
 	public ulong GetSnapshotRootNode(ulong hash) => _mainRepository.GetSnapshotRootNode(hash);
+
+	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _mainRepository.GetLeafSnapshotHashes();
 
 	public void Dispose() => _persistentRepository.Dispose();
 }
