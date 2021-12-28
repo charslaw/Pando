@@ -39,7 +39,7 @@ public class PersistenceBackedRepository : IPandoRepository, IDisposable
 
 	public bool HasNode(ulong hash) => _mainRepository.HasNode(hash);
 	public bool HasSnapshot(ulong hash) => _mainRepository.HasSnapshot(hash);
-	public bool HasAnySnapshot() => _mainRepository.HasAnySnapshot();
+	public int SnapshotCount => _mainRepository.SnapshotCount;
 
 	public T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer) => _mainRepository.GetNode(hash, in nodeDeserializer);
 	public int GetSizeOfNode(ulong hash) => _mainRepository.GetSizeOfNode(hash);
