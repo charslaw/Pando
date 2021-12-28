@@ -18,6 +18,12 @@ internal struct SmallSet<T> where T : struct
 
 	public IEnumerable<T> All => _set ?? throw new Exception("This SmallSet does not contain multiple elements!");
 
+	public SmallSet(T initialValue)
+	{
+		_single = initialValue;
+		_set = null;
+	}
+
 	public void Add(T item)
 	{
 		if (_single is null)
