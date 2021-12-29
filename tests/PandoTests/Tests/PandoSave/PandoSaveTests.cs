@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using FluentAssertions;
 using Pando;
@@ -185,22 +186,18 @@ public class PandoSaveTests
 			SnapshotTree snapshotTree = saver.GetSnapshotTree();
 
 			// Assert
-			var expected = new
-			{
-				Hash = rootHash,
-				Children = new object[]
-				{
-					new
-					{
-						Hash = child1Hash,
-						Children = new object[]
-						{
-							new { Hash = grandChildHash, Children = (object[]?)null },
-						}
-					},
-					new { Hash = child2Hash, Children = (object[]?)null },
-				}
-			};
+			var expected = new SnapshotTree(
+				rootHash,
+				ImmutableArray.Create(
+					new SnapshotTree(
+						child1Hash,
+						ImmutableArray.Create(
+							new SnapshotTree(grandChildHash)
+						)
+					),
+					new SnapshotTree(child2Hash)
+				)
+			);
 
 			snapshotTree.Should().BeEquivalentTo(expected, options => options.ComparingByMembers<SnapshotTree>());
 		}
@@ -219,22 +216,18 @@ public class PandoSaveTests
 			SnapshotTree snapshotTree = saver.GetSnapshotTree();
 
 			// Assert
-			var expected = new
-			{
-				Hash = rootHash,
-				Children = new object[]
-				{
-					new
-					{
-						Hash = child1Hash,
-						Children = new object[]
-						{
-							new { Hash = grandChildHash, Children = (object[]?)null },
-						}
-					},
-					new { Hash = child2Hash, Children = (object[]?)null },
-				}
-			};
+			var expected = new SnapshotTree(
+				rootHash,
+				ImmutableArray.Create(
+					new SnapshotTree(
+						child1Hash,
+						ImmutableArray.Create(
+							new SnapshotTree(grandChildHash)
+						)
+					),
+					new SnapshotTree(child2Hash)
+				)
+			);
 
 			snapshotTree.Should().BeEquivalentTo(expected, options => options.ComparingByMembers<SnapshotTree>());
 		}
@@ -254,29 +247,23 @@ public class PandoSaveTests
 
 			// Assert
 			SnapshotTree snapshotTree = saver.GetSnapshotTree();
-			var expected = new
-			{
-				Hash = rootHash,
-				Children = new object[]
-				{
-					new
-					{
-						Hash = child1Hash,
-						Children = new object[]
-						{
-							new { Hash = grandChildHash, Children = (object[]?)null },
-						}
-					},
-					new
-					{
-						Hash = child2Hash,
-						Children = new object[]
-						{
-							new { Hash = newHash, Children = (object[]?)null }
-						}
-					},
-				}
-			};
+			var expected = new SnapshotTree(
+				rootHash,
+				ImmutableArray.Create(
+					new SnapshotTree(
+						child1Hash,
+						ImmutableArray.Create(
+							new SnapshotTree(grandChildHash)
+						)
+					),
+					new SnapshotTree(
+						child2Hash,
+						ImmutableArray.Create(
+							new SnapshotTree(newHash)
+						)
+					)
+				)
+			);
 
 			snapshotTree.Should().BeEquivalentTo(expected, options => options.ComparingByMembers<SnapshotTree>());
 		}
