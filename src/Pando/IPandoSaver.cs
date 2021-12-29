@@ -17,6 +17,8 @@ public interface IPandoSaver<T>
 	/// <exception cref="HashNotFoundException">Thrown if the given hash does not exist.</exception>
 	T GetSnapshot(ulong hash);
 
+	/// Returns a hierarchical tree of snapshots starting from the root snapshot down through all branches.
+	/// <exception cref="NoRootSnapshotException">Thrown if this saver does not have a root snapshot from which to "grow" the tree.</exception>
 	SnapshotTree GetSnapshotTree();
 }
 
