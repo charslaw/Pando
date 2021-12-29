@@ -54,6 +54,16 @@ public class PandoSaveTests
 			)
 		);
 
+	private static TestTree MakeTestTree5() =>
+		new(
+			"Test Tree 5",
+			new TestTree.A(5),
+			new TestTree.B(
+				new DateTime(1970, 05, 05),
+				5000
+			)
+		);
+
 	public class SaveRootSnapshot
 	{
 		[Fact]
@@ -223,6 +233,48 @@ public class PandoSaveTests
 						}
 					},
 					new { Hash = child2Hash, Children = (object[]?)null },
+				}
+			};
+
+			snapshotTree.Should().BeEquivalentTo(expected, options => options.ComparingByMembers<SnapshotTree>());
+		}
+
+		[Fact]
+		public void Should_return_correct_tree_when_adding_to_reconstituted_saver()
+		{
+			var (repo, rootHash, child1Hash, child2Hash, grandChildHash) = PrepopulatedRepository();
+
+			var saver = new PandoSaver<TestTree>(
+				repo,
+				TestTreeSerializer.Create()
+			);
+
+			// Act
+			var newHash = saver.SaveSnapshot(MakeTestTree5(), child2Hash);
+
+			// Assert
+			SnapshotTree snapshotTree = saver.GetSnapshotTree();
+			var expected = new
+			{
+				Hash = rootHash,
+				Children = new object[]
+				{
+					new
+					{
+						Hash = child1Hash,
+						Children = new object[]
+						{
+							new { Hash = grandChildHash, Children = (object[]?)null },
+						}
+					},
+					new
+					{
+						Hash = child2Hash,
+						Children = new object[]
+						{
+							new { Hash = newHash, Children = (object[]?)null }
+						}
+					},
 				}
 			};
 
