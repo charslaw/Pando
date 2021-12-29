@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using FluentAssertions;
 using Pando;
 using Pando.Exceptions;
@@ -195,6 +196,40 @@ public class PandoSaveTests
 		}
 
 		[Fact]
+		public void Should_return_correct_tree_when_reconstituting_from_persisted_data()
+		{
+			var (repo, rootHash, child1Hash, child2Hash, grandChildHash) = PrepopulatedRepository();
+
+			var saver = new PandoSaver<TestTree>(
+				repo,
+				TestTreeSerializer.Create()
+			);
+
+			// Act
+			SnapshotTree snapshotTree = saver.GetSnapshotTree();
+
+			// Assert
+			var expected = new
+			{
+				Hash = rootHash,
+				Children = new object[]
+				{
+					new
+					{
+						Hash = child1Hash,
+						Children = new object[]
+						{
+							new { Hash = grandChildHash, Children = (object[]?)null },
+						}
+					},
+					new { Hash = child2Hash, Children = (object[]?)null },
+				}
+			};
+
+			snapshotTree.Should().BeEquivalentTo(expected, options => options.ComparingByMembers<SnapshotTree>());
+		}
+
+		[Fact]
 		public void Should_throw_if_no_root_snapshot()
 		{
 			var saver = new PandoSaver<TestTree>(
@@ -203,6 +238,35 @@ public class PandoSaveTests
 			);
 
 			saver.Invoking(s => s.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
+		}
+
+		/// Simulate adding snapshots to the repository in a previous session, then reconstitute a new repository from the persisted data
+		/// This is used to test that a Pando saver will work properly when used with a repository that already has data.
+		private static (IPandoRepository repo, ulong rootHash, ulong child1Hash, ulong child2Hash, ulong grandChildHash) PrepopulatedRepository()
+		{
+			// Assemble "previous session" data
+			var snapshotIndex = new MemoryStream();
+			var leafSnapshots = new MemoryStream();
+			var nodeIndex = new MemoryStream();
+			var nodeData = new MemoryStream();
+
+			var saver = new PandoSaver<TestTree>(
+				new PersistenceBackedRepository(
+					new InMemoryRepository(),
+					new StreamRepository(snapshotIndex, leafSnapshots, nodeIndex, nodeData)
+				),
+				TestTreeSerializer.Create()
+			);
+
+			var rootHash = saver.SaveRootSnapshot(MakeTestTree1());
+			var child1Hash = saver.SaveSnapshot(MakeTestTree2(), rootHash);
+			var child2Hash = saver.SaveSnapshot(MakeTestTree3(), rootHash);
+			var grandChildHash = saver.SaveSnapshot(MakeTestTree4(), child1Hash);
+
+			// Reconstitute a new repository to return
+			var repo = new InMemoryRepository(snapshotIndex, leafSnapshots, nodeIndex, nodeData);
+
+			return (repo, rootHash, child1Hash, child2Hash, grandChildHash);
 		}
 	}
 }

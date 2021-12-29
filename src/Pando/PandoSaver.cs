@@ -17,11 +17,18 @@ public class PandoSaver<T> : IPandoSaver<T>
 	{
 		_repository = repository;
 		_serializer = serializer;
+
+		var snapshotCount = _repository.SnapshotCount;
+		if (snapshotCount > 0)
+		{
+			_snapshotTreeElements = new Dictionary<ulong, SmallSet<ulong>>(snapshotCount);
+			InitializeSnapshotTree(_repository.GetLeafSnapshotHashes());
+		}
 	}
 
 	public ulong SaveRootSnapshot(T tree)
 	{
-		if (_repository.HasAnySnapshot()) throw new AlreadyHasRootSnapshotException();
+		if (_repository.SnapshotCount > 0) throw new AlreadyHasRootSnapshotException();
 
 		var nodeHash = _serializer.Serialize(tree, _repository);
 		var snapshotHash = _repository.AddSnapshot(0UL, nodeHash);
@@ -70,6 +77,33 @@ public class PandoSaver<T> : IPandoSaver<T>
 				}
 
 				return new SnapshotTree(hash, treeChildren.MoveToImmutable());
+		}
+	}
+
+	private void InitializeSnapshotTree(IImmutableSet<ulong> leaves)
+	{
+		foreach (var leaf in leaves)
+		{
+			_snapshotTreeElements[leaf] = new SmallSet<ulong>();
+
+			var currentHash = leaf;
+			var parentHash = _repository.GetSnapshotParent(currentHash);
+			while (parentHash != 0UL)
+			{
+				if (_snapshotTreeElements.TryGetValue(parentHash, out var set))
+				{
+					set.Add(currentHash);
+					_snapshotTreeElements[parentHash] = set;
+					break; // We've run into an existing hash; that means we've already explored everything above this.
+				}
+
+				_snapshotTreeElements.Add(parentHash, new SmallSet<ulong>(currentHash));
+
+				currentHash = parentHash;
+				parentHash = _repository.GetSnapshotParent(currentHash);
+			}
+
+			if (parentHash == 0UL) _rootSnapshot = currentHash;
 		}
 	}
 
