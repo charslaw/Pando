@@ -141,11 +141,11 @@ internal static class StreamUtils
 			nodeDataStream.Seek(0, SeekOrigin.Begin);
 			var streamLength = (int)nodeDataStream.Length;
 			data ??= new SpannableList<byte>(streamLength);
-			if (streamLength == 0) return data;
+			if (streamLength <= 0) return data;
 
 			Span<byte> buffer = stackalloc byte[Math.Min(streamLength, MAX_BUFFER_SIZE)];
 
-			var totalChunks = (streamLength / MAX_BUFFER_SIZE) + 1;
+			var totalChunks = ((streamLength - 1) / MAX_BUFFER_SIZE) + 1; // Math.Ceiling(streamLength / MAX_BUFFER_SIZE) for ints
 
 			for (int i = 0; i < totalChunks; i++)
 			{
