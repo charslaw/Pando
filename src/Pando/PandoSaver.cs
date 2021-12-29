@@ -54,10 +54,10 @@ public class PandoSaver<T> : IPandoSaver<T>
 	{
 		if (_rootSnapshot is null) throw new NoRootSnapshotException();
 
-		return GetSnapshotTree(_rootSnapshot.Value);
+		return GetSnapshotTreeInternal(_rootSnapshot.Value);
 	}
 
-	private SnapshotTree GetSnapshotTree(ulong hash)
+	private SnapshotTree GetSnapshotTreeInternal(ulong hash)
 	{
 		if (!_snapshotTreeElements.ContainsKey(hash)) throw new HashNotFoundException($"Could not find a snapshot with hash {hash}");
 
@@ -67,13 +67,13 @@ public class PandoSaver<T> : IPandoSaver<T>
 		{
 			case 0: return new SnapshotTree(hash);
 			case 1:
-				var list = ImmutableArray.Create(GetSnapshotTree(children.Single));
+				var list = ImmutableArray.Create(GetSnapshotTreeInternal(children.Single));
 				return new SnapshotTree(hash, list);
 			default:
 				var treeChildren = ImmutableArray.CreateBuilder<SnapshotTree>(childrenCount);
 				foreach (var childHash in children.All)
 				{
-					treeChildren.Add(GetSnapshotTree(childHash));
+					treeChildren.Add(GetSnapshotTreeInternal(childHash));
 				}
 
 				return new SnapshotTree(hash, treeChildren.MoveToImmutable());
