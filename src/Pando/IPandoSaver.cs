@@ -22,4 +22,9 @@ public interface IPandoSaver<T>
 	SnapshotTree GetSnapshotTree();
 }
 
+/// <summary>
+/// Represents a snapshot in the snapshot history and its children.
+/// This stores this snapshot's hash as well as all of its SnapshotTree children.
+/// Using this SnapshotTree's <paramref name="Hash"/> you can get the state tree at this snapshot using <see cref="IPandoSaver{T}.GetSnapshot"/>.
+/// </summary>
 public record SnapshotTree(ulong Hash, ImmutableArray<SnapshotTree>? Children = null);
