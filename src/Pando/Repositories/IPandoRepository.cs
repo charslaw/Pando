@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using Pando.Exceptions;
 
 namespace Pando.Repositories;
@@ -35,6 +35,9 @@ public interface IReadablePandoNodeRepository
 
 public interface IReadablePandoSnapshotRepository
 {
+	/// The total number of snapshots in this repository
+	int SnapshotCount { get; }
+
 	/// Returns whether a snapshot identified by the given hash exists in the repository
 	bool HasSnapshot(ulong hash);
 
@@ -46,8 +49,8 @@ public interface IReadablePandoSnapshotRepository
 	/// <exception cref="HashNotFoundException">thrown if there is no snapshot node identified by the given hash.</exception>
 	ulong GetSnapshotRootNode(ulong hash);
 
-	/// Returns an enumerable of all of the added snapshots.
-	IEnumerable<SnapshotEntry> GetAllSnapshotEntries();
+	/// Returns a set of snapshot hashes that correspond with the "heads" of each branch in the snapshot tree in this repository.
+	IImmutableSet<ulong> GetLeafSnapshotHashes();
 }
 
 /// Stores data Snapshots and Nodes

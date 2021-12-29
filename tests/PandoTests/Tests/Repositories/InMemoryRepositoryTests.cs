@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
+using Pando;
 using Pando.Exceptions;
 using Pando.Repositories;
 using Pando.Repositories.Utils;
@@ -239,28 +240,48 @@ public class InMemoryRepositoryTests
 		}
 	}
 
-	public class GetAllSnapshotHashes
+	public class GetLeafSnapshotHashes
 	{
 		[Fact]
-		public void Should_get_all_snapshot_hashes()
+		public void Should_return_only_snapshot_hash()
 		{
 			// Arrange
 			var repository = new InMemoryRepository();
-			var hash1 = repository.AddSnapshot(1UL, 2UL);
-			var hash2 = repository.AddSnapshot(3UL, 5UL);
-			var hash3 = repository.AddSnapshot(8UL, 13UL);
 
 			// Act
-			var actual = repository.GetAllSnapshotEntries();
+			var snapshotHash = repository.AddSnapshot(0, 2);
 
 			// Assert
-			var expected = new SnapshotEntry[]
-			{
-				new(hash1, 1UL, 2U),
-				new(hash2, 3UL, 5UL),
-				new(hash3, 8UL, 13UL),
-			};
-			actual.Should().Equal(expected);
+			repository.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { snapshotHash });
+		}
+
+		[Fact]
+		public void Should_return_the_latest_snapshot_hash_in_a_branch()
+		{
+			// Arrange
+			var repository = new InMemoryRepository();
+
+			// Act
+			var rootHash = repository.AddSnapshot(0, 2);
+			var childHash = repository.AddSnapshot(rootHash, 3);
+
+			// Assert
+			repository.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { childHash });
+		}
+
+		[Fact]
+		public void Should_return_the_latest_snapshot_hash_in_all_branches()
+		{
+			// Arrange
+			var repository = new InMemoryRepository();
+
+			// Act
+			var rootHash = repository.AddSnapshot(0, 2);
+			var childHash1 = repository.AddSnapshot(rootHash, 3);
+			var childHash2 = repository.AddSnapshot(rootHash, 4);
+
+			// Assert
+			repository.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { childHash1, childHash2 });
 		}
 	}
 
@@ -275,7 +296,12 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndex.CreateCopy());
-			var repository = new InMemoryRepository(Stream.Null, nodeIndexStream, Stream.Null);
+			var repository = new InMemoryRepository(
+				snapshotIndexSource: Stream.Null,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: nodeIndexStream,
+				nodeDataSource: Stream.Null
+			);
 
 			// Assert
 			repository.HasNode(nodeHash).Should().BeTrue();
@@ -300,7 +326,12 @@ public class InMemoryRepositoryTests
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndexEntry.CreateCopy());
 			var nodeDataStream = new MemoryStream(nodeData.CreateCopy());
-			var repository = new InMemoryRepository(Stream.Null, nodeIndexStream, nodeDataStream);
+			var repository = new InMemoryRepository(
+				snapshotIndexSource: Stream.Null,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: nodeIndexStream,
+				nodeDataSource: nodeDataStream
+			);
 
 			// Assert
 			var result1 = repository.GetNode(hash1, new ToArrayDeserializer());
@@ -318,7 +349,12 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndex);
-			var repository = new InMemoryRepository(snapshotIndexStream, Stream.Null, Stream.Null);
+			var repository = new InMemoryRepository(
+				snapshotIndexSource: snapshotIndexStream,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: Stream.Null,
+				nodeDataSource: Stream.Null
+			);
 
 			// Assert
 			repository.HasSnapshot(hash).Should().BeTrue();
@@ -339,7 +375,12 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndexEntry.CreateCopy());
-			var repository = new InMemoryRepository(snapshotIndexStream, Stream.Null, Stream.Null);
+			var repository = new InMemoryRepository(
+				snapshotIndexSource: snapshotIndexStream,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: Stream.Null,
+				nodeDataSource: Stream.Null
+			);
 
 			// Assert
 			var actualParentHash = repository.GetSnapshotParent(hash);
@@ -355,7 +396,10 @@ public class InMemoryRepositoryTests
 			nodeDataStream.Write(new byte[] { 1, 2, 3 });
 			var nodeDataList = new SpannableList<byte>();
 			var _ = new InMemoryRepository(
-				Stream.Null, Stream.Null, nodeDataStream,
+				snapshotIndexSource: Stream.Null,
+				leafSnapshotsSource: Stream.Null,
+				nodeIndexSource: Stream.Null,
+				nodeDataSource: nodeDataStream,
 				nodeData: nodeDataList
 			);
 

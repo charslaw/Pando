@@ -21,7 +21,12 @@ public class PersistenceBackedRepositoryTests
 			// Arrange
 			var nodeIndexStream = new MemoryStream();
 			var nodeDataStream = new MemoryStream();
-			var streamRepo = new StreamRepository(Stream.Null, nodeIndexStream, nodeDataStream);
+			using var streamRepo = new StreamRepository(
+				snapshotIndexStream: Stream.Null,
+				leafSnapshotsStream: Stream.Null,
+				nodeIndexStream: nodeIndexStream,
+				nodeDataStream: nodeDataStream
+			);
 			var inMemoryRepo = new InMemoryRepository();
 			var repository = new PersistenceBackedRepository(inMemoryRepo, streamRepo);
 
@@ -50,7 +55,12 @@ public class PersistenceBackedRepositoryTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			var streamRepo = new StreamRepository(snapshotIndexStream, Stream.Null, Stream.Null);
+			using var streamRepo = new StreamRepository(
+				snapshotIndexStream: snapshotIndexStream,
+				leafSnapshotsStream: Stream.Null,
+				nodeIndexStream: Stream.Null,
+				nodeDataStream: Stream.Null
+			);
 			var inMemoryRepo = new InMemoryRepository();
 			var repository = new PersistenceBackedRepository(inMemoryRepo, streamRepo);
 

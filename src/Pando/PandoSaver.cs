@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Pando.Exceptions;
 using Pando.Repositories;
 
@@ -11,22 +10,38 @@ public class PandoSaver<T> : IPandoSaver<T>
 	private readonly IPandoRepository _repository;
 	private readonly IPandoNodeSerializerDeserializer<T> _serializer;
 
+	private ulong? _rootSnapshot;
+	private readonly Dictionary<ulong, SmallSet<ulong>> _snapshotTreeElements = new();
+
 	public PandoSaver(IPandoRepository repository, IPandoNodeSerializerDeserializer<T> serializer)
 	{
 		_repository = repository;
 		_serializer = serializer;
+
+		var snapshotCount = _repository.SnapshotCount;
+		if (snapshotCount > 0)
+		{
+			_snapshotTreeElements = new Dictionary<ulong, SmallSet<ulong>>(snapshotCount);
+			InitializeSnapshotTree(_repository.GetLeafSnapshotHashes());
+		}
 	}
 
 	public ulong SaveRootSnapshot(T tree)
 	{
+		if (_repository.SnapshotCount > 0) throw new AlreadyHasRootSnapshotException();
+
 		var nodeHash = _serializer.Serialize(tree, _repository);
-		return _repository.AddSnapshot(0UL, nodeHash);
+		var snapshotHash = _repository.AddSnapshot(0UL, nodeHash);
+		AddToSnapshotTree(snapshotHash);
+		return snapshotHash;
 	}
 
 	public ulong SaveSnapshot(T tree, ulong parentHash)
 	{
 		var nodeHash = _serializer.Serialize(tree, _repository);
-		return _repository.AddSnapshot(parentHash, nodeHash);
+		var snapshotHash = _repository.AddSnapshot(parentHash, nodeHash);
+		AddToSnapshotTree(snapshotHash, parentHash);
+		return snapshotHash;
 	}
 
 	public T GetSnapshot(ulong hash)
@@ -35,31 +50,76 @@ public class PandoSaver<T> : IPandoSaver<T>
 		return _repository.GetNode(nodeHash, _serializer);
 	}
 
-	public SnapshotChain<T> GetFullSnapshotChain()
+	public SnapshotTree GetSnapshotTree()
 	{
-		var snapshotEntries = _repository.GetAllSnapshotEntries().ToArray();
+		if (_rootSnapshot is null) throw new NoRootSnapshotException();
 
-		foreach (var entry in snapshotEntries)
-		{
-			if (entry.ParentHash == 0) return BuildSnapshotLink(entry, snapshotEntries);
-		}
-
-		throw new NoRootSnapshotException();
+		return GetSnapshotTreeInternal(_rootSnapshot.Value);
 	}
 
-	private SnapshotChain<T> BuildSnapshotLink(SnapshotEntry thisSnapshot, SnapshotEntry[] entries)
+	private SnapshotTree GetSnapshotTreeInternal(ulong hash)
 	{
-		var (hash, _, _) = thisSnapshot;
+		if (!_snapshotTreeElements.ContainsKey(hash)) throw new HashNotFoundException($"Could not find a snapshot with hash {hash}");
 
-		var children = new List<SnapshotChain<T>>();
-		// ReSharper disable once LoopCanBeConvertedToQuery
-		foreach (var entry in entries)
+		var children = _snapshotTreeElements[hash];
+		var childrenCount = children.Count;
+		switch (childrenCount)
 		{
-			if (entry.ParentHash != hash) continue;
+			case 0: return new SnapshotTree(hash);
+			case 1:
+				var list = ImmutableArray.Create(GetSnapshotTreeInternal(children.Single));
+				return new SnapshotTree(hash, list);
+			default:
+				var treeChildren = ImmutableArray.CreateBuilder<SnapshotTree>(childrenCount);
+				foreach (var childHash in children.All)
+				{
+					treeChildren.Add(GetSnapshotTreeInternal(childHash));
+				}
 
-			children.Add(BuildSnapshotLink(entry, entries));
+				return new SnapshotTree(hash, treeChildren.MoveToImmutable());
 		}
+	}
 
-		return new SnapshotChain<T>(hash, children.ToImmutableArray(), this);
+	private void InitializeSnapshotTree(IImmutableSet<ulong> leaves)
+	{
+		foreach (var leaf in leaves)
+		{
+			_snapshotTreeElements[leaf] = new SmallSet<ulong>();
+
+			var currentHash = leaf;
+			var parentHash = _repository.GetSnapshotParent(currentHash);
+			while (parentHash != 0UL)
+			{
+				if (_snapshotTreeElements.TryGetValue(parentHash, out var set))
+				{
+					set.Add(currentHash);
+					_snapshotTreeElements[parentHash] = set;
+					break; // We've run into an existing hash; that means we've already explored everything above this.
+				}
+
+				_snapshotTreeElements.Add(parentHash, new SmallSet<ulong>(currentHash));
+
+				currentHash = parentHash;
+				parentHash = _repository.GetSnapshotParent(currentHash);
+			}
+
+			if (parentHash == 0UL) _rootSnapshot = currentHash;
+		}
+	}
+
+	private void AddToSnapshotTree(ulong hash)
+	{
+		_rootSnapshot = hash;
+		_snapshotTreeElements[hash] = default;
+	}
+
+	private void AddToSnapshotTree(ulong hash, ulong parentHash)
+	{
+		if (!_snapshotTreeElements.ContainsKey(parentHash)) throw new HashNotFoundException($"Could not find a snapshot with hash {hash}");
+
+		_snapshotTreeElements[hash] = default;
+		var children = _snapshotTreeElements[parentHash];
+		children.Add(hash);
+		_snapshotTreeElements[parentHash] = children;
 	}
 }

@@ -60,15 +60,15 @@ var myTreeRootAtSnapshot = myPandoSaver.GetSnapshot(hash);
 
 ### Getting the full history from a `PandoSaver`
 
-You can retrieve the entire history of snapshots by calling `PandoSaver.GetFullSnapshotChain`. This returns a
-root `SnapshotChain` object, which is the root of a tree of snapshots. Each snapshot in the chain may have 0..many
-children, and each link in the chain has a method to get the value of the tree at that snapshot.
+You can retrieve the entire history of snapshots by calling `PandoSaver.GetSnapshotTree`. This returns a
+root `SnapshotTree` object, which is the root of a tree of snapshots. Each snapshot in the chain may have 0..many
+children, which is represented by an `IImmutableSet<ulong>`.
 
 ```c#
-SnapshotChain<T> GetFullSnapshotChain();
+SnapshotTree GetSnapshotTree();
 ```
 
-This method is subject to changes in future versions.
+Given this tree of snapshot hashes, you can use `GetSnapshot` to get the state at any point in the history.
 
 ## Details
 
@@ -88,18 +88,18 @@ A Pando repository stores 3 collections of data:
 - **The Snapshot Index:** maps a snapshot hash to a `SnapshotData` struct, which itself is composed of a parent hash (
   which refers to this snapshot's parent snapshot) and a root node hash (which refers to the node index entry for the
   tree root node at this snapshot).
-	- A snapshot's hash is computed by combining its two constituent hashes and hashing the resulting bytes.
+    - A snapshot's hash is computed by combining its two constituent hashes and hashing the resulting bytes.
 - **The Node Index:** maps a node hash to a `DataSlice` struct, which is comprised of an offset into the stored node
   data and the length of this node's data.
-	- Nodes in the index can take one of two semantic types: **leaf nodes (blobs)** and **branch nodes**. For a leaf
-	  node, the corresponding data in the stored node data is "real" data. On the other hand, for a branch node, the
-	  corresponding data in the stored node data is actually a collection of hashes referring to its child nodes in the
-	  index.
-	- A node's hash in the index is computed from the bytes it refers to in the stored node data.
+    - Nodes in the index can take one of two semantic types: **leaf nodes (blobs)** and **branch nodes**. For a leaf
+      node, the corresponding data in the stored node data is "real" data. On the other hand, for a branch node, the
+      corresponding data in the stored node data is actually a collection of hashes referring to its child nodes in the
+      index.
+    - A node's hash in the index is computed from the bytes it refers to in the stored node data.
 - **Stored Node Data:** this is a big blob of raw `bytes`. These bytes are created by the node serializer when
   serializing the node.
-	- The interpretation of these bytes is undefined by Pando itself, it must be determined structurally based on what
-	  nodes refer to what slices of the data and the method by which the data was serialized.
+    - The interpretation of these bytes is undefined by Pando itself, it must be determined structurally based on what
+      nodes refer to what slices of the data and the method by which the data was serialized.
 
 A Pando repository has methods for writing snapshots and tree nodes to the repository, which take in the data comprising
 the node or snapshot, and return the resulting hash within the corresponding index. It also has methods for reading

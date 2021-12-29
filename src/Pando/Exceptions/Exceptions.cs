@@ -8,3 +8,5 @@ public class HashNotFoundException : Exception
 }
 
 public class NoRootSnapshotException : Exception { }
+
+public class AlreadyHasRootSnapshotException : Exception { }
