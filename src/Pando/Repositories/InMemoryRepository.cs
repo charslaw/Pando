@@ -102,10 +102,10 @@ public class InMemoryRepository : IPandoRepository
 	{
 		_snapshotIndex.Add(hash, snapshotData);
 
-		// If we're adding a new snapshot, it is by definition a leaf, so add it
-		_leafSnapshots.Add(hash);
-		// And if it has a parent, the parent is by definition no longer a leaf, so remove it (if it was already a leaf)
+		// Parent is by definition no longer a leaf node
 		_leafSnapshots.Remove(snapshotData.ParentHash);
+		// Newly add snapshot is by definition a leaf node
+		_leafSnapshots.Add(hash);
 	}
 
 	public bool HasNode(ulong hash) => _nodeIndex.ContainsKey(hash);
