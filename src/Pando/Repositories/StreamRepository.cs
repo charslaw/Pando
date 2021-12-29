@@ -74,17 +74,25 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	{
 		StreamUtils.SnapshotIndex.WriteIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
 
+		// Parent is by definition no longer a leaf node
 		_leafSnapshotHashSet.Remove(parentHash);
+		// Newly add snapshot is by definition a leaf node
 		_leafSnapshotHashSet.Add(hash);
 
+		UpdateLeafSnapshotStream();
+	}
+
+	/// Overwrites the contents of the leaf snapshot stream with the current contents of the leaf snapshots set
+	private void UpdateLeafSnapshotStream()
+	{
 		_leafSnapshotsStream.Seek(0, SeekOrigin.Begin);
 		_leafSnapshotsStream.SetLength(0);
 		Span<byte> buffer = stackalloc byte[_leafSnapshotHashSet.Count * sizeof(ulong)];
-		var i = 0;
+		var offset = 0;
 		foreach (var leafHash in _leafSnapshotHashSet)
 		{
-			ByteEncoder.CopyBytes(leafHash, buffer.Slice(i * sizeof(ulong), sizeof(ulong)));
-			i++;
+			ByteEncoder.CopyBytes(leafHash, buffer.Slice(offset, sizeof(ulong)));
+			offset += sizeof(ulong);
 		}
 
 		_leafSnapshotsStream.Write(buffer);
