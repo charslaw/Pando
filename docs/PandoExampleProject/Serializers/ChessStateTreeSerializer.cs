@@ -11,16 +11,16 @@ namespace PandoExampleProject.Serializers;
 /// However for this example we are including a manual serializer for illustrative purposes
 ///
 /// Since this is a branch node, its data is composed of the hashes of all of its child nodes
-internal class ChessStateTreeSerializer : IPandoNodeSerializerDeserializer<ChessGameState>
+internal class ChessStateTreeSerializer : INodeSerializer<ChessGameState>
 {
-	private readonly IPandoNodeSerializerDeserializer<ChessPlayerState> _playerStateSerializer;
-	private readonly IPandoNodeSerializerDeserializer<WhiteBlackPair<TimeSpan>> _remainingTimeSerializer;
-	private readonly IPandoNodeSerializerDeserializer<WhiteBlackPair<ImmutableArray<ChessPiece>>> _playerPiecesSerializer;
+	private readonly INodeSerializer<ChessPlayerState> _playerStateSerializer;
+	private readonly INodeSerializer<WhiteBlackPair<TimeSpan>> _remainingTimeSerializer;
+	private readonly INodeSerializer<WhiteBlackPair<ImmutableArray<ChessPiece>>> _playerPiecesSerializer;
 
 	public ChessStateTreeSerializer(
-		IPandoNodeSerializerDeserializer<ChessPlayerState> playerStateSerializer,
-		IPandoNodeSerializerDeserializer<WhiteBlackPair<TimeSpan>> remainingTimeSerializer,
-		IPandoNodeSerializerDeserializer<WhiteBlackPair<ImmutableArray<ChessPiece>>> playerPiecesSerializer
+		INodeSerializer<ChessPlayerState> playerStateSerializer,
+		INodeSerializer<WhiteBlackPair<TimeSpan>> remainingTimeSerializer,
+		INodeSerializer<WhiteBlackPair<ImmutableArray<ChessPiece>>> playerPiecesSerializer
 	)
 	{
 		_playerStateSerializer = playerStateSerializer;

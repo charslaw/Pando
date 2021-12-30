@@ -6,16 +6,16 @@ using Pando.DataSources.Utils;
 
 namespace PandoTests.Tests.PandoSave.TestStateTrees;
 
-internal readonly struct TestTreeSerializer : IPandoNodeSerializerDeserializer<TestTree>
+internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 {
-	private readonly IPandoNodeSerializerDeserializer<string> _nameSerializer;
-	private readonly IPandoNodeSerializerDeserializer<TestTree.A> _aSerializer;
-	private readonly IPandoNodeSerializerDeserializer<TestTree.B> _bSerializer;
+	private readonly INodeSerializer<string> _nameSerializer;
+	private readonly INodeSerializer<TestTree.A> _aSerializer;
+	private readonly INodeSerializer<TestTree.B> _bSerializer;
 
 	public TestTreeSerializer(
-		IPandoNodeSerializerDeserializer<string> nameSerializer,
-		IPandoNodeSerializerDeserializer<TestTree.A> aSerializer,
-		IPandoNodeSerializerDeserializer<TestTree.B> bSerializer
+		INodeSerializer<string> nameSerializer,
+		INodeSerializer<TestTree.A> aSerializer,
+		INodeSerializer<TestTree.B> bSerializer
 	)
 	{
 		_nameSerializer = nameSerializer;
@@ -64,7 +64,7 @@ internal readonly struct TestTreeSerializer : IPandoNodeSerializerDeserializer<T
 	}
 }
 
-internal readonly struct StringSerializer : IPandoNodeSerializerDeserializer<string>
+internal readonly struct StringSerializer : INodeSerializer<string>
 {
 	public ulong Serialize(string str, INodeDataSink dataSink)
 	{
@@ -80,7 +80,7 @@ internal readonly struct StringSerializer : IPandoNodeSerializerDeserializer<str
 	}
 }
 
-internal readonly struct DoubleTreeASerializer : IPandoNodeSerializerDeserializer<TestTree.A>
+internal readonly struct DoubleTreeASerializer : INodeSerializer<TestTree.A>
 {
 	private const int AGE_SIZE = sizeof(int);
 
@@ -98,7 +98,7 @@ internal readonly struct DoubleTreeASerializer : IPandoNodeSerializerDeserialize
 	}
 }
 
-internal readonly struct DoubleTreeBSerializer : IPandoNodeSerializerDeserializer<TestTree.B>
+internal readonly struct DoubleTreeBSerializer : INodeSerializer<TestTree.B>
 {
 	private const int TIME_END = sizeof(long);
 	private const int CENTS_END = TIME_END + sizeof(int);

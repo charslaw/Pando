@@ -24,10 +24,10 @@ public interface INodeDataSource
 	bool HasNode(ulong hash);
 
 	/// Retrieves the data for the node identified by the given hash,
-	/// then delegates deserialization to the given <paramref name="nodeDeserializer"/>, then returns the result.
+	/// then delegates deserialization to the given <paramref name="nodeReader"/>, then returns the result.
 	/// <exception cref="HashNotFoundException">thrown if there is no node identified by the given hash.</exception>
-	/// <returns>The deserialized object, as returned by the <paramref name="nodeDeserializer"/></returns>
-	T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer);
+	/// <returns>The deserialized object, as returned by the <paramref name="nodeReader"/></returns>
+	T GetNode<T>(ulong hash, in INodeReader<T> nodeReader);
 
 	/// Gets the size in bytes of the node identified by the given hash.
 	int GetSizeOfNode(ulong hash);

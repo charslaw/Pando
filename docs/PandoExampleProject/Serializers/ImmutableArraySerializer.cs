@@ -6,11 +6,11 @@ using Pando.DataSources;
 
 namespace PandoExampleProject.Serializers;
 
-public class ImmutableArraySerializer<TNode> : IPandoNodeSerializerDeserializer<ImmutableArray<TNode>>
+public class ImmutableArraySerializer<TNode> : INodeSerializer<ImmutableArray<TNode>>
 {
-	private readonly IPandoNodeSerializerDeserializer<TNode> _elementSerializer;
+	private readonly INodeSerializer<TNode> _elementSerializer;
 
-	public ImmutableArraySerializer(IPandoNodeSerializerDeserializer<TNode> elementSerializer)
+	public ImmutableArraySerializer(INodeSerializer<TNode> elementSerializer)
 	{
 		_elementSerializer = elementSerializer;
 	}

@@ -41,7 +41,7 @@ public class PersistenceBackedDataSource : IDataSource, IDisposable
 	public bool HasSnapshot(ulong hash) => _mainDataSource.HasSnapshot(hash);
 	public int SnapshotCount => _mainDataSource.SnapshotCount;
 
-	public T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer) => _mainDataSource.GetNode(hash, in nodeDeserializer);
+	public T GetNode<T>(ulong hash, in INodeReader<T> nodeReader) => _mainDataSource.GetNode(hash, in nodeReader);
 	public int GetSizeOfNode(ulong hash) => _mainDataSource.GetSizeOfNode(hash);
 
 	public ulong GetSnapshotParent(ulong hash) => _mainDataSource.GetSnapshotParent(hash);

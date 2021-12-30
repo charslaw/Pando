@@ -8,12 +8,12 @@ namespace Pando;
 public class PandoSaver<T> : IPandoSaver<T>
 {
 	private readonly IDataSource _dataSource;
-	private readonly IPandoNodeSerializerDeserializer<T> _serializer;
+	private readonly INodeSerializer<T> _serializer;
 
 	private ulong? _rootSnapshot;
 	private readonly Dictionary<ulong, SmallSet<ulong>> _snapshotTreeElements = new();
 
-	public PandoSaver(IDataSource dataSource, IPandoNodeSerializerDeserializer<T> serializer)
+	public PandoSaver(IDataSource dataSource, INodeSerializer<T> serializer)
 	{
 		_dataSource = dataSource;
 		_serializer = serializer;

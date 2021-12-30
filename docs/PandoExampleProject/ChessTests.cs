@@ -11,7 +11,7 @@ namespace PandoExampleProject;
 /// than to assert functionality about the system.
 public class ChessTests
 {
-	private static IPandoNodeSerializerDeserializer<ChessGameState> MakeSerializer() => new ChessStateTreeSerializer(
+	private static INodeSerializer<ChessGameState> MakeSerializer() => new ChessStateTreeSerializer(
 		new ChessPlayerStateSerializer(),
 		new WhiteBlackPairTimespanSerializer(),
 		new WhiteBlackPairBranchSerializer<ImmutableArray<ChessPiece>>(

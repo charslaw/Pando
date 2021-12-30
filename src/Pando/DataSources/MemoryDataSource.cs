@@ -114,11 +114,11 @@ public class MemoryDataSource : IDataSource
 
 	public int SnapshotCount => _snapshotIndex.Count;
 
-	public T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer)
+	public T GetNode<T>(ulong hash, in INodeReader<T> nodeReader)
 	{
 		CheckNodeHash(hash);
 		var (start, dataLength) = _nodeIndex[hash];
-		var visitor = new RepositorySpanVisitor<T>(nodeDeserializer, this);
+		var visitor = new RepositorySpanVisitor<T>(nodeReader, this);
 		return _nodeData.VisitSpan<RepositorySpanVisitor<T>, T>(start, dataLength, in visitor);
 	}
 
@@ -161,15 +161,15 @@ public class MemoryDataSource : IDataSource
 
 	private readonly struct RepositorySpanVisitor<T> : ISpanVisitor<byte, T>
 	{
-		private readonly IPandoNodeDeserializer<T> _deserializer;
+		private readonly INodeReader<T> _reader;
 		private readonly IDataSource _repository;
 
-		public RepositorySpanVisitor(IPandoNodeDeserializer<T> deserializer, IDataSource repository)
+		public RepositorySpanVisitor(INodeReader<T> reader, IDataSource repository)
 		{
-			_deserializer = deserializer;
+			_reader = reader;
 			_repository = repository;
 		}
 
-		public T Visit(ReadOnlySpan<byte> span) => _deserializer.Deserialize(span, _repository);
+		public T Visit(ReadOnlySpan<byte> span) => _reader.Deserialize(span, _repository);
 	}
 }

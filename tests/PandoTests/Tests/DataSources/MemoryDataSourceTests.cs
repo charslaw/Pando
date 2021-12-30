@@ -93,7 +93,7 @@ public class MemoryDataSourceTests
 			dataSource.AddNode(nodeData.CreateCopy());
 
 			// Act
-			var actual = dataSource.GetNode(hash, new ToArrayDeserializer());
+			var actual = dataSource.GetNode(hash, new ToArrayReader());
 
 			// Assert
 			actual.Should().Equal(nodeData);
@@ -115,7 +115,7 @@ public class MemoryDataSourceTests
 			dataSource.AddNode(nodeData3.CreateCopy());
 
 			// Act
-			var actual = dataSource.GetNode(hash, new ToArrayDeserializer());
+			var actual = dataSource.GetNode(hash, new ToArrayReader());
 
 			// Assert
 			actual.Should().Equal(nodeData2);
@@ -128,7 +128,7 @@ public class MemoryDataSourceTests
 			var dataSource = new MemoryDataSource();
 
 			// Assert
-			dataSource.Invoking(ts => ts.GetNode<object?>(0, new ToArrayDeserializer()))
+			dataSource.Invoking(ts => ts.GetNode<object?>(0, new ToArrayReader()))
 				.Should()
 				.Throw<HashNotFoundException>();
 		}
@@ -334,8 +334,8 @@ public class MemoryDataSourceTests
 			);
 
 			// Assert
-			var result1 = dataSource.GetNode(hash1, new ToArrayDeserializer());
-			var result2 = dataSource.GetNode(hash2, new ToArrayDeserializer());
+			var result1 = dataSource.GetNode(hash1, new ToArrayReader());
+			var result2 = dataSource.GetNode(hash2, new ToArrayReader());
 			result1.Should().Equal(nodeData[..4]);
 			result2.Should().Equal(nodeData[4..8]);
 		}

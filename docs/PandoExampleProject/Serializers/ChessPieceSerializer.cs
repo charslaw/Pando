@@ -4,7 +4,7 @@ using Pando.DataSources;
 
 namespace PandoExampleProject.Serializers;
 
-internal class ChessPieceSerializer : IPandoNodeSerializerDeserializer<ChessPiece>
+internal class ChessPieceSerializer : INodeSerializer<ChessPiece>
 {
 	public ulong Serialize(ChessPiece obj, INodeDataSink dataSink)
 	{

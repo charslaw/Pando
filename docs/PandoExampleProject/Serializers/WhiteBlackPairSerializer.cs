@@ -8,7 +8,7 @@ namespace PandoExampleProject.Serializers;
 /// A specific implementation of a WhiteBlackPair serializer for TimeSpan
 /// Implementing a generic serializer for containers of primitive types is tough because it can be difficult to know how large the type is.
 /// It is made more difficult for TimeSpan because you have to convert it to a primitive value first (via the Ticks property)
-internal class WhiteBlackPairTimespanSerializer : IPandoNodeSerializerDeserializer<WhiteBlackPair<TimeSpan>>
+internal class WhiteBlackPairTimespanSerializer : INodeSerializer<WhiteBlackPair<TimeSpan>>
 {
 	public ulong Serialize(WhiteBlackPair<TimeSpan> obj, INodeDataSink dataSink)
 	{
@@ -30,11 +30,11 @@ internal class WhiteBlackPairTimespanSerializer : IPandoNodeSerializerDeserializ
 /// In this case, we know for certain the size of the contents of the node, since the node simply contains hashes, which are always 8 bytes,
 /// even though we don't know anything about the size of the contained nodes themselves.
 /// The contained nodes could be either blobs or branches; it doesn't matter to us.
-internal class WhiteBlackPairBranchSerializer<TNode> : IPandoNodeSerializerDeserializer<WhiteBlackPair<TNode>>
+internal class WhiteBlackPairBranchSerializer<TNode> : INodeSerializer<WhiteBlackPair<TNode>>
 {
-	private readonly IPandoNodeSerializerDeserializer<TNode> _memberSerializer;
+	private readonly INodeSerializer<TNode> _memberSerializer;
 
-	public WhiteBlackPairBranchSerializer(IPandoNodeSerializerDeserializer<TNode> memberSerializer)
+	public WhiteBlackPairBranchSerializer(INodeSerializer<TNode> memberSerializer)
 	{
 		_memberSerializer = memberSerializer;
 	}
