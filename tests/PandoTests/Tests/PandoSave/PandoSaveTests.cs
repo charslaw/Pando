@@ -290,7 +290,7 @@ public class PandoSaveTests
 			var nodeData = new MemoryStream();
 
 			var saver = new PandoSaver<TestTree>(
-				new PersistenceBackedRepository(
+				new PersistenceBackedDataSource(
 					new MemoryDataSource(),
 					new StreamRepository(snapshotIndex, leafSnapshots, nodeIndex, nodeData)
 				),

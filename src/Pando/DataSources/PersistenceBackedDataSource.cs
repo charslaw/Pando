@@ -4,12 +4,12 @@ using Pando.DataSources.Utils;
 
 namespace Pando.DataSources;
 
-public class PersistenceBackedRepository : IPandoRepository, IDisposable
+public class PersistenceBackedDataSource : IPandoRepository, IDisposable
 {
 	private readonly MemoryDataSource _mainDataSource;
 	private readonly StreamRepository _persistentRepository;
 
-	public PersistenceBackedRepository(MemoryDataSource mainDataSource, StreamRepository persistentRepository)
+	public PersistenceBackedDataSource(MemoryDataSource mainDataSource, StreamRepository persistentRepository)
 	{
 		_mainDataSource = mainDataSource;
 		_persistentRepository = persistentRepository;
