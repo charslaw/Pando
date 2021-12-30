@@ -7,6 +7,7 @@ using Pando;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
+using Pando.Repositories;
 using PandoTests.Tests.PandoSave.TestStateTrees;
 using PandoTests.Utils;
 using Xunit;

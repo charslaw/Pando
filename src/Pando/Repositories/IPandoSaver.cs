@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Pando.Exceptions;
 
-namespace Pando;
+namespace Pando.Repositories;
 
 public interface IPandoSaver<T>
 {

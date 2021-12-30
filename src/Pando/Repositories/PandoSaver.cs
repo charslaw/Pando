@@ -4,7 +4,7 @@ using Pando.DataSources;
 using Pando.Exceptions;
 using Pando.Serialization;
 
-namespace Pando;
+namespace Pando.Repositories;
 
 public class PandoSaver<T> : IPandoSaver<T>
 {
