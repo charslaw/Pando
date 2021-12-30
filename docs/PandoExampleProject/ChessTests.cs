@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Pando;
-using Pando.Repositories;
+using Pando.DataSources;
 using PandoExampleProject.Serializers;
 using Xunit;
 

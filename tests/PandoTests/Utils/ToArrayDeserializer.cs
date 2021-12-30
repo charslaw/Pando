@@ -1,7 +1,7 @@
 using System;
 using Pando;
-using Pando.Repositories;
-using Pando.Repositories.Utils;
+using Pando.DataSources;
+using Pando.DataSources.Utils;
 
 namespace PandoTests.Utils;
 

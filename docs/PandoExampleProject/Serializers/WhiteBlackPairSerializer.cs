@@ -1,7 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using Pando;
-using Pando.Repositories;
+using Pando.DataSources;
 
 namespace PandoExampleProject.Serializers;
 

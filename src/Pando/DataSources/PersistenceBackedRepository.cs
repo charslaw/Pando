@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Immutable;
-using Pando.Repositories.Utils;
+using Pando.DataSources.Utils;
 
-namespace Pando.Repositories;
+namespace Pando.DataSources;
 
 public class PersistenceBackedRepository : IPandoRepository, IDisposable
 {

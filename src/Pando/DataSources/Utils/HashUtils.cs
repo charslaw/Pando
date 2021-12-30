@@ -1,7 +1,7 @@
 using System;
 using Standart.Hash.xxHash;
 
-namespace Pando.Repositories.Utils;
+namespace Pando.DataSources.Utils;
 
 internal static class HashUtils
 {

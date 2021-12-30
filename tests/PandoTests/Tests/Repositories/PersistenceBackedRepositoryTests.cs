@@ -1,6 +1,6 @@
 using System.IO;
 using FluentAssertions;
-using Pando.Repositories;
+using Pando.DataSources;
 using PandoTests.Utils;
 using Xunit;
 

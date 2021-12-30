@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Pando.Repositories.Utils;
+using Pando.DataSources.Utils;
 
-namespace Pando.Repositories;
+namespace Pando.DataSources;
 
 public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnapshotRepository, IDisposable
 {

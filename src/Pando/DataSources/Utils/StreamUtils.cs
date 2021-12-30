@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Pando.Repositories.Utils;
+namespace Pando.DataSources.Utils;
 
 internal static class StreamUtils
 {

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Immutable;
 using Pando.Exceptions;
 
-namespace Pando.Repositories;
+namespace Pando.DataSources;
 
 public interface IWritablePandoNodeRepository
 {

@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using Pando.DataSources.Utils;
 using Pando.Exceptions;
-using Pando.Repositories.Utils;
 
-namespace Pando.Repositories;
+namespace Pando.DataSources;
 
 public class InMemoryRepository : IPandoRepository
 {
