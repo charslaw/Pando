@@ -4,7 +4,7 @@ using Pando.DataSources.Utils;
 
 namespace Pando.DataSources;
 
-public class PersistenceBackedDataSource : IPandoRepository, IDisposable
+public class PersistenceBackedDataSource : IDataSource, IDisposable
 {
 	private readonly MemoryDataSource _mainDataSource;
 	private readonly StreamDataSource _persistentDataSource;

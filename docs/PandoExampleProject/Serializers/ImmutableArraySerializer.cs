@@ -15,21 +15,21 @@ public class ImmutableArraySerializer<TNode> : IPandoNodeSerializerDeserializer<
 		_elementSerializer = elementSerializer;
 	}
 
-	public ulong Serialize(ImmutableArray<TNode> obj, IWritablePandoNodeRepository repository)
+	public ulong Serialize(ImmutableArray<TNode> obj, INodeDataSink dataSink)
 	{
 		var len = obj.Length;
 		Span<byte> buffer = stackalloc byte[sizeof(ulong) * len];
 
 		for (int i = 0; i < len; i++)
 		{
-			var hash = _elementSerializer.Serialize(obj[i], repository);
+			var hash = _elementSerializer.Serialize(obj[i], dataSink);
 			BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(i * sizeof(ulong), sizeof(ulong)), hash);
 		}
 
-		return repository.AddNode(buffer);
+		return dataSink.AddNode(buffer);
 	}
 
-	public ImmutableArray<TNode> Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository)
+	public ImmutableArray<TNode> Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
 		var len = bytes.Length / sizeof(ulong);
 		var arrayBuilder = ImmutableArray.CreateBuilder<TNode>(len);
@@ -37,7 +37,7 @@ public class ImmutableArraySerializer<TNode> : IPandoNodeSerializerDeserializer<
 		for (int i = 0; i < len; i++)
 		{
 			var hash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong) * i, sizeof(ulong)));
-			arrayBuilder.Add(repository.GetNode(hash, _elementSerializer));
+			arrayBuilder.Add(dataSource.GetNode(hash, _elementSerializer));
 		}
 
 		return arrayBuilder.ToImmutable();

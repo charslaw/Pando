@@ -7,7 +7,7 @@ using Pando.Exceptions;
 
 namespace Pando.DataSources;
 
-public class MemoryDataSource : IPandoRepository
+public class MemoryDataSource : IDataSource
 {
 	private readonly Dictionary<ulong, SnapshotData> _snapshotIndex;
 	private readonly HashSet<ulong> _leafSnapshots;
@@ -147,7 +147,7 @@ public class MemoryDataSource : IPandoRepository
 	{
 		if (!HasNode(hash))
 		{
-			throw new HashNotFoundException($"The store does not contain a node with the requested hash {hash}");
+			throw new HashNotFoundException($"The data source does not contain a node with the requested hash {hash}");
 		}
 	}
 
@@ -155,16 +155,16 @@ public class MemoryDataSource : IPandoRepository
 	{
 		if (!HasSnapshot(hash))
 		{
-			throw new HashNotFoundException($"The store does not contain a snapshot with the requested hash {hash}");
+			throw new HashNotFoundException($"The data source does not contain a snapshot with the requested hash {hash}");
 		}
 	}
 
 	private readonly struct RepositorySpanVisitor<T> : ISpanVisitor<byte, T>
 	{
 		private readonly IPandoNodeDeserializer<T> _deserializer;
-		private readonly IPandoRepository _repository;
+		private readonly IDataSource _repository;
 
-		public RepositorySpanVisitor(IPandoNodeDeserializer<T> deserializer, IPandoRepository repository)
+		public RepositorySpanVisitor(IPandoNodeDeserializer<T> deserializer, IDataSource repository)
 		{
 			_deserializer = deserializer;
 			_repository = repository;

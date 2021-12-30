@@ -6,7 +6,7 @@ namespace PandoExampleProject.Serializers;
 
 internal class ChessPieceSerializer : IPandoNodeSerializerDeserializer<ChessPiece>
 {
-	public ulong Serialize(ChessPiece obj, IWritablePandoNodeRepository repository)
+	public ulong Serialize(ChessPiece obj, INodeDataSink dataSink)
 	{
 		Span<byte> buffer = stackalloc byte[5];
 
@@ -16,10 +16,10 @@ internal class ChessPieceSerializer : IPandoNodeSerializerDeserializer<ChessPiec
 		buffer[3] = (byte)obj.CurrentFile;
 		buffer[4] = (byte)obj.State;
 
-		return repository.AddNode(buffer);
+		return dataSink.AddNode(buffer);
 	}
 
-	public ChessPiece Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository)
+	public ChessPiece Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
 		return new ChessPiece(
 			(Player)bytes[0],

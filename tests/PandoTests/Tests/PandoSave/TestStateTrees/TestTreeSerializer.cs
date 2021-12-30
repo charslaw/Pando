@@ -37,28 +37,28 @@ internal readonly struct TestTreeSerializer : IPandoNodeSerializerDeserializer<T
 
 	private const int SIZE = MYB_HASH_END;
 
-	public ulong Serialize(TestTree obj, IWritablePandoNodeRepository repository)
+	public ulong Serialize(TestTree obj, INodeDataSink dataSink)
 	{
-		var nameHash = _nameSerializer.Serialize(obj.Name, repository);
-		var myAHash = _aSerializer.Serialize(obj.MyA, repository);
-		var myBHash = _bSerializer.Serialize(obj.MyB, repository);
+		var nameHash = _nameSerializer.Serialize(obj.Name, dataSink);
+		var myAHash = _aSerializer.Serialize(obj.MyA, dataSink);
+		var myBHash = _bSerializer.Serialize(obj.MyB, dataSink);
 
 		Span<byte> buffer = stackalloc byte[SIZE];
 		ByteEncoder.CopyBytes(nameHash, buffer[..NAME_HASH_END]);
 		ByteEncoder.CopyBytes(myAHash, buffer[NAME_HASH_END..MYA_HASH_END]);
 		ByteEncoder.CopyBytes(myBHash, buffer[MYA_HASH_END..MYB_HASH_END]);
-		return repository.AddNode(buffer);
+		return dataSink.AddNode(buffer);
 	}
 
-	public TestTree Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository)
+	public TestTree Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
 		var nameHash = ByteEncoder.GetUInt64(bytes[..NAME_HASH_END]);
 		var myAHash = ByteEncoder.GetUInt64(bytes[NAME_HASH_END..MYA_HASH_END]);
 		var myBHash = ByteEncoder.GetUInt64(bytes[MYA_HASH_END..MYB_HASH_END]);
 
-		var name = repository.GetNode(nameHash, _nameSerializer);
-		var myA = repository.GetNode(myAHash, _aSerializer);
-		var myB = repository.GetNode(myBHash, _bSerializer);
+		var name = dataSource.GetNode(nameHash, _nameSerializer);
+		var myA = dataSource.GetNode(myAHash, _aSerializer);
+		var myB = dataSource.GetNode(myBHash, _bSerializer);
 
 		return new TestTree(name, myA, myB);
 	}
@@ -66,15 +66,15 @@ internal readonly struct TestTreeSerializer : IPandoNodeSerializerDeserializer<T
 
 internal readonly struct StringSerializer : IPandoNodeSerializerDeserializer<string>
 {
-	public ulong Serialize(string str, IWritablePandoNodeRepository repository)
+	public ulong Serialize(string str, INodeDataSink dataSink)
 	{
 		var nameByteCount = Encoding.UTF8.GetByteCount(str);
 		Span<byte> buffer = stackalloc byte[nameByteCount];
 		Encoding.UTF8.GetBytes(str, buffer);
-		return repository.AddNode(buffer);
+		return dataSink.AddNode(buffer);
 	}
 
-	public string Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository _)
+	public string Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource _)
 	{
 		return Encoding.UTF8.GetString(bytes);
 	}
@@ -84,14 +84,14 @@ internal readonly struct DoubleTreeASerializer : IPandoNodeSerializerDeserialize
 {
 	private const int AGE_SIZE = sizeof(int);
 
-	public ulong Serialize(TestTree.A obj, IWritablePandoNodeRepository repository)
+	public ulong Serialize(TestTree.A obj, INodeDataSink dataSink)
 	{
 		Span<byte> buffer = stackalloc byte[AGE_SIZE];
 		ByteEncoder.CopyBytes(obj.Age, buffer);
-		return repository.AddNode(buffer);
+		return dataSink.AddNode(buffer);
 	}
 
-	public TestTree.A Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository _)
+	public TestTree.A Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource _)
 	{
 		var age = ByteEncoder.GetInt32(bytes);
 		return new TestTree.A(age);
@@ -104,7 +104,7 @@ internal readonly struct DoubleTreeBSerializer : IPandoNodeSerializerDeserialize
 	private const int CENTS_END = TIME_END + sizeof(int);
 	private const int SIZE = CENTS_END;
 
-	public ulong Serialize(TestTree.B obj, IWritablePandoNodeRepository repository)
+	public ulong Serialize(TestTree.B obj, INodeDataSink dataSink)
 	{
 		Span<byte> myBuffer = stackalloc byte[SIZE];
 		var timeBinary = obj.Time.ToBinary();
@@ -112,10 +112,10 @@ internal readonly struct DoubleTreeBSerializer : IPandoNodeSerializerDeserialize
 		ByteEncoder.CopyBytes(timeBinary, myBuffer[..TIME_END]);
 		ByteEncoder.CopyBytes(obj.Cents, myBuffer[TIME_END..CENTS_END]);
 
-		return repository.AddNode(myBuffer);
+		return dataSink.AddNode(myBuffer);
 	}
 
-	public TestTree.B Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository _)
+	public TestTree.B Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource _)
 	{
 		var timeBinary = ByteEncoder.GetInt64(bytes[..TIME_END]);
 		var date = DateTime.FromBinary(timeBinary);

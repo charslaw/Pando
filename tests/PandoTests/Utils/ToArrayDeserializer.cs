@@ -8,7 +8,7 @@ namespace PandoTests.Utils;
 /// An implementation of IPandoNodeDeserializer that just converts the span to an array. This is used only for testing, to inspect the raw bytes.
 internal readonly struct ToArrayDeserializer : IPandoNodeDeserializer<byte[]>
 {
-	public byte[] Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository) => bytes.ToArray();
+	public byte[] Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource) => bytes.ToArray();
 }
 
 /// An implementation of ISpanVisitor that just converts the span to an array. This is used only for testing, to inspect the raw bytes.

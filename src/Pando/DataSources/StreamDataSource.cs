@@ -5,7 +5,7 @@ using Pando.DataSources.Utils;
 
 namespace Pando.DataSources;
 
-public class StreamDataSource : IWritablePandoNodeRepository, IWritablePandoSnapshotRepository, IDisposable
+public class StreamDataSource : INodeDataSink, ISnapshotDataSink, IDisposable
 {
 	private readonly Stream _snapshotIndexStream;
 	private readonly Stream _leafSnapshotsStream;

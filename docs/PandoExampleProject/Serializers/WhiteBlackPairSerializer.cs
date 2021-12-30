@@ -10,15 +10,15 @@ namespace PandoExampleProject.Serializers;
 /// It is made more difficult for TimeSpan because you have to convert it to a primitive value first (via the Ticks property)
 internal class WhiteBlackPairTimespanSerializer : IPandoNodeSerializerDeserializer<WhiteBlackPair<TimeSpan>>
 {
-	public ulong Serialize(WhiteBlackPair<TimeSpan> obj, IWritablePandoNodeRepository repository)
+	public ulong Serialize(WhiteBlackPair<TimeSpan> obj, INodeDataSink dataSink)
 	{
 		Span<byte> buffer = stackalloc byte[sizeof(long) * 2];
 		BinaryPrimitives.WriteInt64LittleEndian(buffer.Slice(0, sizeof(long)), obj.WhiteValue.Ticks);
 		BinaryPrimitives.WriteInt64LittleEndian(buffer.Slice(sizeof(long), sizeof(long)), obj.BlackValue.Ticks);
-		return repository.AddNode(buffer);
+		return dataSink.AddNode(buffer);
 	}
 
-	public WhiteBlackPair<TimeSpan> Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository)
+	public WhiteBlackPair<TimeSpan> Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
 		var whiteTicks = BinaryPrimitives.ReadInt64LittleEndian(bytes.Slice(0, sizeof(long)));
 		var blackTicks = BinaryPrimitives.ReadInt64LittleEndian(bytes.Slice(sizeof(long), sizeof(long)));
@@ -39,26 +39,26 @@ internal class WhiteBlackPairBranchSerializer<TNode> : IPandoNodeSerializerDeser
 		_memberSerializer = memberSerializer;
 	}
 
-	public ulong Serialize(WhiteBlackPair<TNode> obj, IWritablePandoNodeRepository repository)
+	public ulong Serialize(WhiteBlackPair<TNode> obj, INodeDataSink dataSink)
 	{
 		Span<byte> buffer = stackalloc byte[sizeof(ulong) * 2];
 
-		var whiteHash = _memberSerializer.Serialize(obj.WhiteValue, repository);
-		var blackHash = _memberSerializer.Serialize(obj.BlackValue, repository);
+		var whiteHash = _memberSerializer.Serialize(obj.WhiteValue, dataSink);
+		var blackHash = _memberSerializer.Serialize(obj.BlackValue, dataSink);
 
 		BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(0, sizeof(ulong)), whiteHash);
 		BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(sizeof(ulong), sizeof(ulong)), blackHash);
 
-		return repository.AddNode(buffer);
+		return dataSink.AddNode(buffer);
 	}
 
-	public WhiteBlackPair<TNode> Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository)
+	public WhiteBlackPair<TNode> Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
 		var whiteHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(0, sizeof(ulong)));
 		var blackHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong), sizeof(ulong)));
 
-		var whiteValue = repository.GetNode(whiteHash, _memberSerializer);
-		var blackValue = repository.GetNode(blackHash, _memberSerializer);
+		var whiteValue = dataSource.GetNode(whiteHash, _memberSerializer);
+		var blackValue = dataSource.GetNode(blackHash, _memberSerializer);
 
 		return new WhiteBlackPair<TNode>(whiteValue, blackValue);
 	}

@@ -281,7 +281,7 @@ public class PandoSaveTests
 
 		/// Simulate adding snapshots to the repository in a previous session, then reconstitute a new repository from the persisted data
 		/// This is used to test that a Pando saver will work properly when used with a repository that already has data.
-		private static (IPandoRepository repo, ulong rootHash, ulong child1Hash, ulong child2Hash, ulong grandChildHash) PrepopulatedRepository()
+		private static (IDataSource source, ulong rootHash, ulong child1Hash, ulong child2Hash, ulong grandChildHash) PrepopulatedRepository()
 		{
 			// Assemble "previous session" data
 			var snapshotIndex = new MemoryStream();
@@ -303,9 +303,9 @@ public class PandoSaveTests
 			var grandChildHash = saver.SaveSnapshot(MakeTestTree4(), child1Hash);
 
 			// Reconstitute a new repository to return
-			var repo = new MemoryDataSource(snapshotIndex, leafSnapshots, nodeIndex, nodeData);
+			var source = new MemoryDataSource(snapshotIndex, leafSnapshots, nodeIndex, nodeData);
 
-			return (repo, rootHash, child1Hash, child2Hash, grandChildHash);
+			return (source, rootHash, child1Hash, child2Hash, grandChildHash);
 		}
 	}
 }

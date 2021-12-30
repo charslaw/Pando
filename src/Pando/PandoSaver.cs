@@ -7,47 +7,47 @@ namespace Pando;
 
 public class PandoSaver<T> : IPandoSaver<T>
 {
-	private readonly IPandoRepository _repository;
+	private readonly IDataSource _dataSource;
 	private readonly IPandoNodeSerializerDeserializer<T> _serializer;
 
 	private ulong? _rootSnapshot;
 	private readonly Dictionary<ulong, SmallSet<ulong>> _snapshotTreeElements = new();
 
-	public PandoSaver(IPandoRepository repository, IPandoNodeSerializerDeserializer<T> serializer)
+	public PandoSaver(IDataSource dataSource, IPandoNodeSerializerDeserializer<T> serializer)
 	{
-		_repository = repository;
+		_dataSource = dataSource;
 		_serializer = serializer;
 
-		var snapshotCount = _repository.SnapshotCount;
+		var snapshotCount = _dataSource.SnapshotCount;
 		if (snapshotCount > 0)
 		{
 			_snapshotTreeElements = new Dictionary<ulong, SmallSet<ulong>>(snapshotCount);
-			InitializeSnapshotTree(_repository.GetLeafSnapshotHashes());
+			InitializeSnapshotTree(_dataSource.GetLeafSnapshotHashes());
 		}
 	}
 
 	public ulong SaveRootSnapshot(T tree)
 	{
-		if (_repository.SnapshotCount > 0) throw new AlreadyHasRootSnapshotException();
+		if (_dataSource.SnapshotCount > 0) throw new AlreadyHasRootSnapshotException();
 
-		var nodeHash = _serializer.Serialize(tree, _repository);
-		var snapshotHash = _repository.AddSnapshot(0UL, nodeHash);
+		var nodeHash = _serializer.Serialize(tree, _dataSource);
+		var snapshotHash = _dataSource.AddSnapshot(0UL, nodeHash);
 		AddToSnapshotTree(snapshotHash);
 		return snapshotHash;
 	}
 
 	public ulong SaveSnapshot(T tree, ulong parentHash)
 	{
-		var nodeHash = _serializer.Serialize(tree, _repository);
-		var snapshotHash = _repository.AddSnapshot(parentHash, nodeHash);
+		var nodeHash = _serializer.Serialize(tree, _dataSource);
+		var snapshotHash = _dataSource.AddSnapshot(parentHash, nodeHash);
 		AddToSnapshotTree(snapshotHash, parentHash);
 		return snapshotHash;
 	}
 
 	public T GetSnapshot(ulong hash)
 	{
-		var nodeHash = _repository.GetSnapshotRootNode(hash);
-		return _repository.GetNode(nodeHash, _serializer);
+		var nodeHash = _dataSource.GetSnapshotRootNode(hash);
+		return _dataSource.GetNode(nodeHash, _serializer);
 	}
 
 	public SnapshotTree GetSnapshotTree()
@@ -87,7 +87,7 @@ public class PandoSaver<T> : IPandoSaver<T>
 			_snapshotTreeElements[leaf] = new SmallSet<ulong>();
 
 			var currentHash = leaf;
-			var parentHash = _repository.GetSnapshotParent(currentHash);
+			var parentHash = _dataSource.GetSnapshotParent(currentHash);
 			while (parentHash != 0UL)
 			{
 				if (_snapshotTreeElements.TryGetValue(parentHash, out var set))
@@ -100,7 +100,7 @@ public class PandoSaver<T> : IPandoSaver<T>
 				_snapshotTreeElements.Add(parentHash, new SmallSet<ulong>(currentHash));
 
 				currentHash = parentHash;
-				parentHash = _repository.GetSnapshotParent(currentHash);
+				parentHash = _dataSource.GetSnapshotParent(currentHash);
 			}
 
 			if (parentHash == 0UL) _rootSnapshot = currentHash;

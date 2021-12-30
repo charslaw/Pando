@@ -28,14 +28,14 @@ internal class ChessStateTreeSerializer : IPandoNodeSerializerDeserializer<Chess
 		_playerPiecesSerializer = playerPiecesSerializer;
 	}
 
-	/// <param name="obj">ChessGameState that we want to serialize to the repository</param>
-	/// <param name="repository">Repository we want to serialize to</param>
-	public ulong Serialize(ChessGameState obj, IWritablePandoNodeRepository repository)
+	/// <param name="obj">ChessGameState that we want to serialize to the data sink</param>
+	/// <param name="dataSink">Data sink we want to serialize to</param>
+	public ulong Serialize(ChessGameState obj, INodeDataSink dataSink)
 	{
-		// Get the hash of each child node by serializing them to the repository
-		ulong playerStateHash = _playerStateSerializer.Serialize(obj.PlayerState, repository);
-		ulong remainingTimeHash = _remainingTimeSerializer.Serialize(obj.RemainingTime, repository);
-		ulong piecesHash = _playerPiecesSerializer.Serialize(obj.PlayerPieces, repository);
+		// Get the hash of each child node by serializing them to the data sink
+		ulong playerStateHash = _playerStateSerializer.Serialize(obj.PlayerState, dataSink);
+		ulong remainingTimeHash = _remainingTimeSerializer.Serialize(obj.RemainingTime, dataSink);
+		ulong piecesHash = _playerPiecesSerializer.Serialize(obj.PlayerPieces, dataSink);
 
 		// Write each hash to a buffer
 		// *Pando always assumes little endian*
@@ -44,13 +44,13 @@ internal class ChessStateTreeSerializer : IPandoNodeSerializerDeserializer<Chess
 		BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(sizeof(ulong), sizeof(ulong)), remainingTimeHash);
 		BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(sizeof(ulong) * 2, sizeof(ulong)), piecesHash);
 
-		// Write the branch data to the repository, returning the resulting hash of this node
-		return repository.AddNode(buffer);
+		// Write the branch data to the data sink, returning the resulting hash of this node
+		return dataSink.AddNode(buffer);
 	}
 
 	/// <param name="bytes">The raw byte data of this branch node</param>
-	/// <param name="repository">The repository to pull child nodes from</param>
-	public ChessGameState Deserialize(ReadOnlySpan<byte> bytes, IReadablePandoNodeRepository repository)
+	/// <param name="dataSource">The data source to pull child nodes from</param>
+	public ChessGameState Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
 		// Get child hashes from raw data
 		// *Pando always assumes little endian*
@@ -58,10 +58,10 @@ internal class ChessStateTreeSerializer : IPandoNodeSerializerDeserializer<Chess
 		ulong remainingTimeHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong), sizeof(ulong)));
 		ulong playerPiecesHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong) * 2, sizeof(ulong)));
 
-		// Get child nodes from repository
-		var playerState = repository.GetNode(playerStateHash, _playerStateSerializer);
-		var remainingTime = repository.GetNode(remainingTimeHash, _remainingTimeSerializer);
-		var playerPieces = repository.GetNode(playerPiecesHash, _playerPiecesSerializer);
+		// Get child nodes from data source
+		var playerState = dataSource.GetNode(playerStateHash, _playerStateSerializer);
+		var remainingTime = dataSource.GetNode(remainingTimeHash, _remainingTimeSerializer);
+		var playerPieces = dataSource.GetNode(playerPiecesHash, _playerPiecesSerializer);
 
 		// Create the final state object
 		return new ChessGameState(playerState, remainingTime, playerPieces);
