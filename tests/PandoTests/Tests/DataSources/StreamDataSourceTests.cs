@@ -8,9 +8,9 @@ using PandoTests.Utils;
 using Standart.Hash.xxHash;
 using Xunit;
 
-namespace PandoTests.Tests.Repositories;
+namespace PandoTests.Tests.DataSources;
 
-public class StreamRepositoryTests
+public class StreamDataSourceTests
 {
 	public class AddNode
 	{

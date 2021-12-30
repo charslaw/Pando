@@ -9,9 +9,9 @@ using PandoTests.Utils;
 using Standart.Hash.xxHash;
 using Xunit;
 
-namespace PandoTests.Tests.Repositories;
+namespace PandoTests.Tests.DataSources;
 
-public class InMemoryRepositoryTests
+public class MemoryDataSourceTests
 {
 	public class AddNode
 	{

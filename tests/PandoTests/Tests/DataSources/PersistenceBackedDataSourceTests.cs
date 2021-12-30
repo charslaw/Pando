@@ -4,9 +4,9 @@ using Pando.DataSources;
 using PandoTests.Utils;
 using Xunit;
 
-namespace PandoTests.Tests.Repositories;
+namespace PandoTests.Tests.DataSources;
 
-public class PersistenceBackedRepositoryTests
+public class PersistenceBackedDataSourceTests
 {
 	public class AddNode
 	{
