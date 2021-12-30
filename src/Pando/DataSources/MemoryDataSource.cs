@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.IO;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
+using Pando.Serialization;
 
 namespace Pando.DataSources;
 

@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using Pando.DataSources;
 using Pando.Exceptions;
+using Pando.Serialization;
 
 namespace Pando;
 

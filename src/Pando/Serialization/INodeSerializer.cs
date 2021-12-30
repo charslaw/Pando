@@ -1,7 +1,7 @@
 using System;
 using Pando.DataSources;
 
-namespace Pando;
+namespace Pando.Serialization;
 
 public interface INodeWriter<in T>
 {

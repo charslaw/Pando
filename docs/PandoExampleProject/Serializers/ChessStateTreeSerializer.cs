@@ -1,8 +1,8 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Immutable;
-using Pando;
 using Pando.DataSources;
+using Pando.Serialization;
 
 namespace PandoExampleProject.Serializers;
 
