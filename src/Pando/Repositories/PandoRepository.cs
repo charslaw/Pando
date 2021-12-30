@@ -6,7 +6,7 @@ using Pando.Serialization;
 
 namespace Pando.Repositories;
 
-public class PandoSaver<T> : IPandoSaver<T>
+public class PandoRepository<T> : IRepository<T>
 {
 	private readonly IDataSource _dataSource;
 	private readonly INodeSerializer<T> _serializer;
@@ -14,7 +14,7 @@ public class PandoSaver<T> : IPandoSaver<T>
 	private ulong? _rootSnapshot;
 	private readonly Dictionary<ulong, SmallSet<ulong>> _snapshotTreeElements = new();
 
-	public PandoSaver(IDataSource dataSource, INodeSerializer<T> serializer)
+	public PandoRepository(IDataSource dataSource, INodeSerializer<T> serializer)
 	{
 		_dataSource = dataSource;
 		_serializer = serializer;

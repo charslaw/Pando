@@ -14,7 +14,7 @@ using Xunit;
 
 namespace PandoTests.Tests.PandoSave;
 
-public class PandoSaveTests
+public class PandoRepositoryTests
 {
 	private static TestTree MakeTestTree1() =>
 		new(
@@ -75,14 +75,14 @@ public class PandoSaveTests
 			var tree = MakeTestTree1();
 
 			// Arrange
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
 
 			// Act
-			var snapshotHash = saver.SaveRootSnapshot(tree);
-			TestTree actual = saver.GetSnapshot(snapshotHash);
+			var snapshotHash = repository.SaveRootSnapshot(tree);
+			TestTree actual = repository.GetSnapshot(snapshotHash);
 
 			// Assert
 			actual.Should()
@@ -100,16 +100,16 @@ public class PandoSaveTests
 			// Arrange
 			var nodeIndex = new Dictionary<ulong, DataSlice>();
 			var nodeData = new SpannableList<byte>();
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(nodeIndex: nodeIndex, nodeData: nodeData),
 				TestTreeSerializer.Create()
 			);
 
 			// Act
-			var rootHash = saver.SaveRootSnapshot(tree);
+			var rootHash = repository.SaveRootSnapshot(tree);
 			var dataArraySnapshot1 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
-			saver.SaveSnapshot(tree2, rootHash);
+			repository.SaveSnapshot(tree2, rootHash);
 			var dataArraySnapshot2 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
 			// Assert
@@ -125,14 +125,14 @@ public class PandoSaveTests
 			var tree2 = MakeTestTree2();
 
 			// Arrange
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
-			saver.SaveRootSnapshot(tree);
+			repository.SaveRootSnapshot(tree);
 
 			// Assert
-			saver.Invoking(s => s.SaveRootSnapshot(tree2))
+			repository.Invoking(s => s.SaveRootSnapshot(tree2))
 				.Should()
 				.Throw<AlreadyHasRootSnapshotException>();
 		}
@@ -148,14 +148,14 @@ public class PandoSaveTests
 			var tree1Copy = tree1 with { };
 
 			// Arrange
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
 
 			// Act
-			var snapshotHash1 = saver.SaveRootSnapshot(tree1);
-			var snapshotHash2 = saver.SaveSnapshot(tree1Copy, snapshotHash1);
+			var snapshotHash1 = repository.SaveRootSnapshot(tree1);
+			var snapshotHash2 = repository.SaveSnapshot(tree1Copy, snapshotHash1);
 
 			// Assert
 			snapshotHash1.Should().NotBe(snapshotHash2);
@@ -174,17 +174,17 @@ public class PandoSaveTests
 			var tree4 = MakeTestTree4();
 
 			// Arrange
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
-			var rootHash = saver.SaveRootSnapshot(tree1);
-			var child1Hash = saver.SaveSnapshot(tree2, rootHash);
-			var child2Hash = saver.SaveSnapshot(tree3, rootHash);
-			var grandChildHash = saver.SaveSnapshot(tree4, child1Hash);
+			var rootHash = repository.SaveRootSnapshot(tree1);
+			var child1Hash = repository.SaveSnapshot(tree2, rootHash);
+			var child2Hash = repository.SaveSnapshot(tree3, rootHash);
+			var grandChildHash = repository.SaveSnapshot(tree4, child1Hash);
 
 			// Act
-			SnapshotTree snapshotTree = saver.GetSnapshotTree();
+			SnapshotTree snapshotTree = repository.GetSnapshotTree();
 
 			// Assert
 			var expected = new SnapshotTree(
@@ -208,13 +208,13 @@ public class PandoSaveTests
 		{
 			var (source, rootHash, child1Hash, child2Hash, grandChildHash) = PrepopulatedDataSource();
 
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				source,
 				TestTreeSerializer.Create()
 			);
 
 			// Act
-			SnapshotTree snapshotTree = saver.GetSnapshotTree();
+			SnapshotTree snapshotTree = repository.GetSnapshotTree();
 
 			// Assert
 			var expected = new SnapshotTree(
@@ -234,20 +234,20 @@ public class PandoSaveTests
 		}
 
 		[Fact]
-		public void Should_return_correct_tree_when_adding_to_reconstituted_saver()
+		public void Should_return_correct_tree_when_adding_to_reconstituted_repository()
 		{
 			var (source, rootHash, child1Hash, child2Hash, grandChildHash) = PrepopulatedDataSource();
 
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				source,
 				TestTreeSerializer.Create()
 			);
 
 			// Act
-			var newHash = saver.SaveSnapshot(MakeTestTree5(), child2Hash);
+			var newHash = repository.SaveSnapshot(MakeTestTree5(), child2Hash);
 
 			// Assert
-			SnapshotTree snapshotTree = saver.GetSnapshotTree();
+			SnapshotTree snapshotTree = repository.GetSnapshotTree();
 			var expected = new SnapshotTree(
 				rootHash,
 				ImmutableArray.Create(
@@ -272,16 +272,16 @@ public class PandoSaveTests
 		[Fact]
 		public void Should_throw_if_no_root_snapshot()
 		{
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
 
-			saver.Invoking(s => s.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
+			repository.Invoking(s => s.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
 		}
 
 		/// Simulate adding snapshots to the data source in a previous session, then reconstitute a new data source from the persisted data
-		/// This is used to test that a Pando saver will work properly when used with a data source that already has data.
+		/// This is used to test that a Pando repository will work properly when used with a data source that already has data.
 		private static (IDataSource source, ulong rootHash, ulong child1Hash, ulong child2Hash, ulong grandChildHash) PrepopulatedDataSource()
 		{
 			// Assemble "previous session" data
@@ -290,7 +290,7 @@ public class PandoSaveTests
 			var nodeIndex = new MemoryStream();
 			var nodeData = new MemoryStream();
 
-			var saver = new PandoSaver<TestTree>(
+			var repository = new PandoRepository<TestTree>(
 				new PersistenceBackedDataSource(
 					new MemoryDataSource(),
 					new StreamDataSource(snapshotIndex, leafSnapshots, nodeIndex, nodeData)
@@ -298,10 +298,10 @@ public class PandoSaveTests
 				TestTreeSerializer.Create()
 			);
 
-			var rootHash = saver.SaveRootSnapshot(MakeTestTree1());
-			var child1Hash = saver.SaveSnapshot(MakeTestTree2(), rootHash);
-			var child2Hash = saver.SaveSnapshot(MakeTestTree3(), rootHash);
-			var grandChildHash = saver.SaveSnapshot(MakeTestTree4(), child1Hash);
+			var rootHash = repository.SaveRootSnapshot(MakeTestTree1());
+			var child1Hash = repository.SaveSnapshot(MakeTestTree2(), rootHash);
+			var child2Hash = repository.SaveSnapshot(MakeTestTree3(), rootHash);
+			var grandChildHash = repository.SaveSnapshot(MakeTestTree4(), child1Hash);
 
 			// Reconstitute a new data source to return
 			var source = new MemoryDataSource(snapshotIndex, leafSnapshots, nodeIndex, nodeData);
