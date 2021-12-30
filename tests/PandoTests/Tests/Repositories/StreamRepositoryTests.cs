@@ -27,7 +27,7 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var nodeIndexStream = new MemoryStream();
-			using var repository = new StreamRepository(
+			using var repository = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: nodeIndexStream,
@@ -64,7 +64,7 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var nodeDataStream = new MemoryStream();
-			using var repository = new StreamRepository(
+			using var repository = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: Stream.Null,
@@ -98,7 +98,7 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			using var repository = new StreamRepository(
+			using var repository = new StreamDataSource(
 				snapshotIndexStream: snapshotIndexStream,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: Stream.Null,
@@ -131,7 +131,7 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			using var repository = new StreamRepository(
+			using var repository = new StreamDataSource(
 				snapshotIndexStream: snapshotIndexStream,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: Stream.Null,
@@ -154,7 +154,7 @@ public class StreamRepositoryTests
 		{
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream();
-			using var repository = new StreamRepository(
+			using var repository = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: leafSnapshotsStream,
 				nodeIndexStream: Stream.Null,
@@ -176,7 +176,7 @@ public class StreamRepositoryTests
 		{
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream();
-			using var repository = new StreamRepository(
+			using var repository = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: leafSnapshotsStream,
 				nodeIndexStream: Stream.Null,
@@ -199,7 +199,7 @@ public class StreamRepositoryTests
 		{
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream();
-			using var repository = new StreamRepository(
+			using var repository = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: leafSnapshotsStream,
 				nodeIndexStream: Stream.Null,
@@ -233,7 +233,7 @@ public class StreamRepositoryTests
 
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream(initialLeafSnapshots);
-			using var repository = new StreamRepository(
+			using var repository = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: leafSnapshotsStream,
 				nodeIndexStream: Stream.Null,

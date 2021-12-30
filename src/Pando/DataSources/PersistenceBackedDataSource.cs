@@ -7,12 +7,12 @@ namespace Pando.DataSources;
 public class PersistenceBackedDataSource : IPandoRepository, IDisposable
 {
 	private readonly MemoryDataSource _mainDataSource;
-	private readonly StreamRepository _persistentRepository;
+	private readonly StreamDataSource _persistentDataSource;
 
-	public PersistenceBackedDataSource(MemoryDataSource mainDataSource, StreamRepository persistentRepository)
+	public PersistenceBackedDataSource(MemoryDataSource mainDataSource, StreamDataSource persistentDataSource)
 	{
 		_mainDataSource = mainDataSource;
-		_persistentRepository = persistentRepository;
+		_persistentDataSource = persistentDataSource;
 	}
 
 	public ulong AddNode(ReadOnlySpan<byte> bytes)
@@ -22,7 +22,7 @@ public class PersistenceBackedDataSource : IPandoRepository, IDisposable
 		if (_mainDataSource.HasNode(hash)) return hash;
 
 		_mainDataSource.AddNodeWithHashUnsafe(hash, bytes);
-		_persistentRepository.AddNodeWithHashUnsafe(hash, bytes);
+		_persistentDataSource.AddNodeWithHashUnsafe(hash, bytes);
 		return hash;
 	}
 
@@ -33,7 +33,7 @@ public class PersistenceBackedDataSource : IPandoRepository, IDisposable
 		if (_mainDataSource.HasSnapshot(hash)) return hash;
 
 		_mainDataSource.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
-		_persistentRepository.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
+		_persistentDataSource.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
 		return hash;
 	}
 
@@ -49,5 +49,5 @@ public class PersistenceBackedDataSource : IPandoRepository, IDisposable
 
 	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _mainDataSource.GetLeafSnapshotHashes();
 
-	public void Dispose() => _persistentRepository.Dispose();
+	public void Dispose() => _persistentDataSource.Dispose();
 }

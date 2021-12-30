@@ -5,7 +5,7 @@ using Pando.DataSources.Utils;
 
 namespace Pando.DataSources;
 
-public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnapshotRepository, IDisposable
+public class StreamDataSource : IWritablePandoNodeRepository, IWritablePandoSnapshotRepository, IDisposable
 {
 	private readonly Stream _snapshotIndexStream;
 	private readonly Stream _leafSnapshotsStream;
@@ -17,7 +17,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// Counts total number of bytes in the node data stream.
 	private long _nodeDataBytesCount;
 
-	public StreamRepository(Stream snapshotIndexStream, Stream leafSnapshotsStream, Stream nodeIndexStream, Stream nodeDataStream)
+	public StreamDataSource(Stream snapshotIndexStream, Stream leafSnapshotsStream, Stream nodeIndexStream, Stream nodeDataStream)
 	{
 		_snapshotIndexStream = snapshotIndexStream;
 		_leafSnapshotsStream = leafSnapshotsStream;
@@ -27,7 +27,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 		_nodeDataBytesCount = nodeDataStream.Length;
 	}
 
-	/// <remarks>The StreamRepository <i>does not</i> defend against duplicate nodes.
+	/// <remarks>The StreamDataSource <i>does not</i> defend against duplicate nodes.
 	/// Before adding a node, you should ensure it is not a duplicate</remarks>
 	/// <inheritdoc/>
 	public ulong AddNode(ReadOnlySpan<byte> bytes)
@@ -41,7 +41,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// <remarks>
 	///     <para>This method is unsafe because the given hash and data might mismatch.
 	///     When calling this method, ensure the correct hash is given.</para>
-	///     <para>The StreamRepository <i>does not</i> defend against duplicate nodes.
+	///     <para>The StreamDataSource <i>does not</i> defend against duplicate nodes.
 	///     Before adding a node, you should ensure it is not a duplicate.</para>
 	/// </remarks>
 	internal void AddNodeWithHashUnsafe(ulong hash, ReadOnlySpan<byte> bytes)
@@ -53,7 +53,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 		StreamUtils.NodeIndex.WriteIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
 	}
 
-	/// <remarks>The StreamRepository <i>does not</i> defend against duplicate snapshots.
+	/// <remarks>The StreamDataSource <i>does not</i> defend against duplicate snapshots.
 	/// Before adding a snapshot, you should ensure it is not a duplicate.</remarks>
 	/// <inheritdoc/>
 	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
@@ -67,7 +67,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 	/// <remarks>
 	///     <para>This method is unsafe because the given hash and data might mismatch.
 	///     When calling this method, ensure the correct hash is given.</para>
-	///     <para>The StreamRepository <i>does not</i> defend against duplicate snapshots.
+	///     <para>The StreamDataSource <i>does not</i> defend against duplicate snapshots.
 	///     Before adding a snapshot, you should ensure it is not a duplicate.</para>
 	/// </remarks>
 	internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
@@ -98,7 +98,7 @@ public class StreamRepository : IWritablePandoNodeRepository, IWritablePandoSnap
 		_leafSnapshotsStream.Write(buffer);
 	}
 
-	/// Disposes this StreamRepository and all contained streams
+	/// Disposes this StreamDataSource and all contained streams
 	public void Dispose()
 	{
 		_snapshotIndexStream.Dispose();

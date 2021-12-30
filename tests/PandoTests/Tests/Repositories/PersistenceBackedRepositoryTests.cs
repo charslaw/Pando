@@ -21,7 +21,7 @@ public class PersistenceBackedRepositoryTests
 			// Arrange
 			var nodeIndexStream = new MemoryStream();
 			var nodeDataStream = new MemoryStream();
-			using var streamRepo = new StreamRepository(
+			using var streamRepo = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: nodeIndexStream,
@@ -55,7 +55,7 @@ public class PersistenceBackedRepositoryTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			using var streamRepo = new StreamRepository(
+			using var streamRepo = new StreamDataSource(
 				snapshotIndexStream: snapshotIndexStream,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: Stream.Null,

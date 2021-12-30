@@ -292,7 +292,7 @@ public class PandoSaveTests
 			var saver = new PandoSaver<TestTree>(
 				new PersistenceBackedDataSource(
 					new MemoryDataSource(),
-					new StreamRepository(snapshotIndex, leafSnapshots, nodeIndex, nodeData)
+					new StreamDataSource(snapshotIndex, leafSnapshots, nodeIndex, nodeData)
 				),
 				TestTreeSerializer.Create()
 			);
