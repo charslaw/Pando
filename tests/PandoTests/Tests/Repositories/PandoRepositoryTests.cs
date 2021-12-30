@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using FluentAssertions;
-using Pando;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
 using PandoTests.Tests.Repositories.TestStateTrees;
-using PandoTests.Utils;
 using Xunit;
 
 namespace PandoTests.Tests.Repositories;
@@ -107,14 +105,10 @@ public class PandoRepositoryTests
 
 			// Act
 			var rootHash = repository.SaveRootSnapshot(tree);
-			var dataArraySnapshot1 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
-
 			repository.SaveSnapshot(tree2, rootHash);
-			var dataArraySnapshot2 = nodeData.VisitSpan(0, nodeData.Count, new ToArrayVisitor());
 
 			// Assert
 			nodeIndex.Count.Should().Be(4, "because a TestTree has 4 blobs");
-			dataArraySnapshot1.Length.Should().Be(dataArraySnapshot2.Length);
 		}
 
 		[Fact]

@@ -119,8 +119,9 @@ public class MemoryDataSource : IDataSource
 	{
 		CheckNodeHash(hash);
 		var (start, dataLength) = _nodeIndex[hash];
-		var visitor = new RepositorySpanVisitor<T>(nodeReader, this);
-		return _nodeData.VisitSpan<RepositorySpanVisitor<T>, T>(start, dataLength, in visitor);
+		Span<byte> buffer = stackalloc byte[dataLength];
+		_nodeData.CopyTo(start, dataLength, buffer);
+		return nodeReader.Deserialize(buffer, this);
 	}
 
 	public int GetSizeOfNode(ulong hash)
@@ -158,19 +159,5 @@ public class MemoryDataSource : IDataSource
 		{
 			throw new HashNotFoundException($"The data source does not contain a snapshot with the requested hash {hash}");
 		}
-	}
-
-	private readonly struct RepositorySpanVisitor<T> : ISpanVisitor<byte, T>
-	{
-		private readonly INodeReader<T> _reader;
-		private readonly IDataSource _repository;
-
-		public RepositorySpanVisitor(INodeReader<T> reader, IDataSource repository)
-		{
-			_reader = reader;
-			_repository = repository;
-		}
-
-		public T Visit(ReadOnlySpan<byte> span) => _reader.Deserialize(span, _repository);
 	}
 }

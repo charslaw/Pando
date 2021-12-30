@@ -51,19 +51,8 @@ internal class SpannableList<T>
 		Array.Resize(ref _array, minimumNewSize * EXPANSION_FACTOR);
 	}
 
-	/// Allows an external consumer to access a span of the list without leaking the span.
-	/// <remarks>Don't call this method concurrently with <see cref="SpannableList{T}.AddSpan"/></remarks>
-	public TResult VisitSpan<TResult>(int start, int length, ISpanVisitor<T, TResult> spanVisitor) => spanVisitor.Visit(_array.AsSpan(start, length));
-
-	/// <inheritdoc cref="VisitSpan{TResult}"/>
-	/// <summary><para>This generic version of the <c>VisitSpan</c> method exists to avoid boxing struct implementations of
-	/// <see cref="ISpanVisitor{T,TResult}"/></para></summary>
-	public TResult VisitSpan<TSpanVisitor, TResult>(int start, int length, in TSpanVisitor spanVisitor)
-		where TSpanVisitor : struct, ISpanVisitor<T, TResult> => spanVisitor.Visit(_array.AsSpan(start, length));
-}
-
-internal interface ISpanVisitor<T, out TResult>
-{
-	[Pure]
-	public TResult Visit(ReadOnlySpan<T> span);
+	public void CopyTo(int sourceStart, int sourceLength, Span<T> destination)
+	{
+		_array.AsSpan(sourceStart, sourceLength).CopyTo(destination);
+	}
 }
