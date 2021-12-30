@@ -7,14 +7,14 @@ using Pando.Exceptions;
 
 namespace Pando.DataSources;
 
-public class InMemoryRepository : IPandoRepository
+public class MemoryDataSource : IPandoRepository
 {
 	private readonly Dictionary<ulong, SnapshotData> _snapshotIndex;
 	private readonly HashSet<ulong> _leafSnapshots;
 	private readonly Dictionary<ulong, DataSlice> _nodeIndex;
 	private readonly SpannableList<byte> _nodeData;
 
-	public InMemoryRepository()
+	public MemoryDataSource()
 	{
 		_snapshotIndex = new Dictionary<ulong, SnapshotData>();
 		_leafSnapshots = new HashSet<ulong>();
@@ -22,7 +22,7 @@ public class InMemoryRepository : IPandoRepository
 		_nodeData = new SpannableList<byte>();
 	}
 
-	public InMemoryRepository(Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource)
+	public MemoryDataSource(Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource)
 		: this(
 			snapshotIndexSource: snapshotIndexSource,
 			leafSnapshotsSource: leafSnapshotsSource,
@@ -31,7 +31,7 @@ public class InMemoryRepository : IPandoRepository
 			null, null, null
 		) { }
 
-	internal InMemoryRepository(
+	internal MemoryDataSource(
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
 		Dictionary<ulong, DataSlice>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
@@ -44,7 +44,7 @@ public class InMemoryRepository : IPandoRepository
 	}
 
 
-	internal InMemoryRepository(
+	internal MemoryDataSource(
 		Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource,
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
 		Dictionary<ulong, DataSlice>? nodeIndex = null,

@@ -25,7 +25,7 @@ public class ChessTests
 	public void MakeSomeMoves()
 	{
 		var pandoSaver = new PandoSaver<ChessGameState>(
-			new InMemoryRepository(),
+			new MemoryDataSource(),
 			MakeSerializer()
 		);
 

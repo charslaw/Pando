@@ -24,7 +24,7 @@ public class InMemoryRepositoryTests
 			// Arrange
 			var nodeIndex = new Dictionary<ulong, DataSlice>();
 			var nodeDataList = new SpannableList<byte>();
-			var repository = new InMemoryRepository(
+			var repository = new MemoryDataSource(
 				nodeIndex: nodeIndex,
 				nodeData: nodeDataList
 			);
@@ -44,7 +44,7 @@ public class InMemoryRepositoryTests
 			var nodeData = new byte[] { 0, 1, 2, 3 };
 
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Assert
 			repository.Invoking(repo =>
@@ -65,7 +65,7 @@ public class InMemoryRepositoryTests
 
 			// Arrange
 			var nodeDataList = new SpannableList<byte>();
-			var repository = new InMemoryRepository(nodeData: nodeDataList);
+			var repository = new MemoryDataSource(nodeData: nodeDataList);
 
 			// Act
 			repository.AddNode(nodeData.CreateCopy());
@@ -89,7 +89,7 @@ public class InMemoryRepositoryTests
 			var hash = xxHash64.ComputeHash(nodeData);
 
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 			repository.AddNode(nodeData.CreateCopy());
 
 			// Act
@@ -109,7 +109,7 @@ public class InMemoryRepositoryTests
 			var hash = xxHash64.ComputeHash(nodeData2);
 
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 			repository.AddNode(nodeData1.CreateCopy());
 			repository.AddNode(nodeData2.CreateCopy());
 			repository.AddNode(nodeData3.CreateCopy());
@@ -125,7 +125,7 @@ public class InMemoryRepositoryTests
 		public void Should_throw_if_called_with_nonexistent_hash()
 		{
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Assert
 			repository.Invoking(ts => ts.GetNode<object?>(0, new ToArrayDeserializer()))
@@ -145,7 +145,7 @@ public class InMemoryRepositoryTests
 
 			// Arrange
 			var snapshotIndex = new Dictionary<ulong, SnapshotData>();
-			var repository = new InMemoryRepository(snapshotIndex: snapshotIndex);
+			var repository = new MemoryDataSource(snapshotIndex: snapshotIndex);
 
 			// Act
 			repository.AddSnapshot(parentHash, rootNodeHash);
@@ -162,7 +162,7 @@ public class InMemoryRepositoryTests
 			ulong rootNodeHash = 2;
 
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Assert
 			repository.Invoking(repo =>
@@ -186,7 +186,7 @@ public class InMemoryRepositoryTests
 			ulong rootNodeHash = 2;
 
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Act
 			var hash = repository.AddSnapshot(parentHash, rootNodeHash);
@@ -199,7 +199,7 @@ public class InMemoryRepositoryTests
 		public void Should_throw_if_GetSnapshotParent_called_with_nonexistent_hash()
 		{
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Assert
 			repository.Invoking(ts => ts.GetSnapshotParent(0))
@@ -218,7 +218,7 @@ public class InMemoryRepositoryTests
 			ulong rootNodeHash = 2;
 
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Act
 			var hash = repository.AddSnapshot(parentHash, rootNodeHash);
@@ -231,7 +231,7 @@ public class InMemoryRepositoryTests
 		public void Should_throw_if_GetSnapshotRootNode_called_with_nonexistent_hash()
 		{
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Assert
 			repository.Invoking(ts => ts.GetSnapshotRootNode(0))
@@ -246,7 +246,7 @@ public class InMemoryRepositoryTests
 		public void Should_return_only_snapshot_hash()
 		{
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Act
 			var snapshotHash = repository.AddSnapshot(0, 2);
@@ -259,7 +259,7 @@ public class InMemoryRepositoryTests
 		public void Should_return_the_latest_snapshot_hash_in_a_branch()
 		{
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Act
 			var rootHash = repository.AddSnapshot(0, 2);
@@ -273,7 +273,7 @@ public class InMemoryRepositoryTests
 		public void Should_return_the_latest_snapshot_hash_in_all_branches()
 		{
 			// Arrange
-			var repository = new InMemoryRepository();
+			var repository = new MemoryDataSource();
 
 			// Act
 			var rootHash = repository.AddSnapshot(0, 2);
@@ -296,7 +296,7 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndex.CreateCopy());
-			var repository = new InMemoryRepository(
+			var repository = new MemoryDataSource(
 				snapshotIndexSource: Stream.Null,
 				leafSnapshotsSource: Stream.Null,
 				nodeIndexSource: nodeIndexStream,
@@ -326,7 +326,7 @@ public class InMemoryRepositoryTests
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndexEntry.CreateCopy());
 			var nodeDataStream = new MemoryStream(nodeData.CreateCopy());
-			var repository = new InMemoryRepository(
+			var repository = new MemoryDataSource(
 				snapshotIndexSource: Stream.Null,
 				leafSnapshotsSource: Stream.Null,
 				nodeIndexSource: nodeIndexStream,
@@ -349,7 +349,7 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndex);
-			var repository = new InMemoryRepository(
+			var repository = new MemoryDataSource(
 				snapshotIndexSource: snapshotIndexStream,
 				leafSnapshotsSource: Stream.Null,
 				nodeIndexSource: Stream.Null,
@@ -375,7 +375,7 @@ public class InMemoryRepositoryTests
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndexEntry.CreateCopy());
-			var repository = new InMemoryRepository(
+			var repository = new MemoryDataSource(
 				snapshotIndexSource: snapshotIndexStream,
 				leafSnapshotsSource: Stream.Null,
 				nodeIndexSource: Stream.Null,
@@ -395,7 +395,7 @@ public class InMemoryRepositoryTests
 			var nodeDataStream = new MemoryStream(8);
 			nodeDataStream.Write(new byte[] { 1, 2, 3 });
 			var nodeDataList = new SpannableList<byte>();
-			var _ = new InMemoryRepository(
+			var _ = new MemoryDataSource(
 				snapshotIndexSource: Stream.Null,
 				leafSnapshotsSource: Stream.Null,
 				nodeIndexSource: Stream.Null,

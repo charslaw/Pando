@@ -6,12 +6,12 @@ namespace Pando.DataSources;
 
 public class PersistenceBackedRepository : IPandoRepository, IDisposable
 {
-	private readonly InMemoryRepository _mainRepository;
+	private readonly MemoryDataSource _mainDataSource;
 	private readonly StreamRepository _persistentRepository;
 
-	public PersistenceBackedRepository(InMemoryRepository mainRepository, StreamRepository persistentRepository)
+	public PersistenceBackedRepository(MemoryDataSource mainDataSource, StreamRepository persistentRepository)
 	{
-		_mainRepository = mainRepository;
+		_mainDataSource = mainDataSource;
 		_persistentRepository = persistentRepository;
 	}
 
@@ -19,9 +19,9 @@ public class PersistenceBackedRepository : IPandoRepository, IDisposable
 	{
 		var hash = HashUtils.ComputeNodeHash(bytes);
 
-		if (_mainRepository.HasNode(hash)) return hash;
+		if (_mainDataSource.HasNode(hash)) return hash;
 
-		_mainRepository.AddNodeWithHashUnsafe(hash, bytes);
+		_mainDataSource.AddNodeWithHashUnsafe(hash, bytes);
 		_persistentRepository.AddNodeWithHashUnsafe(hash, bytes);
 		return hash;
 	}
@@ -30,24 +30,24 @@ public class PersistenceBackedRepository : IPandoRepository, IDisposable
 	{
 		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
 
-		if (_mainRepository.HasSnapshot(hash)) return hash;
+		if (_mainDataSource.HasSnapshot(hash)) return hash;
 
-		_mainRepository.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
+		_mainDataSource.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
 		_persistentRepository.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
 		return hash;
 	}
 
-	public bool HasNode(ulong hash) => _mainRepository.HasNode(hash);
-	public bool HasSnapshot(ulong hash) => _mainRepository.HasSnapshot(hash);
-	public int SnapshotCount => _mainRepository.SnapshotCount;
+	public bool HasNode(ulong hash) => _mainDataSource.HasNode(hash);
+	public bool HasSnapshot(ulong hash) => _mainDataSource.HasSnapshot(hash);
+	public int SnapshotCount => _mainDataSource.SnapshotCount;
 
-	public T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer) => _mainRepository.GetNode(hash, in nodeDeserializer);
-	public int GetSizeOfNode(ulong hash) => _mainRepository.GetSizeOfNode(hash);
+	public T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer) => _mainDataSource.GetNode(hash, in nodeDeserializer);
+	public int GetSizeOfNode(ulong hash) => _mainDataSource.GetSizeOfNode(hash);
 
-	public ulong GetSnapshotParent(ulong hash) => _mainRepository.GetSnapshotParent(hash);
-	public ulong GetSnapshotRootNode(ulong hash) => _mainRepository.GetSnapshotRootNode(hash);
+	public ulong GetSnapshotParent(ulong hash) => _mainDataSource.GetSnapshotParent(hash);
+	public ulong GetSnapshotRootNode(ulong hash) => _mainDataSource.GetSnapshotRootNode(hash);
 
-	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _mainRepository.GetLeafSnapshotHashes();
+	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _mainDataSource.GetLeafSnapshotHashes();
 
 	public void Dispose() => _persistentRepository.Dispose();
 }

@@ -27,7 +27,7 @@ public class PersistenceBackedRepositoryTests
 				nodeIndexStream: nodeIndexStream,
 				nodeDataStream: nodeDataStream
 			);
-			var inMemoryRepo = new InMemoryRepository();
+			var inMemoryRepo = new MemoryDataSource();
 			var repository = new PersistenceBackedRepository(inMemoryRepo, streamRepo);
 
 			// Act
@@ -61,7 +61,7 @@ public class PersistenceBackedRepositoryTests
 				nodeIndexStream: Stream.Null,
 				nodeDataStream: Stream.Null
 			);
-			var inMemoryRepo = new InMemoryRepository();
+			var inMemoryRepo = new MemoryDataSource();
 			var repository = new PersistenceBackedRepository(inMemoryRepo, streamRepo);
 
 			// Act

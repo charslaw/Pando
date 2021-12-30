@@ -75,7 +75,7 @@ public class PandoSaveTests
 
 			// Arrange
 			var saver = new PandoSaver<TestTree>(
-				new InMemoryRepository(),
+				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
 
@@ -100,7 +100,7 @@ public class PandoSaveTests
 			var nodeIndex = new Dictionary<ulong, DataSlice>();
 			var nodeData = new SpannableList<byte>();
 			var saver = new PandoSaver<TestTree>(
-				new InMemoryRepository(nodeIndex: nodeIndex, nodeData: nodeData),
+				new MemoryDataSource(nodeIndex: nodeIndex, nodeData: nodeData),
 				TestTreeSerializer.Create()
 			);
 
@@ -125,7 +125,7 @@ public class PandoSaveTests
 
 			// Arrange
 			var saver = new PandoSaver<TestTree>(
-				new InMemoryRepository(),
+				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
 			saver.SaveRootSnapshot(tree);
@@ -148,7 +148,7 @@ public class PandoSaveTests
 
 			// Arrange
 			var saver = new PandoSaver<TestTree>(
-				new InMemoryRepository(),
+				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
 
@@ -174,7 +174,7 @@ public class PandoSaveTests
 
 			// Arrange
 			var saver = new PandoSaver<TestTree>(
-				new InMemoryRepository(),
+				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
 			var rootHash = saver.SaveRootSnapshot(tree1);
@@ -272,7 +272,7 @@ public class PandoSaveTests
 		public void Should_throw_if_no_root_snapshot()
 		{
 			var saver = new PandoSaver<TestTree>(
-				new InMemoryRepository(),
+				new MemoryDataSource(),
 				TestTreeSerializer.Create()
 			);
 
@@ -291,7 +291,7 @@ public class PandoSaveTests
 
 			var saver = new PandoSaver<TestTree>(
 				new PersistenceBackedRepository(
-					new InMemoryRepository(),
+					new MemoryDataSource(),
 					new StreamRepository(snapshotIndex, leafSnapshots, nodeIndex, nodeData)
 				),
 				TestTreeSerializer.Create()
@@ -303,7 +303,7 @@ public class PandoSaveTests
 			var grandChildHash = saver.SaveSnapshot(MakeTestTree4(), child1Hash);
 
 			// Reconstitute a new repository to return
-			var repo = new InMemoryRepository(snapshotIndex, leafSnapshots, nodeIndex, nodeData);
+			var repo = new MemoryDataSource(snapshotIndex, leafSnapshots, nodeIndex, nodeData);
 
 			return (repo, rootHash, child1Hash, child2Hash, grandChildHash);
 		}
