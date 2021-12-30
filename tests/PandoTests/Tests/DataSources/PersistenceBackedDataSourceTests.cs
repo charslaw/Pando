@@ -11,7 +11,7 @@ public class PersistenceBackedDataSourceTests
 	public class AddNode
 	{
 		[Fact]
-		public void Should_not_output_duplicate_node_to_stream_repository()
+		public void Should_not_output_duplicate_node_to_stream_data_source()
 		{
 			// Test Data
 			var nodeData = new byte[] { 1, 2, 3, 4 };
@@ -21,18 +21,18 @@ public class PersistenceBackedDataSourceTests
 			// Arrange
 			var nodeIndexStream = new MemoryStream();
 			var nodeDataStream = new MemoryStream();
-			using var streamRepo = new StreamDataSource(
+			using var streamSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: nodeIndexStream,
 				nodeDataStream: nodeDataStream
 			);
-			var inMemoryRepo = new MemoryDataSource();
-			var repository = new PersistenceBackedDataSource(inMemoryRepo, streamRepo);
+			var memorySource = new MemoryDataSource();
+			var dataSource = new PersistenceBackedDataSource(memorySource, streamSource);
 
 			// Act
-			repository.AddNode(nodeData.CreateCopy());
-			repository.AddNode(nodeData.CreateCopy());
+			dataSource.AddNode(nodeData.CreateCopy());
+			dataSource.AddNode(nodeData.CreateCopy());
 
 			// Assert
 			var actualIndex = nodeIndexStream.ToArray();
@@ -46,7 +46,7 @@ public class PersistenceBackedDataSourceTests
 	public class AddSnapshot
 	{
 		[Fact]
-		public void Should_not_output_duplicate_snapshot_to_stream_repository()
+		public void Should_not_output_duplicate_snapshot_to_stream_data_source()
 		{
 			// Test Data
 			var parentHash = 5UL;
@@ -55,18 +55,18 @@ public class PersistenceBackedDataSourceTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			using var streamRepo = new StreamDataSource(
+			using var streamSource = new StreamDataSource(
 				snapshotIndexStream: snapshotIndexStream,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: Stream.Null,
 				nodeDataStream: Stream.Null
 			);
-			var inMemoryRepo = new MemoryDataSource();
-			var repository = new PersistenceBackedDataSource(inMemoryRepo, streamRepo);
+			var memoryDataSource = new MemoryDataSource();
+			var dataSource = new PersistenceBackedDataSource(memoryDataSource, streamSource);
 
 			// Act
-			repository.AddSnapshot(parentHash, rootNodeHash);
-			repository.AddSnapshot(parentHash, rootNodeHash);
+			dataSource.AddSnapshot(parentHash, rootNodeHash);
+			dataSource.AddSnapshot(parentHash, rootNodeHash);
 
 			// Assert
 			var actualIndex = snapshotIndexStream.ToArray();

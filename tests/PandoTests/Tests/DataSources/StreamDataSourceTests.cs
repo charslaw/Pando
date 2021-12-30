@@ -27,7 +27,7 @@ public class StreamDataSourceTests
 
 			// Arrange
 			var nodeIndexStream = new MemoryStream();
-			using var repository = new StreamDataSource(
+			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: nodeIndexStream,
@@ -35,9 +35,9 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			repository.AddNode(nodeData[0]);
-			repository.AddNode(nodeData[1]);
-			repository.AddNode(nodeData[2]);
+			dataSource.AddNode(nodeData[0]);
+			dataSource.AddNode(nodeData[1]);
+			dataSource.AddNode(nodeData[2]);
 
 			// Assert
 			Span<byte> expected = stackalloc byte[48];
@@ -64,7 +64,7 @@ public class StreamDataSourceTests
 
 			// Arrange
 			var nodeDataStream = new MemoryStream();
-			using var repository = new StreamDataSource(
+			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: Stream.Null,
@@ -72,9 +72,9 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			repository.AddNode(nodeData1);
-			repository.AddNode(nodeData2);
-			repository.AddNode(nodeData3);
+			dataSource.AddNode(nodeData1);
+			dataSource.AddNode(nodeData2);
+			dataSource.AddNode(nodeData3);
 
 			// Assert
 			var expected = ArrayX.Concat(nodeData1, nodeData2, nodeData3);
@@ -98,7 +98,7 @@ public class StreamDataSourceTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			using var repository = new StreamDataSource(
+			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: snapshotIndexStream,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: Stream.Null,
@@ -106,7 +106,7 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			repository.AddSnapshot(0, rootNodeHash);
+			dataSource.AddSnapshot(0, rootNodeHash);
 
 			// Assert
 			var snapshotIndex = snapshotIndexStream.ToArray();
@@ -131,7 +131,7 @@ public class StreamDataSourceTests
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
-			using var repository = new StreamDataSource(
+			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: snapshotIndexStream,
 				leafSnapshotsStream: Stream.Null,
 				nodeIndexStream: Stream.Null,
@@ -139,7 +139,7 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			repository.AddSnapshot(parentHash, rootNodeHash);
+			dataSource.AddSnapshot(parentHash, rootNodeHash);
 
 			// Assert
 			var snapshotIndex = snapshotIndexStream.ToArray();
@@ -154,7 +154,7 @@ public class StreamDataSourceTests
 		{
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream();
-			using var repository = new StreamDataSource(
+			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: leafSnapshotsStream,
 				nodeIndexStream: Stream.Null,
@@ -162,7 +162,7 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			var snapshotHash = repository.AddSnapshot(0, 1);
+			var snapshotHash = dataSource.AddSnapshot(0, 1);
 
 			// Assert
 			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
@@ -176,7 +176,7 @@ public class StreamDataSourceTests
 		{
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream();
-			using var repository = new StreamDataSource(
+			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: leafSnapshotsStream,
 				nodeIndexStream: Stream.Null,
@@ -184,8 +184,8 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			var rootHash = repository.AddSnapshot(0, 1);
-			var childHash = repository.AddSnapshot(rootHash, 2);
+			var rootHash = dataSource.AddSnapshot(0, 1);
+			var childHash = dataSource.AddSnapshot(rootHash, 2);
 
 			// Assert
 			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
@@ -199,7 +199,7 @@ public class StreamDataSourceTests
 		{
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream();
-			using var repository = new StreamDataSource(
+			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: leafSnapshotsStream,
 				nodeIndexStream: Stream.Null,
@@ -207,9 +207,9 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			var rootHash = repository.AddSnapshot(0, 1);
-			var childHash1 = repository.AddSnapshot(rootHash, 2);
-			var childHash2 = repository.AddSnapshot(rootHash, 3);
+			var rootHash = dataSource.AddSnapshot(0, 1);
+			var childHash1 = dataSource.AddSnapshot(rootHash, 2);
+			var childHash2 = dataSource.AddSnapshot(rootHash, 3);
 
 			// Assert
 			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
@@ -233,7 +233,7 @@ public class StreamDataSourceTests
 
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream(initialLeafSnapshots);
-			using var repository = new StreamDataSource(
+			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
 				leafSnapshotsStream: leafSnapshotsStream,
 				nodeIndexStream: Stream.Null,
@@ -241,7 +241,7 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			var newSnapshot = repository.AddSnapshot(snapshot1Hash, 0);
+			var newSnapshot = dataSource.AddSnapshot(snapshot1Hash, 0);
 
 			// Assert
 			var actualHashes = GetHashesFromByteArray(leafSnapshotsStream.ToArray());

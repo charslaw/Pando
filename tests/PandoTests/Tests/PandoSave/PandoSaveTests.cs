@@ -205,10 +205,10 @@ public class PandoSaveTests
 		[Fact]
 		public void Should_return_correct_tree_when_reconstituting_from_persisted_data()
 		{
-			var (repo, rootHash, child1Hash, child2Hash, grandChildHash) = PrepopulatedRepository();
+			var (source, rootHash, child1Hash, child2Hash, grandChildHash) = PrepopulatedDataSource();
 
 			var saver = new PandoSaver<TestTree>(
-				repo,
+				source,
 				TestTreeSerializer.Create()
 			);
 
@@ -235,10 +235,10 @@ public class PandoSaveTests
 		[Fact]
 		public void Should_return_correct_tree_when_adding_to_reconstituted_saver()
 		{
-			var (repo, rootHash, child1Hash, child2Hash, grandChildHash) = PrepopulatedRepository();
+			var (source, rootHash, child1Hash, child2Hash, grandChildHash) = PrepopulatedDataSource();
 
 			var saver = new PandoSaver<TestTree>(
-				repo,
+				source,
 				TestTreeSerializer.Create()
 			);
 
@@ -279,9 +279,9 @@ public class PandoSaveTests
 			saver.Invoking(s => s.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
 		}
 
-		/// Simulate adding snapshots to the repository in a previous session, then reconstitute a new repository from the persisted data
-		/// This is used to test that a Pando saver will work properly when used with a repository that already has data.
-		private static (IDataSource source, ulong rootHash, ulong child1Hash, ulong child2Hash, ulong grandChildHash) PrepopulatedRepository()
+		/// Simulate adding snapshots to the data source in a previous session, then reconstitute a new data source from the persisted data
+		/// This is used to test that a Pando saver will work properly when used with a data source that already has data.
+		private static (IDataSource source, ulong rootHash, ulong child1Hash, ulong child2Hash, ulong grandChildHash) PrepopulatedDataSource()
 		{
 			// Assemble "previous session" data
 			var snapshotIndex = new MemoryStream();
@@ -302,7 +302,7 @@ public class PandoSaveTests
 			var child2Hash = saver.SaveSnapshot(MakeTestTree3(), rootHash);
 			var grandChildHash = saver.SaveSnapshot(MakeTestTree4(), child1Hash);
 
-			// Reconstitute a new repository to return
+			// Reconstitute a new data source to return
 			var source = new MemoryDataSource(snapshotIndex, leafSnapshots, nodeIndex, nodeData);
 
 			return (source, rootHash, child1Hash, child2Hash, grandChildHash);
