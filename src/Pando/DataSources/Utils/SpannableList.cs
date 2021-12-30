@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics.Contracts;
 
-namespace Pando.Repositories.Utils;
+namespace Pando.DataSources.Utils;
 
 /// A collection that you can add a span of data to, and visit a span of.
 /// <remarks><see cref="SpannableList{T}"/> is not thread safe.<br/>

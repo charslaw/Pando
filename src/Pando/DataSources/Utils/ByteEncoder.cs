@@ -1,7 +1,7 @@
 using System;
 using System.Buffers.Binary;
 
-namespace Pando.Repositories.Utils;
+namespace Pando.DataSources.Utils;
 
 /// Utilities for converting to and from raw bytes (in little endian format)
 internal static class ByteEncoder

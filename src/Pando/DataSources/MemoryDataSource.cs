@@ -2,19 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
+using Pando.DataSources.Utils;
 using Pando.Exceptions;
-using Pando.Repositories.Utils;
+using Pando.Serialization;
 
-namespace Pando.Repositories;
+namespace Pando.DataSources;
 
-public class InMemoryRepository : IPandoRepository
+public class MemoryDataSource : IDataSource
 {
 	private readonly Dictionary<ulong, SnapshotData> _snapshotIndex;
 	private readonly HashSet<ulong> _leafSnapshots;
 	private readonly Dictionary<ulong, DataSlice> _nodeIndex;
 	private readonly SpannableList<byte> _nodeData;
 
-	public InMemoryRepository()
+	public MemoryDataSource()
 	{
 		_snapshotIndex = new Dictionary<ulong, SnapshotData>();
 		_leafSnapshots = new HashSet<ulong>();
@@ -22,7 +23,7 @@ public class InMemoryRepository : IPandoRepository
 		_nodeData = new SpannableList<byte>();
 	}
 
-	public InMemoryRepository(Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource)
+	public MemoryDataSource(Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource)
 		: this(
 			snapshotIndexSource: snapshotIndexSource,
 			leafSnapshotsSource: leafSnapshotsSource,
@@ -31,7 +32,7 @@ public class InMemoryRepository : IPandoRepository
 			null, null, null
 		) { }
 
-	internal InMemoryRepository(
+	internal MemoryDataSource(
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
 		Dictionary<ulong, DataSlice>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
@@ -44,7 +45,7 @@ public class InMemoryRepository : IPandoRepository
 	}
 
 
-	internal InMemoryRepository(
+	internal MemoryDataSource(
 		Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource,
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
 		Dictionary<ulong, DataSlice>? nodeIndex = null,
@@ -114,11 +115,11 @@ public class InMemoryRepository : IPandoRepository
 
 	public int SnapshotCount => _snapshotIndex.Count;
 
-	public T GetNode<T>(ulong hash, in IPandoNodeDeserializer<T> nodeDeserializer)
+	public T GetNode<T>(ulong hash, in INodeReader<T> nodeReader)
 	{
 		CheckNodeHash(hash);
 		var (start, dataLength) = _nodeIndex[hash];
-		var visitor = new RepositorySpanVisitor<T>(nodeDeserializer, this);
+		var visitor = new RepositorySpanVisitor<T>(nodeReader, this);
 		return _nodeData.VisitSpan<RepositorySpanVisitor<T>, T>(start, dataLength, in visitor);
 	}
 
@@ -147,7 +148,7 @@ public class InMemoryRepository : IPandoRepository
 	{
 		if (!HasNode(hash))
 		{
-			throw new HashNotFoundException($"The store does not contain a node with the requested hash {hash}");
+			throw new HashNotFoundException($"The data source does not contain a node with the requested hash {hash}");
 		}
 	}
 
@@ -155,21 +156,21 @@ public class InMemoryRepository : IPandoRepository
 	{
 		if (!HasSnapshot(hash))
 		{
-			throw new HashNotFoundException($"The store does not contain a snapshot with the requested hash {hash}");
+			throw new HashNotFoundException($"The data source does not contain a snapshot with the requested hash {hash}");
 		}
 	}
 
 	private readonly struct RepositorySpanVisitor<T> : ISpanVisitor<byte, T>
 	{
-		private readonly IPandoNodeDeserializer<T> _deserializer;
-		private readonly IPandoRepository _repository;
+		private readonly INodeReader<T> _reader;
+		private readonly IDataSource _repository;
 
-		public RepositorySpanVisitor(IPandoNodeDeserializer<T> deserializer, IPandoRepository repository)
+		public RepositorySpanVisitor(INodeReader<T> reader, IDataSource repository)
 		{
-			_deserializer = deserializer;
+			_reader = reader;
 			_repository = repository;
 		}
 
-		public T Visit(ReadOnlySpan<byte> span) => _deserializer.Deserialize(span, _repository);
+		public T Visit(ReadOnlySpan<byte> span) => _reader.Deserialize(span, _repository);
 	}
 }

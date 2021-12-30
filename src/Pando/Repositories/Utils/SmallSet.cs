@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Pando;
+namespace Pando.Repositories.Utils;
 
 /// A SmallSet is a set that we expect to have zero or one elements most of the time, and thus is optimized for that case.
 /// This will incur no allocations until the set grows to at least 2 elements, at which point a "real" set is allocated.
