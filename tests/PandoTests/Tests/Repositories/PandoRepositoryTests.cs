@@ -8,11 +8,11 @@ using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
-using PandoTests.Tests.PandoSave.TestStateTrees;
+using PandoTests.Tests.Repositories.TestStateTrees;
 using PandoTests.Utils;
 using Xunit;
 
-namespace PandoTests.Tests.PandoSave;
+namespace PandoTests.Tests.Repositories;
 
 public class PandoRepositoryTests
 {

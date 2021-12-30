@@ -1,6 +1,6 @@
 using System;
 
-namespace PandoTests.Tests.PandoSave.TestStateTrees;
+namespace PandoTests.Tests.Repositories.TestStateTrees;
 
 public record TestTree(string Name, TestTree.A MyA, TestTree.B MyB)
 {

@@ -4,7 +4,7 @@ using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Serialization;
 
-namespace PandoTests.Tests.PandoSave.TestStateTrees;
+namespace PandoTests.Tests.Repositories.TestStateTrees;
 
 internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 {
