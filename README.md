@@ -11,26 +11,26 @@ snapshots while avoiding data duplication (each unique blob is stored only once 
 
 ## Usage
 
-The entry point to Pando is the `PandoSaver<T>` class. Each `PandoSaver<T>` specifies the type of the root of the tree
-hierarchy that it is intended to serialize. The public interface surface is defined in `IPandoSaver<T>`.
+The entry point to Pando is the `PandoRepository<T>` class. Each `PandoRepository<T>` specifies the type of the root of
+the tree hierarchy that it is intended to serialize. The public interface surface is defined in `IRepository<T>`.
 
-### Creating a `PandoSaver`
+### Creating a `PandoRepository`
 
-In order to create a `PandoSaver`, you must define a *data source* and a *serializer*. The *data source* determines the
-destination to which data will be saved, while the *serializer* defines how to convert the tree into binary data.
+In order to create a `PandoRepository`, you must define a *data source* and a *serializer*. The *data source* determines
+the destination to which data will be saved, while the *serializer* defines how to convert the tree into binary data.
 
 The *data source* is of type `IDataSource` and the Pando library offers two built in options to fulfill this
 dependency  (see [data sources](#data-sources)). The *serializer* must be user defined as the logic will be specific to
 the type that you are serializing (see [serializers](#serializers)).
 
 ```c#
-// Create a new blank PandoSaver
-var myPandoSaver = new PandoSaver<MyTreeRoot>(new MemoryDataSource(), new MyTreeRootSerializer());
+// Create a new blank PandoRepository
+var myPandoRepository = new PandoRepository<MyTreeRoot>(new MemoryDataSource(), new MyTreeRootSerializer());
 ```
 
-### Saving to a `PandoSaver`
+### Saving to a `PandoRepository`
 
-Once you have your `PandoSaver`, you can save a snapshot of your tree using `PandoSaver.SaveSnapshot`:
+Once you have your `PandoRepository`, you can save a snapshot of your tree using `PandoRepository.SaveSnapshot`:
 
 ```c#
 ulong SaveSnapshot(T tree);
@@ -40,12 +40,12 @@ ulong SaveSnapshot(T tree);
 that was just saved.
 
 ```c#
-var snapshotHash = myPandoSaver.SaveSnapshot(myTreeRoot);
+var snapshotHash = myPandoRepository.SaveSnapshot(myTreeRoot);
 ```
 
-### Getting data from a `PandoSaver`
+### Getting data from a `PandoRepository`
 
-You can retrieve the tree state at a particular snapshot by calling `PandoSaver.GetSnapshot`:
+You can retrieve the tree state at a particular snapshot by calling `PandoRepository.GetSnapshot`:
 
 ```c#
 T GetSnapshot(ulong hash);
@@ -55,12 +55,12 @@ T GetSnapshot(ulong hash);
 the snapshot doesn't exist within the data source, it will throw a `HashNotFoundException`.
 
 ```c#
-var myTreeRootAtSnapshot = myPandoSaver.GetSnapshot(hash);
+var myTreeRootAtSnapshot = myPandoRepository.GetSnapshot(hash);
 ```
 
-### Getting the full history from a `PandoSaver`
+### Getting the full history from a `PandoRepository`
 
-You can retrieve the entire history of snapshots by calling `PandoSaver.GetSnapshotTree`. This returns a
+You can retrieve the entire history of snapshots by calling `PandoRepository.GetSnapshotTree`. This returns a
 root `SnapshotTree` object, which is the root of a tree of snapshots. Each snapshot in the chain may have 0..many
 children, which is represented by an `IImmutableSet<ulong>`.
 
@@ -108,9 +108,9 @@ reading snapshots and tree nodes from the data source given the corresponding in
 
 ### Serializers
 
-The serializer given to the `PandoSaver` must implement `IPandoNodeSerializer<T>` where `T` is the same root node type
-as the `PandoSaver` root type. This implementation must be provided by you because the logic for serialization will
-depend upon the specific shape of your tree.
+The serializer given to the `PandoRepository` must implement `IPandoNodeSerializer<T>` where `T` is the same root node
+type as the `PandoRepository` root type. This implementation must be provided by you because the logic for serialization
+will depend upon the specific shape of your tree.
 
 A Pando Node serializer is unique compared to other serializers in that it is designed to progressively save tree nodes
 to the Pando data source starting from the leaf nodes (blobs) and returning the hash of the saved nodes so that the
