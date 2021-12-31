@@ -294,7 +294,7 @@ public class PandoRepositoryTests
 				TestTreeSerializer.Create()
 			);
 
-			repository.Invoking(s => s.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
+			repository.Invoking(repo => repo.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
 		}
 
 		/// Simulate adding snapshots to the data source in a previous session, then reconstitute a new data source from the persisted data
