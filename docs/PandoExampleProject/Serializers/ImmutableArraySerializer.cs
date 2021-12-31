@@ -39,7 +39,7 @@ public class ImmutableArraySerializer<TNode> : INodeSerializer<ImmutableArray<TN
 		for (int i = 0; i < len; i++)
 		{
 			var hash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong) * i, sizeof(ulong)));
-			arrayBuilder.Add(dataSource.GetNode(hash, _elementSerializer));
+			arrayBuilder.Add(_elementSerializer.DeserializeFromHash(hash, dataSource));
 		}
 
 		return arrayBuilder.ToImmutable();

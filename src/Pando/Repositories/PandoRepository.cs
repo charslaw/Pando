@@ -49,7 +49,7 @@ public class PandoRepository<T> : IRepository<T>
 	public T GetSnapshot(ulong hash)
 	{
 		var nodeHash = _dataSource.GetSnapshotRootNode(hash);
-		return _dataSource.GetNode(nodeHash, _serializer);
+		return _serializer.DeserializeFromHash(nodeHash, _dataSource);
 	}
 
 	public SnapshotTree GetSnapshotTree()

@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
-using Pando;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
@@ -79,7 +79,7 @@ public class MemoryDataSourceTests
 		}
 	}
 
-	public class GetNode
+	public class CopyNodeBytesTo
 	{
 		[Fact]
 		public void Should_get_added_node()
@@ -93,7 +93,9 @@ public class MemoryDataSourceTests
 			dataSource.AddNode(nodeData.CreateCopy());
 
 			// Act
-			var actual = dataSource.GetNode(hash, new ToArrayReader());
+			Span<byte> actualBuffer = stackalloc byte[4];
+			dataSource.CopyNodeBytesTo(hash, ref actualBuffer);
+			var actual = actualBuffer.ToArray();
 
 			// Assert
 			actual.Should().Equal(nodeData);
@@ -106,7 +108,7 @@ public class MemoryDataSourceTests
 			var nodeData1 = new byte[] { 0, 1, 2, 3 };
 			var nodeData2 = new byte[] { 4, 5, 6, 7 };
 			var nodeData3 = new byte[] { 8, 9, 10, 11 };
-			var hash = xxHash64.ComputeHash(nodeData2);
+			var node2Hash = xxHash64.ComputeHash(nodeData2);
 
 			// Arrange
 			var dataSource = new MemoryDataSource();
@@ -115,7 +117,9 @@ public class MemoryDataSourceTests
 			dataSource.AddNode(nodeData3.CreateCopy());
 
 			// Act
-			var actual = dataSource.GetNode(hash, new ToArrayReader());
+			Span<byte> actualBuffer = stackalloc byte[4];
+			dataSource.CopyNodeBytesTo(node2Hash, ref actualBuffer);
+			var actual = actualBuffer.ToArray();
 
 			// Assert
 			actual.Should().Equal(nodeData2);
@@ -128,7 +132,12 @@ public class MemoryDataSourceTests
 			var dataSource = new MemoryDataSource();
 
 			// Assert
-			dataSource.Invoking(ts => ts.GetNode<object?>(0, new ToArrayReader()))
+			dataSource.Invoking(ts =>
+					{
+						Span<byte> buffer = stackalloc byte[0];
+						ts.CopyNodeBytesTo(0, ref buffer);
+					}
+				)
 				.Should()
 				.Throw<HashNotFoundException>();
 		}
@@ -334,8 +343,11 @@ public class MemoryDataSourceTests
 			);
 
 			// Assert
-			var result1 = dataSource.GetNode(hash1, new ToArrayReader());
-			var result2 = dataSource.GetNode(hash2, new ToArrayReader());
+			Span<byte> actualBuffer = stackalloc byte[4];
+			dataSource.CopyNodeBytesTo(hash1, ref actualBuffer);
+			var result1 = actualBuffer.ToArray();
+			dataSource.CopyNodeBytesTo(hash2, ref actualBuffer);
+			var result2 = actualBuffer.ToArray();
 			result1.Should().Equal(nodeData[..4]);
 			result2.Should().Equal(nodeData[4..8]);
 		}

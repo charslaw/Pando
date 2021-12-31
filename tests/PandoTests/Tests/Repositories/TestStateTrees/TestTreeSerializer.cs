@@ -59,9 +59,9 @@ internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 		var myAHash = ByteEncoder.GetUInt64(bytes[NAME_HASH_END..MYA_HASH_END]);
 		var myBHash = ByteEncoder.GetUInt64(bytes[MYA_HASH_END..MYB_HASH_END]);
 
-		var name = dataSource.GetNode(nameHash, _nameSerializer);
-		var myA = dataSource.GetNode(myAHash, _aSerializer);
-		var myB = dataSource.GetNode(myBHash, _bSerializer);
+		var name = _nameSerializer.DeserializeFromHash(nameHash, dataSource);
+		var myA = _aSerializer.DeserializeFromHash(myAHash, dataSource);
+		var myB = _bSerializer.DeserializeFromHash(myBHash, dataSource);
 
 		return new TestTree(name, myA, myB);
 	}

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Immutable;
 using Pando.Exceptions;
-using Pando.Serialization;
 
 namespace Pando.DataSources;
 
@@ -21,25 +20,21 @@ public interface ISnapshotDataSink
 
 public interface INodeDataSource
 {
-	/// Returns whether a node identified by the given hash exists in the data source
+	/// Returns whether a node identified by the given hash exists in the data source.
 	bool HasNode(ulong hash);
-
-	/// Retrieves the data for the node identified by the given hash,
-	/// then delegates deserialization to the given <paramref name="nodeReader"/>, then returns the result.
-	/// <exception cref="HashNotFoundException">thrown if there is no node identified by the given hash.</exception>
-	/// <returns>The deserialized object, as returned by the <paramref name="nodeReader"/></returns>
-	T GetNode<T>(ulong hash, in INodeReader<T> nodeReader);
 
 	/// Gets the size in bytes of the node identified by the given hash.
 	int GetSizeOfNode(ulong hash);
+
+	void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes);
 }
 
 public interface ISnapshotDataSource
 {
-	/// The total number of snapshots in this data source
+	/// The total number of snapshots in this data source.
 	int SnapshotCount { get; }
 
-	/// Returns whether a snapshot identified by the given hash exists in the data source
+	/// Returns whether a snapshot identified by the given hash exists in the data source.
 	bool HasSnapshot(ulong hash);
 
 	/// Returns the hash of the parent of the snapshot identified by the given hash.

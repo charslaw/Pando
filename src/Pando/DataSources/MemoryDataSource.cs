@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.IO;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
-using Pando.Serialization;
 
 namespace Pando.DataSources;
 
@@ -125,13 +124,11 @@ public class MemoryDataSource : IDataSource
 		return dataLength;
 	}
 
-	public T GetNode<T>(ulong hash, in INodeReader<T> nodeReader)
+	public void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes)
 	{
 		CheckNodeHash(hash);
 		var (start, dataLength) = _nodeIndex[hash];
-		Span<byte> buffer = stackalloc byte[dataLength];
-		_nodeData.CopyTo(start, dataLength, buffer);
-		return nodeReader.Deserialize(buffer, this);
+		_nodeData.CopyTo(start, dataLength, ref outputBytes);
 	}
 
 #endregion

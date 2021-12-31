@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Immutable;
 using Pando.DataSources.Utils;
-using Pando.Serialization;
 
 namespace Pando.DataSources;
 
@@ -39,15 +38,13 @@ public class PersistenceBackedDataSource : IDataSource, IDisposable
 	}
 
 	public bool HasNode(ulong hash) => _mainDataSource.HasNode(hash);
+	public int GetSizeOfNode(ulong hash) => _mainDataSource.GetSizeOfNode(hash);
+	public void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes) => _mainDataSource.CopyNodeBytesTo(hash, ref outputBytes);
+
 	public bool HasSnapshot(ulong hash) => _mainDataSource.HasSnapshot(hash);
 	public int SnapshotCount => _mainDataSource.SnapshotCount;
-
-	public T GetNode<T>(ulong hash, in INodeReader<T> nodeReader) => _mainDataSource.GetNode(hash, in nodeReader);
-	public int GetSizeOfNode(ulong hash) => _mainDataSource.GetSizeOfNode(hash);
-
 	public ulong GetSnapshotParent(ulong hash) => _mainDataSource.GetSnapshotParent(hash);
 	public ulong GetSnapshotRootNode(ulong hash) => _mainDataSource.GetSnapshotRootNode(hash);
-
 	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _mainDataSource.GetLeafSnapshotHashes();
 
 	public void Dispose() => _persistentDataSource.Dispose();

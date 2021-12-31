@@ -63,8 +63,8 @@ internal class WhiteBlackPairBranchSerializer<TNode> : INodeSerializer<WhiteBlac
 		var whiteHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(0, sizeof(ulong)));
 		var blackHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong), sizeof(ulong)));
 
-		var whiteValue = dataSource.GetNode(whiteHash, _memberSerializer);
-		var blackValue = dataSource.GetNode(blackHash, _memberSerializer);
+		var whiteValue = _memberSerializer.DeserializeFromHash(whiteHash, dataSource);
+		var blackValue = _memberSerializer.DeserializeFromHash(blackHash, dataSource);
 
 		return new WhiteBlackPair<TNode>(whiteValue, blackValue);
 	}
