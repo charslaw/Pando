@@ -17,6 +17,8 @@ internal class ChessStateTreeSerializer : INodeSerializer<ChessGameState>
 	private readonly INodeSerializer<WhiteBlackPair<TimeSpan>> _remainingTimeSerializer;
 	private readonly INodeSerializer<WhiteBlackPair<ImmutableArray<ChessPiece>>> _playerPiecesSerializer;
 
+	public int? NodeSize { get; }
+
 	public ChessStateTreeSerializer(
 		INodeSerializer<ChessPlayerState> playerStateSerializer,
 		INodeSerializer<WhiteBlackPair<TimeSpan>> remainingTimeSerializer,
@@ -26,6 +28,7 @@ internal class ChessStateTreeSerializer : INodeSerializer<ChessGameState>
 		_playerStateSerializer = playerStateSerializer;
 		_remainingTimeSerializer = remainingTimeSerializer;
 		_playerPiecesSerializer = playerPiecesSerializer;
+		NodeSize = _playerStateSerializer.NodeSize + _remainingTimeSerializer.NodeSize + _playerPiecesSerializer.NodeSize;
 	}
 
 	/// <param name="obj">ChessGameState that we want to serialize to the data sink</param>

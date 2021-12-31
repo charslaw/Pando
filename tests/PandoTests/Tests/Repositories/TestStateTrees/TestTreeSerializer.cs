@@ -12,6 +12,8 @@ internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 	private readonly INodeSerializer<TestTree.A> _aSerializer;
 	private readonly INodeSerializer<TestTree.B> _bSerializer;
 
+	public int? NodeSize { get; }
+
 	public TestTreeSerializer(
 		INodeSerializer<string> nameSerializer,
 		INodeSerializer<TestTree.A> aSerializer,
@@ -21,6 +23,7 @@ internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 		_nameSerializer = nameSerializer;
 		_aSerializer = aSerializer;
 		_bSerializer = bSerializer;
+		NodeSize = _nameSerializer.NodeSize + _aSerializer.NodeSize + _bSerializer.NodeSize;
 	}
 
 	/// Creates a new TestTreeSerializerDeserializer with the default configuration injected.
@@ -66,6 +69,8 @@ internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 
 internal readonly struct StringSerializer : INodeSerializer<string>
 {
+	public int? NodeSize => null;
+
 	public ulong Serialize(string str, INodeDataSink dataSink)
 	{
 		var nameByteCount = Encoding.UTF8.GetByteCount(str);
@@ -83,6 +88,7 @@ internal readonly struct StringSerializer : INodeSerializer<string>
 internal readonly struct DoubleTreeASerializer : INodeSerializer<TestTree.A>
 {
 	private const int AGE_SIZE = sizeof(int);
+	public int? NodeSize => AGE_SIZE;
 
 	public ulong Serialize(TestTree.A obj, INodeDataSink dataSink)
 	{
@@ -103,6 +109,8 @@ internal readonly struct DoubleTreeBSerializer : INodeSerializer<TestTree.B>
 	private const int TIME_END = sizeof(long);
 	private const int CENTS_END = TIME_END + sizeof(int);
 	private const int SIZE = CENTS_END;
+
+	public int? NodeSize => SIZE;
 
 	public ulong Serialize(TestTree.B obj, INodeDataSink dataSink)
 	{

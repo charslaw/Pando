@@ -8,6 +8,8 @@ namespace PandoExampleProject.Serializers;
 
 public class ImmutableArraySerializer<TNode> : INodeSerializer<ImmutableArray<TNode>>
 {
+	public int? NodeSize => null;
+
 	private readonly INodeSerializer<TNode> _elementSerializer;
 
 	public ImmutableArraySerializer(INodeSerializer<TNode> elementSerializer)
