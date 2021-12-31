@@ -6,9 +6,12 @@ namespace PandoExampleProject.Serializers;
 
 internal class ChessPieceSerializer : INodeSerializer<ChessPiece>
 {
+	private const int SIZE = 5;
+	public int? NodeSize => SIZE;
+
 	public ulong Serialize(ChessPiece obj, INodeDataSink dataSink)
 	{
-		Span<byte> buffer = stackalloc byte[5];
+		Span<byte> buffer = stackalloc byte[SIZE];
 
 		buffer[0] = (byte)obj.Owner;
 		buffer[1] = (byte)obj.Type;

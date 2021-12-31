@@ -1,12 +1,8 @@
 using System;
-using System.Diagnostics.Contracts;
 
 namespace Pando.DataSources.Utils;
 
-/// A collection that you can add a span of data to, and visit a span of.
-/// <remarks><see cref="SpannableList{T}"/> is not thread safe.<br/>
-/// Do not attempt to concurrently add multiple spans to the list.<br/>
-/// Do not attempt to concurrently get from and add to the list.</remarks>
+/// A collection that you can add a span of items to, and copy data to a span.
 internal class SpannableList<T>
 {
 	private const int EXPANSION_FACTOR = 2;
@@ -25,45 +21,42 @@ internal class SpannableList<T>
 		initialValues.CopyTo(_array.AsSpan(0, initialDataLength));
 	}
 
-	/// Adds a given span to the spannable list.
-	/// <remarks>This method is not reentrant.
-	/// Don't call it concurrently with itself or <see cref="SpannableList{T}.VisitSpan{TResult}"/></remarks>
+	/// Adds a given span to the list.
 	public DataSlice AddSpan(ReadOnlySpan<T> sourceSpan)
 	{
-		var sourceLength = sourceSpan.Length;
+		lock (_array)
+		{
+			var sourceLength = sourceSpan.Length;
 
-		EnsureCapacity(sourceLength);
+			EnsureCapacity(sourceLength);
 
-		var start = _head;
-		var destSpan = _array.AsSpan(start, sourceLength);
-		sourceSpan.CopyTo(destSpan);
-		_head += sourceLength;
-
-		return new DataSlice(start, sourceLength);
+			var start = _head;
+			var destSpan = _array.AsSpan(start, sourceLength);
+			sourceSpan.CopyTo(destSpan);
+			_head += sourceLength;
+			return new DataSlice(start, sourceLength);
+		}
 	}
 
+	/// Makes sure that the list has the given amount of head space to add items into
 	private void EnsureCapacity(int length)
 	{
-		var currentHeadspace = _array.Length - _head;
-		if (currentHeadspace >= length) return;
+		lock (_array)
+		{
+			var currentHeadspace = _array.Length - _head;
+			if (currentHeadspace >= length) return;
 
-		var minimumNewSize = _head + length;
-		Array.Resize(ref _array, minimumNewSize * EXPANSION_FACTOR);
+			var minimumNewSize = _head + length;
+			Array.Resize(ref _array, minimumNewSize * EXPANSION_FACTOR);
+		}
 	}
 
-	/// Allows an external consumer to access a span of the list without leaking the span.
-	/// <remarks>Don't call this method concurrently with <see cref="SpannableList{T}.AddSpan"/></remarks>
-	public TResult VisitSpan<TResult>(int start, int length, ISpanVisitor<T, TResult> spanVisitor) => spanVisitor.Visit(_array.AsSpan(start, length));
-
-	/// <inheritdoc cref="VisitSpan{TResult}"/>
-	/// <summary><para>This generic version of the <c>VisitSpan</c> method exists to avoid boxing struct implementations of
-	/// <see cref="ISpanVisitor{T,TResult}"/></para></summary>
-	public TResult VisitSpan<TSpanVisitor, TResult>(int start, int length, in TSpanVisitor spanVisitor)
-		where TSpanVisitor : struct, ISpanVisitor<T, TResult> => spanVisitor.Visit(_array.AsSpan(start, length));
-}
-
-internal interface ISpanVisitor<T, out TResult>
-{
-	[Pure]
-	public TResult Visit(ReadOnlySpan<T> span);
+	/// Copy data from the list into a destination span.
+	public void CopyTo(int sourceStart, int sourceLength, ref Span<T> destination)
+	{
+		lock (_array)
+		{
+			_array.AsSpan(sourceStart, sourceLength).CopyTo(destination);
+		}
+	}
 }

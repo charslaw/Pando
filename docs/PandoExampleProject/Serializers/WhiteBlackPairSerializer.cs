@@ -10,9 +10,12 @@ namespace PandoExampleProject.Serializers;
 /// It is made more difficult for TimeSpan because you have to convert it to a primitive value first (via the Ticks property)
 internal class WhiteBlackPairTimespanSerializer : INodeSerializer<WhiteBlackPair<TimeSpan>>
 {
+	private const int SIZE = sizeof(long) * 2;
+	public int? NodeSize => SIZE;
+
 	public ulong Serialize(WhiteBlackPair<TimeSpan> obj, INodeDataSink dataSink)
 	{
-		Span<byte> buffer = stackalloc byte[sizeof(long) * 2];
+		Span<byte> buffer = stackalloc byte[SIZE];
 		BinaryPrimitives.WriteInt64LittleEndian(buffer.Slice(0, sizeof(long)), obj.WhiteValue.Ticks);
 		BinaryPrimitives.WriteInt64LittleEndian(buffer.Slice(sizeof(long), sizeof(long)), obj.BlackValue.Ticks);
 		return dataSink.AddNode(buffer);
@@ -34,9 +37,12 @@ internal class WhiteBlackPairBranchSerializer<TNode> : INodeSerializer<WhiteBlac
 {
 	private readonly INodeSerializer<TNode> _memberSerializer;
 
+	public int? NodeSize { get; }
+
 	public WhiteBlackPairBranchSerializer(INodeSerializer<TNode> memberSerializer)
 	{
 		_memberSerializer = memberSerializer;
+		NodeSize = _memberSerializer.NodeSize * 2;
 	}
 
 	public ulong Serialize(WhiteBlackPair<TNode> obj, INodeDataSink dataSink)
@@ -57,8 +63,8 @@ internal class WhiteBlackPairBranchSerializer<TNode> : INodeSerializer<WhiteBlac
 		var whiteHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(0, sizeof(ulong)));
 		var blackHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong), sizeof(ulong)));
 
-		var whiteValue = dataSource.GetNode(whiteHash, _memberSerializer);
-		var blackValue = dataSource.GetNode(blackHash, _memberSerializer);
+		var whiteValue = _memberSerializer.DeserializeFromHash(whiteHash, dataSource);
+		var blackValue = _memberSerializer.DeserializeFromHash(blackHash, dataSource);
 
 		return new WhiteBlackPair<TNode>(whiteValue, blackValue);
 	}

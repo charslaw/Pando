@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.IO;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
-using Pando.Serialization;
 
 namespace Pando.DataSources;
 
@@ -58,6 +57,9 @@ public class MemoryDataSource : IDataSource
 		_nodeData = StreamUtils.NodeData.PopulateNodeData(nodeDataSource, nodeData);
 	}
 
+
+#region INodeDataSink Implementation
+
 	/// <remarks>This implementation is guaranteed not to insert duplicate nodes.</remarks>
 	/// <inheritdoc/>
 	public ulong AddNode(ReadOnlySpan<byte> bytes)
@@ -83,6 +85,10 @@ public class MemoryDataSource : IDataSource
 		_nodeIndex.Add(hash, dataSlice);
 	}
 
+#endregion
+
+#region ISnapshotDataSink Implementation
+
 	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
 	{
 		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
@@ -96,11 +102,7 @@ public class MemoryDataSource : IDataSource
 	/// When calling this method, ensure the correct hash is given.</remarks>
 	internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
 	{
-		AddSnapshotWithHashUnsafe(hash, new SnapshotData(parentHash, rootNodeHash));
-	}
-
-	private void AddSnapshotWithHashUnsafe(ulong hash, SnapshotData snapshotData)
-	{
+		SnapshotData snapshotData = new SnapshotData(parentHash, rootNodeHash);
 		_snapshotIndex.Add(hash, snapshotData);
 
 		// Parent is by definition no longer a leaf node
@@ -109,19 +111,11 @@ public class MemoryDataSource : IDataSource
 		_leafSnapshots.Add(hash);
 	}
 
+#endregion
+
+#region INodeDataSource Implementation
+
 	public bool HasNode(ulong hash) => _nodeIndex.ContainsKey(hash);
-
-	public bool HasSnapshot(ulong hash) => _snapshotIndex.ContainsKey(hash);
-
-	public int SnapshotCount => _snapshotIndex.Count;
-
-	public T GetNode<T>(ulong hash, in INodeReader<T> nodeReader)
-	{
-		CheckNodeHash(hash);
-		var (start, dataLength) = _nodeIndex[hash];
-		var visitor = new RepositorySpanVisitor<T>(nodeReader, this);
-		return _nodeData.VisitSpan<RepositorySpanVisitor<T>, T>(start, dataLength, in visitor);
-	}
 
 	public int GetSizeOfNode(ulong hash)
 	{
@@ -129,6 +123,21 @@ public class MemoryDataSource : IDataSource
 		var (_, dataLength) = _nodeIndex[hash];
 		return dataLength;
 	}
+
+	public void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes)
+	{
+		CheckNodeHash(hash);
+		var (start, dataLength) = _nodeIndex[hash];
+		_nodeData.CopyTo(start, dataLength, ref outputBytes);
+	}
+
+#endregion
+
+#region ISnapshotDataSource Implementation
+
+	public int SnapshotCount => _snapshotIndex.Count;
+
+	public bool HasSnapshot(ulong hash) => _snapshotIndex.ContainsKey(hash);
 
 	public ulong GetSnapshotParent(ulong hash)
 	{
@@ -144,6 +153,8 @@ public class MemoryDataSource : IDataSource
 
 	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _leafSnapshots.ToImmutableHashSet();
 
+#endregion
+
 	private void CheckNodeHash(ulong hash)
 	{
 		if (!HasNode(hash))
@@ -158,19 +169,5 @@ public class MemoryDataSource : IDataSource
 		{
 			throw new HashNotFoundException($"The data source does not contain a snapshot with the requested hash {hash}");
 		}
-	}
-
-	private readonly struct RepositorySpanVisitor<T> : ISpanVisitor<byte, T>
-	{
-		private readonly INodeReader<T> _reader;
-		private readonly IDataSource _repository;
-
-		public RepositorySpanVisitor(INodeReader<T> reader, IDataSource repository)
-		{
-			_reader = reader;
-			_repository = repository;
-		}
-
-		public T Visit(ReadOnlySpan<byte> span) => _reader.Deserialize(span, _repository);
 	}
 }

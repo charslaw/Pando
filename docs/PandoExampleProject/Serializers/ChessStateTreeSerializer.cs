@@ -17,6 +17,8 @@ internal class ChessStateTreeSerializer : INodeSerializer<ChessGameState>
 	private readonly INodeSerializer<WhiteBlackPair<TimeSpan>> _remainingTimeSerializer;
 	private readonly INodeSerializer<WhiteBlackPair<ImmutableArray<ChessPiece>>> _playerPiecesSerializer;
 
+	public int? NodeSize { get; }
+
 	public ChessStateTreeSerializer(
 		INodeSerializer<ChessPlayerState> playerStateSerializer,
 		INodeSerializer<WhiteBlackPair<TimeSpan>> remainingTimeSerializer,
@@ -26,6 +28,7 @@ internal class ChessStateTreeSerializer : INodeSerializer<ChessGameState>
 		_playerStateSerializer = playerStateSerializer;
 		_remainingTimeSerializer = remainingTimeSerializer;
 		_playerPiecesSerializer = playerPiecesSerializer;
+		NodeSize = _playerStateSerializer.NodeSize + _remainingTimeSerializer.NodeSize + _playerPiecesSerializer.NodeSize;
 	}
 
 	/// <param name="obj">ChessGameState that we want to serialize to the data sink</param>
@@ -59,9 +62,9 @@ internal class ChessStateTreeSerializer : INodeSerializer<ChessGameState>
 		ulong playerPiecesHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong) * 2, sizeof(ulong)));
 
 		// Get child nodes from data source
-		var playerState = dataSource.GetNode(playerStateHash, _playerStateSerializer);
-		var remainingTime = dataSource.GetNode(remainingTimeHash, _remainingTimeSerializer);
-		var playerPieces = dataSource.GetNode(playerPiecesHash, _playerPiecesSerializer);
+		var playerState = _playerStateSerializer.DeserializeFromHash(playerStateHash, dataSource);
+		var remainingTime = _remainingTimeSerializer.DeserializeFromHash(remainingTimeHash, dataSource);
+		var playerPieces = _playerPiecesSerializer.DeserializeFromHash(playerPiecesHash, dataSource);
 
 		// Create the final state object
 		return new ChessGameState(playerState, remainingTime, playerPieces);
