@@ -154,6 +154,24 @@ public class PandoRepositoryTests
 			// Assert
 			snapshotHash1.Should().NotBe(snapshotHash2);
 		}
+
+		[Fact]
+		public void Should_throw_if_given_parent_snapshot_hash_doesnt_exist()
+		{
+			var tree1 = MakeTestTree1();
+
+			var source = new MemoryDataSource();
+			var repository = new PandoRepository<TestTree>(
+				source,
+				TestTreeSerializer.Create()
+			);
+
+			repository.Invoking(repo => repo.SaveSnapshot(tree1, 0UL))
+				.Should()
+				.Throw<HashNotFoundException>();
+
+			source.SnapshotCount.Should().Be(0, "because it should check the validity prior to making any changes to the data source");
+		}
 	}
 
 	public class GetSnapshotTree
@@ -271,7 +289,7 @@ public class PandoRepositoryTests
 				TestTreeSerializer.Create()
 			);
 
-			repository.Invoking(s => s.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
+			repository.Invoking(repo => repo.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
 		}
 
 		/// Simulate adding snapshots to the data source in a previous session, then reconstitute a new data source from the persisted data
