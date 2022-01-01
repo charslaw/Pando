@@ -22,7 +22,7 @@ public record Company(      // Company is a branch
 
 ### `CompanyName` and `EmployeeNames[i]`
 
-Strings can be complicated since in a UTF8 string a character can be 2-4 bytes. For this memory layout example we'll
+Strings can be complicated since in a UTF8 string a character can be 1-4 bytes. For this memory layout example we'll
 assume all of the characters are 2 bytes, however in a real-world scenario any UTF8 string should work.
 
 You could also write a custom serializer for a ASCII only string, etc.
