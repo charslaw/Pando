@@ -2,133 +2,72 @@ using System;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
-public class EnumSerializer<TEnum> : IPrimitiveSerializer<TEnum>
+public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TEnum>
 	where TEnum : unmanaged, Enum
+	where TUnderlying : unmanaged
 {
-	private readonly Type _underlyingType;
+	private readonly IPrimitiveSerializer<TUnderlying> _underlyingSerializer;
 
-	public EnumSerializer()
+	internal EnumSerializer(IPrimitiveSerializer<TUnderlying> underlyingSerializer)
+	{
+		// We somewhat dangerously assume that it is safe to convert TEnum to whatever TUnderlying is.
+		// This is relatively safe because the only way to construct an EnumSerializer is via the provided factory methods,
+		// which create serializers based on the underlying type of the given enum.
+		_underlyingSerializer = underlyingSerializer;
+	}
+
+	public unsafe void Serialize(TEnum value, ref Span<byte> buffer)
+	{
+		var underlying = *(TUnderlying*)(&value);
+		_underlyingSerializer.Serialize(underlying, ref buffer);
+	}
+
+	public unsafe TEnum Deserialize(ReadOnlySpan<byte> buffer)
+	{
+		var underlyingValue = _underlyingSerializer.Deserialize(buffer);
+		return *(TEnum*)(&underlyingValue);
+	}
+}
+
+public static class EnumSerializer
+{
+	public static IPrimitiveSerializer<TEnum> SerializerFor<TEnum>()
+		where TEnum : unmanaged, Enum
 	{
 		var enumType = typeof(TEnum);
-		_underlyingType = enumType.GetEnumUnderlyingType();
+		var underlyingType = enumType.GetEnumUnderlyingType();
 
-		if (_underlyingType == typeof(nint) || _underlyingType == typeof(nuint))
-		{
-			throw new ArgumentException($"{_underlyingType.FullName} is not a valid underlying type for EnumSerializer");
-		}
+		if (underlyingType == typeof(sbyte)) return new EnumSerializer<TEnum, sbyte>(SByteSerializer.Default);
+		if (underlyingType == typeof(byte)) return new EnumSerializer<TEnum, byte>(ByteSerializer.Default);
+		if (underlyingType == typeof(short)) return new EnumSerializer<TEnum, short>(Int16LittleEndianSerializer.Default);
+		if (underlyingType == typeof(ushort)) return new EnumSerializer<TEnum, ushort>(UInt16LittleEndianSerializer.Default);
+		if (underlyingType == typeof(int)) return new EnumSerializer<TEnum, int>(Int32LittleEndianSerializer.Default);
+		if (underlyingType == typeof(uint)) return new EnumSerializer<TEnum, uint>(UInt32LittleEndianSerializer.Default);
+		if (underlyingType == typeof(long)) return new EnumSerializer<TEnum, long>(Int64LittleEndianSerializer.Default);
+		if (underlyingType == typeof(ulong)) return new EnumSerializer<TEnum, ulong>(UInt64LittleEndianSerializer.Default);
+
+		throw new NotSupportedException(
+			$"Can't get a serializer for {enumType.FullName}: underlying type {underlyingType.FullName} is not supported."
+		);
 	}
 
-	public void Serialize(TEnum value, ref Span<byte> buffer)
+	public static IPrimitiveSerializer<TEnum> SerializerFor<TEnum, TUnderlying>(IPrimitiveSerializer<TUnderlying> underlyingSerializer)
+		where TEnum : unmanaged, Enum
+		where TUnderlying : unmanaged
 	{
-		unsafe
+		var enumType = typeof(TEnum);
+		var actualUnderlyingType = enumType.GetEnumUnderlyingType();
+		var givenUnderlyingType = typeof(TUnderlying);
+
+		if (actualUnderlyingType != givenUnderlyingType)
 		{
-			if (_underlyingType == typeof(sbyte))
-			{
-				SByteSerializer.Default.Serialize(*(sbyte*)(&value), ref buffer);
-				return;
-			}
-
-			if (_underlyingType == typeof(byte))
-			{
-				ByteSerializer.Default.Serialize(*(byte*)(&value), ref buffer);
-				return;
-			}
-
-			if (_underlyingType == typeof(short))
-			{
-				Int16LittleEndianSerializer.Default.Serialize(*(short*)(&value), ref buffer);
-				return;
-			}
-
-			if (_underlyingType == typeof(ushort))
-			{
-				UInt16LittleEndianSerializer.Default.Serialize(*(ushort*)(&value), ref buffer);
-				return;
-			}
-
-			if (_underlyingType == typeof(int))
-			{
-				Int32LittleEndianSerializer.Default.Serialize(*(int*)(&value), ref buffer);
-				return;
-			}
-
-			if (_underlyingType == typeof(uint))
-			{
-				UInt32LittleEndianSerializer.Default.Serialize(*(uint*)(&value), ref buffer);
-				return;
-			}
-
-			if (_underlyingType == typeof(long))
-			{
-				Int64LittleEndianSerializer.Default.Serialize(*(long*)(&value), ref buffer);
-				return;
-			}
-
-			if (_underlyingType == typeof(ulong))
-			{
-				UInt64LittleEndianSerializer.Default.Serialize(*(ulong*)(&value), ref buffer);
-				return;
-			}
+			throw new NotSupportedException(
+				"The given underlying serializer does not match the underlying type of the given enum type." +
+				$" Given enum has underlying type {actualUnderlyingType.FullName}" +
+				$" while the given serializer serializes type {givenUnderlyingType.FullName}."
+			);
 		}
 
-		// This shouldn't happen because we account for all possible underlying types (except nint and nuint, which are caught in the constructor)
-		throw new Exception($"Can't serialize enum with underlying type {_underlyingType.FullName}");
-	}
-
-	public TEnum Deserialize(ReadOnlySpan<byte> buffer)
-	{
-		unsafe
-		{
-			if (_underlyingType == typeof(sbyte))
-			{
-				var underlyingValue = SByteSerializer.Default.Deserialize(buffer);
-				return *(TEnum*)(&underlyingValue);
-			}
-
-			if (_underlyingType == typeof(byte))
-			{
-				var underlyingValue = ByteSerializer.Default.Deserialize(buffer);
-				return *(TEnum*)(&underlyingValue);
-			}
-
-			if (_underlyingType == typeof(short))
-			{
-				var underlyingValue = Int16LittleEndianSerializer.Default.Deserialize(buffer);
-				return *(TEnum*)(&underlyingValue);
-			}
-
-			if (_underlyingType == typeof(ushort))
-			{
-				var underlyingValue = UInt16LittleEndianSerializer.Default.Deserialize(buffer);
-				return *(TEnum*)(&underlyingValue);
-			}
-
-			if (_underlyingType == typeof(int))
-			{
-				var underlyingValue = Int32LittleEndianSerializer.Default.Deserialize(buffer);
-				return *(TEnum*)(&underlyingValue);
-			}
-
-			if (_underlyingType == typeof(uint))
-			{
-				var underlyingValue = UInt32LittleEndianSerializer.Default.Deserialize(buffer);
-				return *(TEnum*)(&underlyingValue);
-			}
-
-			if (_underlyingType == typeof(long))
-			{
-				var underlyingValue = Int64LittleEndianSerializer.Default.Deserialize(buffer);
-				return *(TEnum*)(&underlyingValue);
-			}
-
-			if (_underlyingType == typeof(ulong))
-			{
-				var underlyingValue = UInt64LittleEndianSerializer.Default.Deserialize(buffer);
-				return *(TEnum*)(&underlyingValue);
-			}
-		}
-
-		// This shouldn't happen because we account for all possible underlying types (except nint and nuint, which are caught in the constructor)
-		throw new Exception($"Can't deserialize enum with underlying type {_underlyingType.FullName}");
+		return new EnumSerializer<TEnum, TUnderlying>(underlyingSerializer);
 	}
 }

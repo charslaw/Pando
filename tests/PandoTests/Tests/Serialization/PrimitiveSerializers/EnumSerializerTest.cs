@@ -51,7 +51,7 @@ public abstract class BaseTestData<T> : IEnumerable<object[]>
 public abstract class BaseEnumTestData<T> : BaseTestData<T>
 	where T : unmanaged, Enum
 {
-	protected override IPrimitiveSerializer<T> ProduceSerializer() => new EnumSerializer<T>();
+	protected override IPrimitiveSerializer<T> ProduceSerializer() => EnumSerializer.SerializerFor<T>();
 }
 
 public class SByteEnumSerializerTestData : BaseEnumTestData<SByteEnum>
