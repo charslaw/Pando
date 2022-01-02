@@ -25,34 +25,49 @@ public class EnumSerializer<TEnum> : IPrimitiveSerializer<TEnum>
 			if (_underlyingType == typeof(sbyte))
 			{
 				SByteSerializer.Default.Serialize(*(sbyte*)(&value), ref buffer);
+				return;
 			}
-			else if (_underlyingType == typeof(byte))
+
+			if (_underlyingType == typeof(byte))
 			{
 				ByteSerializer.Default.Serialize(*(byte*)(&value), ref buffer);
+				return;
 			}
-			else if (_underlyingType == typeof(short))
+
+			if (_underlyingType == typeof(short))
 			{
 				Int16LittleEndianSerializer.Default.Serialize(*(short*)(&value), ref buffer);
+				return;
 			}
-			else if (_underlyingType == typeof(ushort))
+
+			if (_underlyingType == typeof(ushort))
 			{
 				UInt16LittleEndianSerializer.Default.Serialize(*(ushort*)(&value), ref buffer);
+				return;
 			}
-			else if (_underlyingType == typeof(int))
+
+			if (_underlyingType == typeof(int))
 			{
 				Int32LittleEndianSerializer.Default.Serialize(*(int*)(&value), ref buffer);
+				return;
 			}
-			else if (_underlyingType == typeof(uint))
+
+			if (_underlyingType == typeof(uint))
 			{
 				UInt32LittleEndianSerializer.Default.Serialize(*(uint*)(&value), ref buffer);
+				return;
 			}
-			else if (_underlyingType == typeof(long))
+
+			if (_underlyingType == typeof(long))
 			{
 				Int64LittleEndianSerializer.Default.Serialize(*(long*)(&value), ref buffer);
+				return;
 			}
-			else if (_underlyingType == typeof(ulong))
+
+			if (_underlyingType == typeof(ulong))
 			{
 				UInt64LittleEndianSerializer.Default.Serialize(*(ulong*)(&value), ref buffer);
+				return;
 			}
 		}
 
