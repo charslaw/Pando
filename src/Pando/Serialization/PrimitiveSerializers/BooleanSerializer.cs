@@ -7,6 +7,17 @@ public class BooleanSerializer : IPrimitiveSerializer<bool>
 {
 	public static BooleanSerializer Default { get; } = new();
 
+	private const int SIZE = 1;
+
+	public int? ByteCount
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		get => SIZE;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public int ByteCountForValue(bool value) => SIZE;
+
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void Serialize(bool value, ref Span<byte> buffer)
 	{

@@ -8,6 +8,17 @@ public class Int32LittleEndianSerializer : IPrimitiveSerializer<int>
 {
 	public static Int32LittleEndianSerializer Default { get; } = new();
 
+	private const int SIZE = sizeof(int);
+
+	public int? ByteCount
+	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		get => SIZE;
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public int ByteCountForValue(int value) => SIZE;
+
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public void Serialize(int value, ref Span<byte> buffer) => BinaryPrimitives.WriteInt32LittleEndian(buffer, value);
 

@@ -14,7 +14,11 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TE
 		// This is relatively safe because the only way to construct an EnumSerializer is via the provided factory methods,
 		// which create serializers based on the underlying type of the given enum.
 		_underlyingSerializer = underlyingSerializer;
+		ByteCount = _underlyingSerializer.ByteCount;
 	}
+
+	public int? ByteCount { get; }
+	public unsafe int ByteCountForValue(TEnum value) => ByteCount ?? _underlyingSerializer.ByteCountForValue(*(TUnderlying*)(&value));
 
 	public unsafe void Serialize(TEnum value, ref Span<byte> buffer)
 	{
