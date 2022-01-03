@@ -85,7 +85,7 @@ public class PandoRepositoryTests
 			// Assert
 			actual.Should()
 				.NotBeSameAs(tree)
-				.And.BeEquivalentTo(tree);
+				.And.BeEquivalentTo(tree, options => options.ComparingByMembers<TestTree>());
 		}
 
 		[Fact]
