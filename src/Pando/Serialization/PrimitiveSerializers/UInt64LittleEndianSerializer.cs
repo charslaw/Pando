@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Runtime.CompilerServices;
+using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
@@ -20,8 +21,16 @@ public class UInt64LittleEndianSerializer : IPrimitiveSerializer<ulong>
 	public int ByteCountForValue(ulong value) => SIZE;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(ulong value, Span<byte> buffer) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, value);
+	public void Serialize(ulong value, ref Span<byte> buffer)
+	{
+		var slice = SpanHelpers.PopStart(ref buffer, SIZE);
+		BinaryPrimitives.WriteUInt64LittleEndian(slice, value);
+	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public ulong Deserialize(ReadOnlySpan<byte> buffer) => BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+	public ulong Deserialize(ref ReadOnlySpan<byte> buffer)
+	{
+		var slice = SpanHelpers.PopStart(ref buffer, SIZE);
+		return BinaryPrimitives.ReadUInt64LittleEndian(slice);
+	}
 }

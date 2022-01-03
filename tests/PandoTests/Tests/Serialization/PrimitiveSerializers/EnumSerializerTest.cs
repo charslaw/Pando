@@ -26,14 +26,16 @@ public class EnumSerializerTest
 		var (value, bytes) = testData;
 
 		// Serialize
-		Span<byte> buffer = stackalloc byte[bytes.Length];
-		serializer.Serialize(value, buffer);
-		var serializationResult = buffer.ToArray();
+		Span<byte> nodeBytes = stackalloc byte[bytes.Length];
+		var writeBuffer = nodeBytes;
+		serializer.Serialize(value, ref writeBuffer);
+		var serializationResult = nodeBytes.ToArray();
 
 		serializationResult.Should().BeEquivalentTo(bytes);
 
 		// Deserialize
-		var deserializationResult = serializer.Deserialize(bytes);
+		var bytesSpan = new ReadOnlySpan<byte>(bytes);
+		var deserializationResult = serializer.Deserialize(ref bytesSpan);
 
 		deserializationResult.Should().BeEquivalentTo(value);
 	}

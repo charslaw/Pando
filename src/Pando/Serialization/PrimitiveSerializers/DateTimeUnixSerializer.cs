@@ -27,8 +27,8 @@ public class DateTimeUnixSerializer : IPrimitiveSerializer<DateTime>
 	public int ByteCountForValue(DateTime value) => ByteCount ?? _innerSerializer.ByteCountForValue(value.ToBinary());
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(DateTime value, Span<byte> buffer) => _innerSerializer.Serialize(value.ToBinary(), buffer);
+	public void Serialize(DateTime value, ref Span<byte> buffer) => _innerSerializer.Serialize(value.ToBinary(), ref buffer);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public DateTime Deserialize(ReadOnlySpan<byte> buffer) => DateTime.FromBinary(_innerSerializer.Deserialize(buffer));
+	public DateTime Deserialize(ref ReadOnlySpan<byte> buffer) => DateTime.FromBinary(_innerSerializer.Deserialize(ref buffer));
 }

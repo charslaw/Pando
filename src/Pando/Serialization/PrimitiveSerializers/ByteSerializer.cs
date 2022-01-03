@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
+using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
@@ -19,8 +20,16 @@ public class ByteSerializer : IPrimitiveSerializer<byte>
 	public int ByteCountForValue(byte value) => SIZE;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(byte value, Span<byte> buffer) { buffer[0] = value; }
+	public void Serialize(byte value, ref Span<byte> buffer)
+	{
+		var slice = SpanHelpers.PopStart(ref buffer, SIZE);
+		slice[0] = value;
+	}
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public byte Deserialize(ReadOnlySpan<byte> buffer) => buffer[0];
+	public byte Deserialize(ref ReadOnlySpan<byte> buffer)
+	{
+		var slice = SpanHelpers.PopStart(ref buffer, SIZE);
+		return slice[0];
+	}
 }

@@ -27,8 +27,8 @@ public class DateOnlyDayNumberSerializer : IPrimitiveSerializer<DateOnly>
 	public int ByteCountForValue(DateOnly value) => ByteCount ?? _innerSerializer.ByteCountForValue(value.DayNumber);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(DateOnly value, Span<byte> buffer) => _innerSerializer.Serialize(value.DayNumber, buffer);
+	public void Serialize(DateOnly value, ref Span<byte> buffer) => _innerSerializer.Serialize(value.DayNumber, ref buffer);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public DateOnly Deserialize(ReadOnlySpan<byte> buffer) => DateOnly.FromDayNumber(_innerSerializer.Deserialize(buffer));
+	public DateOnly Deserialize(ref ReadOnlySpan<byte> buffer) => DateOnly.FromDayNumber(_innerSerializer.Deserialize(ref buffer));
 }

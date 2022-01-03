@@ -20,16 +20,16 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TE
 	public int? ByteCount { get; }
 	public unsafe int ByteCountForValue(TEnum value) => ByteCount ?? _underlyingSerializer.ByteCountForValue(*(TUnderlying*)(&value));
 
-	public unsafe void Serialize(TEnum value, Span<byte> buffer)
+	public unsafe void Serialize(TEnum value, ref Span<byte> buffer)
 	{
 		var underlying = *(TUnderlying*)(&value);
-		_underlyingSerializer.Serialize(underlying, buffer);
+		_underlyingSerializer.Serialize(underlying, ref buffer);
 	}
 
-	public unsafe TEnum Deserialize(ReadOnlySpan<byte> buffer)
+	public unsafe TEnum Deserialize(ref ReadOnlySpan<byte> buffer)
 	{
-		var underlyingValue = _underlyingSerializer.Deserialize(buffer);
-		return *(TEnum*)(&underlyingValue);
+		var underlying = _underlyingSerializer.Deserialize(ref buffer);
+		return *(TEnum*)(&underlying);
 	}
 }
 
@@ -65,10 +65,11 @@ public static class EnumSerializer
 
 		if (actualUnderlyingType != givenUnderlyingType)
 		{
-			throw new NotSupportedException(
+			throw new ArgumentException(
 				"The given underlying serializer does not match the underlying type of the given enum type." +
 				$" Given enum has underlying type {actualUnderlyingType.FullName}" +
-				$" while the given serializer serializes type {givenUnderlyingType.FullName}."
+				$" while the given serializer serializes type {givenUnderlyingType.FullName}.",
+				nameof(underlyingSerializer)
 			);
 		}
 

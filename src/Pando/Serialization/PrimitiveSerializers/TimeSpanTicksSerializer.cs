@@ -27,8 +27,8 @@ public class TimeSpanTicksSerializer : IPrimitiveSerializer<TimeSpan>
 	public int ByteCountForValue(TimeSpan value) => ByteCount ?? _innerSerializer.ByteCountForValue(value.Ticks);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(TimeSpan value, Span<byte> buffer) => _innerSerializer.Serialize(value.Ticks, buffer);
+	public void Serialize(TimeSpan value, ref Span<byte> buffer) => _innerSerializer.Serialize(value.Ticks, ref buffer);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public TimeSpan Deserialize(ReadOnlySpan<byte> buffer) => TimeSpan.FromTicks(_innerSerializer.Deserialize(buffer));
+	public TimeSpan Deserialize(ref ReadOnlySpan<byte> buffer) => TimeSpan.FromTicks(_innerSerializer.Deserialize(ref buffer));
 }

@@ -13,9 +13,9 @@ public interface IPrimitiveSerializer<T>
 	/// This should always be possible to calculate for a given input, so it is not nullable like <see cref="ByteCount"/>.
 	public int ByteCountForValue(T value);
 
-	/// Serializes the given value into the given byte buffer
-	public void Serialize(T value, Span<byte> buffer);
+	/// Serializes the given value into the start of the given buffer, then slices the buffer to the remaining space after the write
+	public void Serialize(T value, ref Span<byte> buffer);
 
-	/// Deserializes a value from the given byte buffer
-	public T Deserialize(ReadOnlySpan<byte> buffer);
+	/// Deserializes a value from the given byte buffer, then slices the buffer to the remaining unread space
+	public T Deserialize(ref ReadOnlySpan<byte> buffer);
 }

@@ -27,8 +27,8 @@ public class TimeOnlyTicksSerializer : IPrimitiveSerializer<TimeOnly>
 	public int ByteCountForValue(TimeOnly value) => ByteCount ?? _innerSerializer.ByteCountForValue(value.Ticks);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(TimeOnly value, Span<byte> buffer) => _innerSerializer.Serialize(value.Ticks, buffer);
+	public void Serialize(TimeOnly value, ref Span<byte> buffer) => _innerSerializer.Serialize(value.Ticks, ref buffer);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public TimeOnly Deserialize(ReadOnlySpan<byte> buffer) => new(_innerSerializer.Deserialize(buffer));
+	public TimeOnly Deserialize(ref ReadOnlySpan<byte> buffer) => new(_innerSerializer.Deserialize(ref buffer));
 }
