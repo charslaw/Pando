@@ -20,10 +20,10 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TE
 	public int? ByteCount { get; }
 	public unsafe int ByteCountForValue(TEnum value) => ByteCount ?? _underlyingSerializer.ByteCountForValue(*(TUnderlying*)(&value));
 
-	public unsafe void Serialize(TEnum value, ref Span<byte> buffer)
+	public unsafe void Serialize(TEnum value, Span<byte> buffer)
 	{
 		var underlying = *(TUnderlying*)(&value);
-		_underlyingSerializer.Serialize(underlying, ref buffer);
+		_underlyingSerializer.Serialize(underlying, buffer);
 	}
 
 	public unsafe TEnum Deserialize(ReadOnlySpan<byte> buffer)

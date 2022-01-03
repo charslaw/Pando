@@ -19,7 +19,7 @@ public class BooleanSerializer : IPrimitiveSerializer<bool>
 	public int ByteCountForValue(bool value) => SIZE;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(bool value, ref Span<byte> buffer)
+	public void Serialize(bool value, Span<byte> buffer)
 	{
 		buffer[0] = (byte)(value ? 1 : 0);
 	}

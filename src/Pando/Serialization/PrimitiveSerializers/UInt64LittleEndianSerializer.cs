@@ -20,7 +20,7 @@ public class UInt64LittleEndianSerializer : IPrimitiveSerializer<ulong>
 	public int ByteCountForValue(ulong value) => SIZE;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(ulong value, ref Span<byte> buffer) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, value);
+	public void Serialize(ulong value, Span<byte> buffer) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, value);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public ulong Deserialize(ReadOnlySpan<byte> buffer) => BinaryPrimitives.ReadUInt64LittleEndian(buffer);

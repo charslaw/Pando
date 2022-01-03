@@ -20,7 +20,7 @@ public class Int16LittleEndianSerializer : IPrimitiveSerializer<short>
 	public int ByteCountForValue(short value) => SIZE;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(short value, ref Span<byte> buffer) => BinaryPrimitives.WriteInt16LittleEndian(buffer, value);
+	public void Serialize(short value, Span<byte> buffer) => BinaryPrimitives.WriteInt16LittleEndian(buffer, value);
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public short Deserialize(ReadOnlySpan<byte> buffer) => BinaryPrimitives.ReadInt16LittleEndian(buffer);

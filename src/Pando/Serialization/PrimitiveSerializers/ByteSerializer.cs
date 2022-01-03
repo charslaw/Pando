@@ -19,7 +19,7 @@ public class ByteSerializer : IPrimitiveSerializer<byte>
 	public int ByteCountForValue(byte value) => SIZE;
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Serialize(byte value, ref Span<byte> buffer) { buffer[0] = value; }
+	public void Serialize(byte value, Span<byte> buffer) { buffer[0] = value; }
 
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public byte Deserialize(ReadOnlySpan<byte> buffer) => buffer[0];

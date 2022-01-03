@@ -27,7 +27,7 @@ public class EnumSerializerTest
 
 		// Serialize
 		Span<byte> buffer = stackalloc byte[bytes.Length];
-		serializer.Serialize(value, ref buffer);
+		serializer.Serialize(value, buffer);
 		var serializationResult = buffer.ToArray();
 
 		serializationResult.Should().BeEquivalentTo(bytes);
