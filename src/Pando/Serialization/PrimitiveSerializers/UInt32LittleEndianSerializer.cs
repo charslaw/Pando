@@ -5,8 +5,10 @@ using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
+/// Serializes/deserializes <c>uint</c> values in little endian encoding (least significant byte first)
 public class UInt32LittleEndianSerializer : IPrimitiveSerializer<uint>
 {
+	/// <summary>A global default instance for <see cref="UInt32LittleEndianSerializer"/></summary>
 	public static UInt32LittleEndianSerializer Default { get; } = new();
 
 	private const int SIZE = sizeof(uint);

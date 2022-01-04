@@ -5,8 +5,10 @@ using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
+/// Serializes/deserializes <c>short</c> values in little endian encoding (least significant byte first)
 public class Int16LittleEndianSerializer : IPrimitiveSerializer<short>
 {
+	/// <summary>A global default instance for <see cref="Int16LittleEndianSerializer"/></summary>
 	public static Int16LittleEndianSerializer Default { get; } = new();
 
 	private const int SIZE = sizeof(short);

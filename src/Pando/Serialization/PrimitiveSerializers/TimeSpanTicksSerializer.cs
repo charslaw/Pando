@@ -3,14 +3,23 @@ using System.Runtime.CompilerServices;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
+/// <summary>
+/// Serializes/deserializes a <see cref="TimeSpan"/> via an <c>long</c> serializer
+/// to serialize the <c>TimeSpan</c>'s <see cref="TimeSpan.Ticks"/>.
+/// </summary>
 public class TimeSpanTicksSerializer : IPrimitiveSerializer<TimeSpan>
 {
+	/// <summary>A global default instance for <see cref="TimeSpanTicksSerializer"/></summary>
 	public static TimeSpanTicksSerializer Default { get; } = new();
 
 	private readonly IPrimitiveSerializer<long> _innerSerializer;
 
+	/// <summary>Create a <see cref="TimeSpanTicksSerializer"/> with the default
+	/// <see cref="Int64LittleEndianSerializer"/> to serialize the Ticks.</summary>
 	public TimeSpanTicksSerializer() : this(Int64LittleEndianSerializer.Default) { }
 
+	/// <summary>Create a <see cref="TimeSpanTicksSerializer"/>
+	/// with the given long serializer to serialize the Ticks.</summary>
 	public TimeSpanTicksSerializer(IPrimitiveSerializer<long> longSerializer)
 	{
 		_innerSerializer = longSerializer;
