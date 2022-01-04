@@ -4,8 +4,10 @@ using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
+/// Serializes/deserializes single <c>byte</c> values
 public class ByteSerializer : IPrimitiveSerializer<byte>
 {
+	/// <summary>A global default instance for <see cref="ByteSerializer"/></summary>
 	public static ByteSerializer Default { get; } = new();
 
 	private const int SIZE = sizeof(byte);

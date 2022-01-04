@@ -3,6 +3,15 @@ using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
+/// <summary>
+/// Serializes/deserializes <see cref="Nullable{T}"/> values via a provided inner serializer.
+/// </summary>
+/// <remarks>
+/// This serializer produces variable-width output.
+/// The first byte of the serialized output encodes whether the value is null or not.
+/// If the value is null, it takes up a single byte.
+/// If the value is not null, it takes up N+1 bytes, where N is the number of bytes produced by the inner serializer.
+/// </remarks>
 public class NullableSerializer<T> : IPrimitiveSerializer<T?>
 	where T : struct
 {
@@ -11,6 +20,8 @@ public class NullableSerializer<T> : IPrimitiveSerializer<T?>
 	/// The number of bytes used to store the null state of the value
 	private const int NULL_FLAG_SIZE = 1;
 
+	/// <summary>Creates a new <see cref="NullableSerializer{T}"/> using the given
+	/// <paramref name="innerSerializer"/> to serialize non-null values.</summary>
 	public NullableSerializer(IPrimitiveSerializer<T> innerSerializer)
 	{
 		_innerSerializer = innerSerializer;

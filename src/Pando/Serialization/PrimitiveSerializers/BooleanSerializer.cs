@@ -4,8 +4,10 @@ using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
+/// Serializes/deserializes <c>bool</c> values as a single byte
 public class BooleanSerializer : IPrimitiveSerializer<bool>
 {
+	/// <summary>A global default instance for <see cref="BooleanSerializer"/></summary>
 	public static BooleanSerializer Default { get; } = new();
 
 	private const int SIZE = 1;

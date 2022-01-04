@@ -2,6 +2,14 @@ using System;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
+/// <summary>
+/// Serializes a specified enum via a serializer capable of serializing the enum's underlying type.
+/// </summary>
+/// <remarks>
+/// In order to create an EnumSerializer, use
+/// <see cref="EnumSerializer"/>.<see cref="EnumSerializer.SerializerFor{TEnum}"/> or
+/// <see cref="EnumSerializer"/>.<see cref="EnumSerializer.SerializerFor{TEnum, TUnderlying}"/>
+/// </remarks>
 public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TEnum>
 	where TEnum : unmanaged, Enum
 	where TUnderlying : unmanaged
@@ -33,8 +41,13 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TE
 	}
 }
 
+/// <summary>Factory functions for creating <see cref="EnumSerializer{TEnum,TUnderlying}"/></summary>
 public static class EnumSerializer
 {
+	/// <summary>Factory function to create an <see cref="EnumSerializer{TEnum,TUnderlying}"/>
+	/// using a default serializer to serialize the underlying value.</summary>
+	/// <exception cref="NotSupportedException">thrown if the specified enum type has an unsupported underlying type.
+	/// Currently, <c>nint</c> and <c>nuint</c> are not supported.</exception>
 	public static IPrimitiveSerializer<TEnum> SerializerFor<TEnum>()
 		where TEnum : unmanaged, Enum
 	{
@@ -55,6 +68,10 @@ public static class EnumSerializer
 		);
 	}
 
+	/// <summary>Factory function to create an <see cref="EnumSerializer{TEnum,TUnderlying}"/>
+	/// using the provided <paramref name="underlyingSerializer"/> to serialize the underlying value.</summary>
+	/// <exception cref="ArgumentException">thrown if the provided <paramref name="underlyingSerializer"/>
+	/// is incapable of serializing the underlying type of <typeparamref name="TEnum"/>.</exception>
 	public static IPrimitiveSerializer<TEnum> SerializerFor<TEnum, TUnderlying>(IPrimitiveSerializer<TUnderlying> underlyingSerializer)
 		where TEnum : unmanaged, Enum
 		where TUnderlying : unmanaged

@@ -3,14 +3,23 @@ using System.Runtime.CompilerServices;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
+/// <summary>
+/// Serializes/deserializes a <see cref="DateOnly"/> via an <c>int</c> serializer
+/// to serialize the <c>DateOnly</c>'s <see cref="DateOnly.DayNumber"/>.
+/// </summary>
 public class DateOnlyDayNumberSerializer : IPrimitiveSerializer<DateOnly>
 {
+	/// <summary>A global default instance for <see cref="DateOnlyDayNumberSerializer"/></summary>
 	public static DateOnlyDayNumberSerializer Default { get; } = new();
 
 	private readonly IPrimitiveSerializer<int> _innerSerializer;
 
+	/// <summary>Create a <see cref="DateOnlyDayNumberSerializer"/> with the default
+	/// <see cref="Int32LittleEndianSerializer"/> to serialize the DayNumber.</summary>
 	public DateOnlyDayNumberSerializer() : this(Int32LittleEndianSerializer.Default) { }
 
+	/// <summary>Create a <see cref="DateOnlyDayNumberSerializer"/>
+	/// with the given int serializer to serialize the DayNumber.</summary>
 	public DateOnlyDayNumberSerializer(IPrimitiveSerializer<int> intSerializer)
 	{
 		_innerSerializer = intSerializer;
