@@ -3,6 +3,8 @@ using System.Text;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Serialization;
+using Pando.Serialization.PrimitiveSerializers;
+using Pando.Serialization.Utils;
 
 namespace PandoTests.Tests.Repositories.TestStateTrees;
 
@@ -34,11 +36,8 @@ internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 		new DoubleTreeBSerializer()
 	);
 
-	private const int NAME_HASH_END = sizeof(ulong);
-	private const int MYA_HASH_END = NAME_HASH_END + sizeof(ulong);
-	private const int MYB_HASH_END = MYA_HASH_END + sizeof(ulong);
-
-	private const int SIZE = MYB_HASH_END;
+	private const int SIZE_OF_HASH = sizeof(ulong);
+	private const int SIZE = SIZE_OF_HASH * 3;
 
 	public ulong Serialize(TestTree obj, INodeDataSink dataSink)
 	{
@@ -46,18 +45,19 @@ internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 		var myAHash = _aSerializer.Serialize(obj.MyA, dataSink);
 		var myBHash = _bSerializer.Serialize(obj.MyB, dataSink);
 
-		Span<byte> buffer = stackalloc byte[SIZE];
-		ByteEncoder.CopyBytes(nameHash, buffer[..NAME_HASH_END]);
-		ByteEncoder.CopyBytes(myAHash, buffer[NAME_HASH_END..MYA_HASH_END]);
-		ByteEncoder.CopyBytes(myBHash, buffer[MYA_HASH_END..MYB_HASH_END]);
-		return dataSink.AddNode(buffer);
+		Span<byte> nodeBytes = stackalloc byte[SIZE];
+		var writeBuffer = nodeBytes;
+		ByteEncoder.CopyBytes(nameHash, SpanHelpers.PopStart(ref writeBuffer, SIZE_OF_HASH));
+		ByteEncoder.CopyBytes(myAHash, SpanHelpers.PopStart(ref writeBuffer, SIZE_OF_HASH));
+		ByteEncoder.CopyBytes(myBHash, SpanHelpers.PopStart(ref writeBuffer, SIZE_OF_HASH));
+		return dataSink.AddNode(nodeBytes);
 	}
 
 	public TestTree Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
-		var nameHash = ByteEncoder.GetUInt64(bytes[..NAME_HASH_END]);
-		var myAHash = ByteEncoder.GetUInt64(bytes[NAME_HASH_END..MYA_HASH_END]);
-		var myBHash = ByteEncoder.GetUInt64(bytes[MYA_HASH_END..MYB_HASH_END]);
+		var nameHash = ByteEncoder.GetUInt64(SpanHelpers.PopStart(ref bytes, SIZE_OF_HASH));
+		var myAHash = ByteEncoder.GetUInt64(SpanHelpers.PopStart(ref bytes, SIZE_OF_HASH));
+		var myBHash = ByteEncoder.GetUInt64(SpanHelpers.PopStart(ref bytes, SIZE_OF_HASH));
 
 		var name = _nameSerializer.DeserializeFromHash(nameHash, dataSource);
 		var myA = _aSerializer.DeserializeFromHash(myAHash, dataSource);
@@ -87,47 +87,61 @@ internal readonly struct StringSerializer : INodeSerializer<string>
 
 internal readonly struct DoubleTreeASerializer : INodeSerializer<TestTree.A>
 {
-	private const int AGE_SIZE = sizeof(int);
-	public int? NodeSize => AGE_SIZE;
+	public int? NodeSize { get; }
+
+	public DoubleTreeASerializer()
+	{
+		NodeSize = Int32LittleEndianSerializer.Default.ByteCount;
+	}
 
 	public ulong Serialize(TestTree.A obj, INodeDataSink dataSink)
 	{
-		Span<byte> buffer = stackalloc byte[AGE_SIZE];
-		ByteEncoder.CopyBytes(obj.Age, buffer);
-		return dataSink.AddNode(buffer);
+		Span<byte>
+			nodeBytes = stackalloc byte[NodeSize!.Value]; // Since we're using a concrete primitive serializer we can know that NodeSize is safe
+		var writeBuffer = nodeBytes;
+		Int32LittleEndianSerializer.Default.Serialize(obj.Age, ref writeBuffer);
+		return dataSink.AddNode(nodeBytes);
 	}
 
 	public TestTree.A Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource _)
 	{
-		var age = ByteEncoder.GetInt32(bytes);
+		var age = Int32LittleEndianSerializer.Default.Deserialize(ref bytes);
 		return new TestTree.A(age);
 	}
 }
 
 internal readonly struct DoubleTreeBSerializer : INodeSerializer<TestTree.B>
 {
-	private const int TIME_END = sizeof(long);
-	private const int CENTS_END = TIME_END + sizeof(int);
-	private const int SIZE = CENTS_END;
+	public int? NodeSize { get; }
 
-	public int? NodeSize => SIZE;
+	public DoubleTreeBSerializer()
+	{
+		NodeSize = DateTimeUnixSerializer.Default.ByteCount + Int32LittleEndianSerializer.Default.ByteCount;
+	}
 
 	public ulong Serialize(TestTree.B obj, INodeDataSink dataSink)
 	{
-		Span<byte> myBuffer = stackalloc byte[SIZE];
-		var timeBinary = obj.Time.ToBinary();
+		var timeSerializer = DateTimeUnixSerializer.Default;
+		var timeSize = timeSerializer.ByteCount!.Value;
+		var centsSerializer = Int32LittleEndianSerializer.Default;
+		var centsSize = centsSerializer.ByteCount!.Value;
 
-		ByteEncoder.CopyBytes(timeBinary, myBuffer[..TIME_END]);
-		ByteEncoder.CopyBytes(obj.Cents, myBuffer[TIME_END..CENTS_END]);
+		Span<byte> buffer = stackalloc byte[timeSize + centsSize];
+		var writeBuffer = buffer;
 
-		return dataSink.AddNode(myBuffer);
+		timeSerializer.Serialize(obj.Time, ref writeBuffer);
+		centsSerializer.Serialize(obj.Cents, ref writeBuffer);
+
+		return dataSink.AddNode(buffer);
 	}
 
 	public TestTree.B Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource _)
 	{
-		var timeBinary = ByteEncoder.GetInt64(bytes[..TIME_END]);
-		var date = DateTime.FromBinary(timeBinary);
-		var cents = ByteEncoder.GetInt32(bytes[TIME_END..CENTS_END]);
+		var timeSerializer = DateTimeUnixSerializer.Default;
+		var centsSerializer = Int32LittleEndianSerializer.Default;
+
+		var date = timeSerializer.Deserialize(ref bytes);
+		var cents = centsSerializer.Deserialize(ref bytes);
 
 		return new TestTree.B(date, cents);
 	}
