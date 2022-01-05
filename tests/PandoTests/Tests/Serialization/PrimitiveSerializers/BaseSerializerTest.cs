@@ -58,6 +58,78 @@ public abstract class BaseSerializerTest<T>
 			);
 	}
 
+	/// <summary>
+	/// <para>Verifies the following about <see cref="IPrimitiveSerializer{T}.Serialize"/>:</para>
+	///   1. That it will throw an <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller than required for the given value.<br />
+	///   2. That when the buffer is too small, it does not resize the given span.
+	/// </summary>
+	[Theory]
+	[MemberData(nameof(TestDataProviderPlaceholders.SerializeUndersizedBufferTestData))]
+	public virtual void Serialize_should_throw_when_buffer_is_too_small(T value, int expectedSize)
+	{
+		var beforeBufferSize = expectedSize - 1;
+		int? afterBufferSize = null;
+
+		Serializer.Invoking(s =>
+				{
+					Span<byte> undersizedBuffer = new byte[beforeBufferSize];
+					try
+					{
+						s.Serialize(value, ref undersizedBuffer);
+					}
+					finally
+					{
+						afterBufferSize = undersizedBuffer.Length;
+					}
+				}
+			)
+			.Should()
+			.Throw<ArgumentOutOfRangeException>();
+
+		afterBufferSize.Should()
+			.Be(beforeBufferSize,
+				"because when the buffer is too small, the serializer should not modify the passed in buffer reference"
+			);
+	}
+
+	/// <summary>
+	/// <para>Verifies the following about <see cref="IPrimitiveSerializer{T}.Deserialize"/>:</para>
+	///   1. That it will throw an <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller than the size of the deserialized type.<br />
+	///   2. That when the buffer is too small, it does not resize the given span.
+	/// </summary>
+	[Theory]
+	[MemberData(nameof(TestDataProviderPlaceholders.DeserializeUndersizedBufferTestData))]
+	public virtual void Deserialize_should_throw_when_buffer_is_too_small(byte[] undersizedBuffer)
+	{
+		var beforeBufferSize = undersizedBuffer.Length;
+		int? afterBufferSize = null;
+
+		Serializer.Invoking(s =>
+				{
+					var bufferSpan = new ReadOnlySpan<byte>(undersizedBuffer);
+
+					try
+					{
+						s.Deserialize(ref bufferSpan);
+					}
+					finally
+					{
+						afterBufferSize = bufferSpan.Length;
+					}
+				}
+			)
+			.Should()
+			.Throw<ArgumentOutOfRangeException>();
+
+		afterBufferSize.Should()
+			.Be(beforeBufferSize,
+				"because when the buffer is too small, the serializer should not modify the passed in buffer reference"
+			);
+	}
+
+	/// <summary>
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.ByteCount"/> returns the appropriate value.
+	/// </summary>
 	[Theory]
 	[MemberData(nameof(TestDataProviderPlaceholders.ByteCountTestData))]
 	public virtual void ByteCount_should_return_correct_size(int? expectedSize)
@@ -69,6 +141,12 @@ public abstract class BaseSerializerTest<T>
 internal static class TestDataProviderPlaceholders
 {
 	public static void SerializationTestData() =>
+		throw new NotImplementedException("This is just a placeholder for the test data source that will be implemented by descendants");
+
+	public static void SerializeUndersizedBufferTestData() =>
+		throw new NotImplementedException("This is just a placeholder for the test data source that will be implemented by descendants");
+
+	public static void DeserializeUndersizedBufferTestData() =>
 		throw new NotImplementedException("This is just a placeholder for the test data source that will be implemented by descendants");
 
 	public static void ByteCountTestData() =>
