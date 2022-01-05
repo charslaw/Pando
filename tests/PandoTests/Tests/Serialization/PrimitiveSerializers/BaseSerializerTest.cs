@@ -60,7 +60,8 @@ public abstract class BaseSerializerTest<T>
 
 	/// <summary>
 	/// <para>Verifies the following about <see cref="IPrimitiveSerializer{T}.Serialize"/>:</para>
-	///   1. That it will throw an <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller than required for the given value.<br />
+	///   1. That it will throw an <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller
+	///			than required for the given value.<br />
 	///   2. That when the buffer is too small, it does not resize the given span.
 	/// </summary>
 	[Theory]
@@ -94,9 +95,15 @@ public abstract class BaseSerializerTest<T>
 
 	/// <summary>
 	/// <para>Verifies the following about <see cref="IPrimitiveSerializer{T}.Deserialize"/>:</para>
-	///   1. That it will throw an <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller than the size of the deserialized type.<br />
+	///   1. That it will throw an <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller
+	///			than the size of the deserialized type.<br />
 	///   2. That when the buffer is too small, it does not resize the given span.
 	/// </summary>
+	/// <remarks>
+	/// This is trivial for fixed size serializers, but for variable size serializers, whether or not the buffer is
+	/// undersized can depend on the contents of the buffer. For these cases the serializer must read from the buffer,
+	/// but must not chop the buffer in the case that the buffer is an incorrect size.
+	/// </remarks>
 	[Theory]
 	[MemberData(nameof(TestDataProviderPlaceholders.DeserializeUndersizedBufferTestData))]
 	public virtual void Deserialize_should_throw_when_buffer_is_too_small(byte[] undersizedBuffer)
