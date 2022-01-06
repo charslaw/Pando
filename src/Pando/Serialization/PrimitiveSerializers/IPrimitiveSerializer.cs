@@ -19,9 +19,13 @@ public interface IPrimitiveSerializer<T>
 	public int ByteCountForValue(T value);
 
 	/// Serializes the given value into the start of the given byte buffer,
-	/// then slices the buffer to the remaining space after the write
+	/// then slices the buffer to the remaining space after the write.
+	/// <exception cref="ArgumentOutOfRangeException">thrown when the given <paramref name="buffer"/>
+	/// is too small to contain the serialized encoding of the given value.</exception>
 	public void Serialize(T value, ref Span<byte> buffer);
 
 	/// Deserializes a value from the given byte buffer, then slices the buffer to the remaining unread space
+	/// <exception cref="ArgumentOutOfRangeException">thrown when the given <paramref name="buffer"/>
+	/// is too small to read a value of type <typeparamref name="T"/> from.</exception>
 	public T Deserialize(ref ReadOnlySpan<byte> buffer);
 }

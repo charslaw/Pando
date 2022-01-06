@@ -1,14 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-
 		<IsPackable>false</IsPackable>
-
 		<Nullable>enable</Nullable>
-
-		<LangVersion>10</LangVersion>
-
+		<LangVersion>preview</LangVersion>
 		<TargetFramework>net6.0</TargetFramework>
+		<EnablePreviewFeatures>True</EnablePreviewFeatures> <!-- For abstract static interface members -->
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,7 +14,7 @@
 		<PackageReference Include="NSubstitute" Version="4.2.2" />
 		<PackageReference Include="NSubstitute.Analyzers.CSharp" Version="1.0.14" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.5.0" />
-		<PackageReference Include="xunit" Version="2.4.1" />
+		<PackageReference Include="xunit" Version="2.4.0" /> <!-- 2.4.1 has a bug that prevents abstract test classes from working correctly -->
 		<PackageReference Include="xunit.runner.console" Version="2.4.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
