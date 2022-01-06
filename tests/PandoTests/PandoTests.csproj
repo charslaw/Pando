@@ -1,14 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-
 		<IsPackable>false</IsPackable>
-
 		<Nullable>enable</Nullable>
-
-		<LangVersion>10</LangVersion>
-
+		<LangVersion>preview</LangVersion>
 		<TargetFramework>net6.0</TargetFramework>
+		<EnablePreviewFeatures>True</EnablePreviewFeatures> <!-- For abstract static interface members -->
 	</PropertyGroup>
 
 	<ItemGroup>

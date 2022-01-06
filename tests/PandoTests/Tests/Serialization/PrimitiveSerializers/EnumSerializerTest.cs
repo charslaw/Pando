@@ -12,7 +12,7 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 /// <see cref="BaseSerializerTest{T}"/>
 public class EnumSerializerTests
 {
-	public class SByteEnumSerializerTests : BaseSerializerTest<SByteEnum>
+	public class SByteEnumSerializerTests : BaseSerializerTest<SByteEnum>, ISerializerTestData<SByteEnum>
 	{
 		private const int EXPECTED_SIZE = sizeof(sbyte);
 
@@ -26,12 +26,14 @@ public class EnumSerializerTests
 			{ SByteEnum.Max, new byte[] { 0x7F } },
 		};
 
-		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
 		public static TheoryData<SByteEnum, int> SerializeUndersizedBufferTestData => new() { { SByteEnum.Min, EXPECTED_SIZE } };
 		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<SByteEnum, int> ByteCountForValueTestData => new() { { SByteEnum.Min, EXPECTED_SIZE } };
 	}
 
-	public class ByteEnumSerializerTests : BaseSerializerTest<ByteEnum>
+	public class ByteEnumSerializerTests : BaseSerializerTest<ByteEnum>, ISerializerTestData<ByteEnum>
 	{
 		private const int EXPECTED_SIZE = sizeof(byte);
 
@@ -45,12 +47,14 @@ public class EnumSerializerTests
 			{ ByteEnum.Max, new byte[] { 0xFF } },
 		};
 
-		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
 		public static TheoryData<ByteEnum, int> SerializeUndersizedBufferTestData => new() { { ByteEnum.Min, EXPECTED_SIZE } };
 		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<ByteEnum, int> ByteCountForValueTestData => new() { { ByteEnum.Min, EXPECTED_SIZE } };
 	}
 
-	public class Int16EnumSerializerTests : BaseSerializerTest<Int16Enum>
+	public class Int16EnumSerializerTests : BaseSerializerTest<Int16Enum>, ISerializerTestData<Int16Enum>
 	{
 		private const int EXPECTED_SIZE = sizeof(short);
 
@@ -64,12 +68,14 @@ public class EnumSerializerTests
 			{ Int16Enum.Max, new byte[] { 0xFF, 0x7F } },
 		};
 
-		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
 		public static TheoryData<Int16Enum, int> SerializeUndersizedBufferTestData => new() { { Int16Enum.Min, EXPECTED_SIZE } };
 		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<Int16Enum, int> ByteCountForValueTestData => new() { { Int16Enum.Min, EXPECTED_SIZE } };
 	}
 
-	public class UInt16EnumSerializerTests : BaseSerializerTest<UInt16Enum>
+	public class UInt16EnumSerializerTests : BaseSerializerTest<UInt16Enum>, ISerializerTestData<UInt16Enum>
 	{
 		private const int EXPECTED_SIZE = sizeof(ushort);
 
@@ -83,12 +89,14 @@ public class EnumSerializerTests
 			{ UInt16Enum.Max, new byte[] { 0xFF, 0xFF } },
 		};
 
-		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
 		public static TheoryData<UInt16Enum, int> SerializeUndersizedBufferTestData => new() { { UInt16Enum.Min, EXPECTED_SIZE } };
 		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<UInt16Enum, int> ByteCountForValueTestData => new() { { UInt16Enum.Min, EXPECTED_SIZE } };
 	}
 
-	public class Int32EnumSerializerTests : BaseSerializerTest<Int32Enum>
+	public class Int32EnumSerializerTests : BaseSerializerTest<Int32Enum>, ISerializerTestData<Int32Enum>
 	{
 		private const int EXPECTED_SIZE = sizeof(int);
 
@@ -102,12 +110,14 @@ public class EnumSerializerTests
 			{ Int32Enum.Max, new byte[] { 0xFF, 0xFF, 0xFF, 0x7F } },
 		};
 
-		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
 		public static TheoryData<Int32Enum, int> SerializeUndersizedBufferTestData => new() { { Int32Enum.Min, EXPECTED_SIZE } };
 		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<Int32Enum, int> ByteCountForValueTestData => new() { { Int32Enum.Min, EXPECTED_SIZE } };
 	}
 
-	public class UInt32EnumSerializerTests : BaseSerializerTest<UInt32Enum>
+	public class UInt32EnumSerializerTests : BaseSerializerTest<UInt32Enum>, ISerializerTestData<UInt32Enum>
 	{
 		private const int EXPECTED_SIZE = sizeof(uint);
 
@@ -121,12 +131,14 @@ public class EnumSerializerTests
 			{ UInt32Enum.Max, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF } },
 		};
 
-		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
 		public static TheoryData<UInt32Enum, int> SerializeUndersizedBufferTestData => new() { { UInt32Enum.Min, EXPECTED_SIZE } };
 		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<UInt32Enum, int> ByteCountForValueTestData => new() { { UInt32Enum.Min, EXPECTED_SIZE } };
 	}
 
-	public class Int64EnumSerializerTests : BaseSerializerTest<Int64Enum>
+	public class Int64EnumSerializerTests : BaseSerializerTest<Int64Enum>, ISerializerTestData<Int64Enum>
 	{
 		private const int EXPECTED_SIZE = sizeof(long);
 
@@ -140,12 +152,14 @@ public class EnumSerializerTests
 			{ Int64Enum.Max, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x7F } },
 		};
 
-		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
 		public static TheoryData<Int64Enum, int> SerializeUndersizedBufferTestData => new() { { Int64Enum.Min, EXPECTED_SIZE } };
 		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<Int64Enum, int> ByteCountForValueTestData => new() { { Int64Enum.Min, EXPECTED_SIZE } };
 	}
 
-	public class UInt64EnumSerializerTests : BaseSerializerTest<UInt64Enum>
+	public class UInt64EnumSerializerTests : BaseSerializerTest<UInt64Enum>, ISerializerTestData<UInt64Enum>
 	{
 		private const int EXPECTED_SIZE = sizeof(ulong);
 
@@ -159,8 +173,10 @@ public class EnumSerializerTests
 			{ UInt64Enum.Max, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } },
 		};
 
-		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
 		public static TheoryData<UInt64Enum, int> SerializeUndersizedBufferTestData => new() { { UInt64Enum.Min, EXPECTED_SIZE } };
 		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<UInt64Enum, int> ByteCountForValueTestData => new() { { UInt64Enum.Min, EXPECTED_SIZE } };
 	}
 }

@@ -20,7 +20,7 @@ public abstract class BaseSerializerTest<T>
 	///   2. That it appropriately chops the write span to the remaining space after the write.
 	/// </summary>
 	[Theory]
-	[MemberData(nameof(TestDataProviderPlaceholders.SerializationTestData))]
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
 	public virtual void Serialize_should_produce_correct_bytes(T value, byte[] bytes)
 	{
 		Span<byte> nodeBytes = stackalloc byte[bytes.Length + EXTRA_BUFFER_SPACE];
@@ -42,7 +42,7 @@ public abstract class BaseSerializerTest<T>
 	///   2. That it appropriately chops the read span to the remaining unread space after the read.
 	/// </summary>
 	[Theory]
-	[MemberData(nameof(TestDataProviderPlaceholders.SerializationTestData))]
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
 	public virtual void Deserialize_should_produce_correct_value(T value, byte[] bytes)
 	{
 		Span<byte> nodeBytes = new byte[bytes.Length + EXTRA_BUFFER_SPACE];
@@ -65,7 +65,7 @@ public abstract class BaseSerializerTest<T>
 	///   2. That when the buffer is too small, it does not resize the given span.
 	/// </summary>
 	[Theory]
-	[MemberData(nameof(TestDataProviderPlaceholders.SerializeUndersizedBufferTestData))]
+	[MemberData(nameof(ISerializerTestData<T>.SerializeUndersizedBufferTestData))]
 	public virtual void Serialize_should_throw_when_buffer_is_too_small(T value, int expectedSize)
 	{
 		var beforeBufferSize = expectedSize - 1;
@@ -105,7 +105,7 @@ public abstract class BaseSerializerTest<T>
 	/// but must not chop the buffer in the case that the buffer is an incorrect size.
 	/// </remarks>
 	[Theory]
-	[MemberData(nameof(TestDataProviderPlaceholders.DeserializeUndersizedBufferTestData))]
+	[MemberData(nameof(ISerializerTestData<T>.DeserializeUndersizedBufferTestData))]
 	public virtual void Deserialize_should_throw_when_buffer_is_too_small(byte[] undersizedBuffer)
 	{
 		var beforeBufferSize = undersizedBuffer.Length;
@@ -135,27 +135,37 @@ public abstract class BaseSerializerTest<T>
 	}
 
 	/// <summary>
-	/// Verifies that <see cref="IPrimitiveSerializer{T}.ByteCount"/> returns the appropriate value.
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.ByteCount"/> returns the appropriate size.
 	/// </summary>
 	[Theory]
-	[MemberData(nameof(TestDataProviderPlaceholders.ByteCountTestData))]
+	[MemberData(nameof(ISerializerTestData<T>.ByteCountTestData))]
 	public virtual void ByteCount_should_return_correct_size(int? expectedSize)
 	{
 		Serializer.ByteCount.Should().Be(expectedSize);
 	}
+
+	/// <summary>
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.ByteCountForValue"/> returns the appropriate size for the given value
+	/// </summary>
+	[Theory]
+	[MemberData(nameof(ISerializerTestData<T>.ByteCountForValueTestData))]
+	public virtual void ByteCountForValue_should_return_correct_size(T value, int expectedSize)
+	{
+		Serializer.ByteCountForValue(value).Should().Be(expectedSize);
+	}
 }
 
-internal static class TestDataProviderPlaceholders
+/// Defines the test data providers required by BaseSerializerTest. This should be implemented by any subclass of BaseSerializerTest
+///
+/// <remarks>Note that BaseSerializerTest itself can't implement this interface because it would need to implement these methods and it can't
+/// keep them abstract because abstract static is *only* supported in interfaces.</remarks>
+public interface ISerializerTestData<T>
 {
-	public static void SerializationTestData() =>
-		throw new NotImplementedException("This is just a placeholder for the test data source that will be implemented by descendants");
+	public abstract static TheoryData<T, byte[]> SerializationTestData { get; }
 
-	public static void SerializeUndersizedBufferTestData() =>
-		throw new NotImplementedException("This is just a placeholder for the test data source that will be implemented by descendants");
+	public abstract static TheoryData<T, int> SerializeUndersizedBufferTestData { get; }
+	public abstract static TheoryData<byte[]> DeserializeUndersizedBufferTestData { get; }
 
-	public static void DeserializeUndersizedBufferTestData() =>
-		throw new NotImplementedException("This is just a placeholder for the test data source that will be implemented by descendants");
-
-	public static void ByteCountTestData() =>
-		throw new NotImplementedException("This is just a placeholder for the test data source that will be implemented by descendants");
+	public abstract static TheoryData<int?> ByteCountTestData { get; }
+	public abstract static TheoryData<T, int> ByteCountForValueTestData { get; }
 }
