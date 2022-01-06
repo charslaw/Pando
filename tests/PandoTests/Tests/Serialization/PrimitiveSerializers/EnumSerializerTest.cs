@@ -4,7 +4,6 @@ using Xunit;
 
 // Rider doesn't detect subclasses of BaseSerializerTest as being used, because they inherit their test methods
 // ReSharper disable UnusedType.Global
-// ReSharper disable UnusedMember.Global
 
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
