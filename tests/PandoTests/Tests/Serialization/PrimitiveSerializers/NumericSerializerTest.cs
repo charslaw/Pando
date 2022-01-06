@@ -9,6 +9,27 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public class NumericSerializerTest
 {
+	public class SByteSerializerTest : BaseSerializerTest<sbyte>, ISerializerTestData<sbyte>
+	{
+		private const int EXPECTED_SIZE = sizeof(byte);
+
+		protected override IPrimitiveSerializer<sbyte> Serializer => new SByteSerializer();
+
+		public static TheoryData<sbyte, byte[]> SerializationTestData => new()
+		{
+			{ 0, new byte[] { 0x00 } },
+			{ 127, new byte[] { 0x7F } },
+			{ -128, new byte[] { 0x80 } },
+			{ -1, new byte[] { 0xFF } }
+		};
+
+		public static TheoryData<sbyte, int> SerializeUndersizedBufferTestData => new() { { 127, EXPECTED_SIZE } };
+		public static TheoryData<byte[]> DeserializeUndersizedBufferTestData => new() { Array.Empty<byte>() };
+
+		public static TheoryData<int?> ByteCountTestData => new() { EXPECTED_SIZE };
+		public static TheoryData<sbyte, int> ByteCountForValueTestData => new() { { 127, EXPECTED_SIZE } };
+	}
+
 	public class ByteSerializerTest : BaseSerializerTest<byte>, ISerializerTestData<byte>
 	{
 		private const int EXPECTED_SIZE = sizeof(byte);
