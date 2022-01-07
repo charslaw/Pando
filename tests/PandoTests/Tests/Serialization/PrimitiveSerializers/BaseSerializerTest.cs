@@ -15,89 +15,102 @@ public abstract class BaseSerializerTest<T>
 	protected abstract IPrimitiveSerializer<T> Serializer { get; }
 
 	/// <summary>
-	/// <para>Verifies the following about <see cref="IPrimitiveSerializer{T}.Serialize"/>:</para>
-	///   1. That it writes the correct bytes to the given buffer.<br />
-	///   2. That it appropriately chops the write span to the remaining space after the write.
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.Serialize"/> writes the correct bytes to the given buffer.
 	/// </summary>
 	[Theory]
 	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
-	public virtual void Serialize_should_produce_correct_bytes(T value, byte[] bytes)
+	public virtual void Serialize_should_produce_correct_bytes(T inputValue, byte[] expectedBytes)
 	{
-		Span<byte> nodeBytes = stackalloc byte[bytes.Length + EXTRA_BUFFER_SPACE];
+		Span<byte> nodeBytes = stackalloc byte[expectedBytes.Length];
 		var writeBuffer = nodeBytes;
 
-		Serializer.Serialize(value, ref writeBuffer);
+		Serializer.Serialize(inputValue, ref writeBuffer);
 
-		var serializationResult = nodeBytes[..bytes.Length].ToArray();
-		serializationResult.Should().BeEquivalentTo(bytes);
-		writeBuffer.Length.Should()
-			.Be(EXTRA_BUFFER_SPACE,
-				"because the serializer is expected to chop off the written-to slice from the write buffer"
-			);
+		var serializationResult = nodeBytes[..expectedBytes.Length].ToArray();
+		serializationResult.Should().BeEquivalentTo(expectedBytes);
 	}
 
 	/// <summary>
-	/// <para>Verifies the following about <see cref="IPrimitiveSerializer{T}.Deserialize"/>:</para>
-	///   1. That it reads the correct value from the given buffer.<br />
-	///   2. That it appropriately chops the read span to the remaining unread space after the read.
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.Serialize"/> will chop the write buffer to the slice remaining after the write.
 	/// </summary>
 	[Theory]
 	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
-	public virtual void Deserialize_should_produce_correct_value(T value, byte[] bytes)
+	public virtual void Serialize_should_chop_used_bytes_from_buffer(T inputValue, byte[] expectedBytes)
 	{
-		Span<byte> nodeBytes = new byte[bytes.Length + EXTRA_BUFFER_SPACE];
-		bytes.CopyTo(nodeBytes);
-		ReadOnlySpan<byte> readBuffer = nodeBytes;
-
-		var deserializationResult = Serializer.Deserialize(ref readBuffer);
-
-		deserializationResult.Should().BeEquivalentTo(value);
-		readBuffer.Length.Should()
-			.Be(EXTRA_BUFFER_SPACE,
-				"because the serializer is expected to chop off the read-from slice from the read buffer"
-			);
+		Span<byte> nodeBytes = stackalloc byte[expectedBytes.Length + EXTRA_BUFFER_SPACE];
+		var writeBuffer = nodeBytes;
+		Serializer.Serialize(inputValue, ref writeBuffer);
+		writeBuffer.Length.Should().Be(EXTRA_BUFFER_SPACE);
 	}
 
 	/// <summary>
-	/// <para>Verifies the following about <see cref="IPrimitiveSerializer{T}.Serialize"/>:</para>
-	///   1. That it will throw an <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller
-	///			than required for the given value.<br />
-	///   2. That when the buffer is too small, it does not resize the given span.
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.Serialize"/> will throw an
+	/// <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller than required for the given value.<br />
 	/// </summary>
 	[Theory]
-	[MemberData(nameof(ISerializerTestData<T>.SerializeUndersizedBufferTestData))]
-	public virtual void Serialize_should_throw_when_buffer_is_too_small(T value, int expectedSize)
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
+	public virtual void Serialize_should_throw_when_buffer_is_too_small(T inputValue, byte[] expectedBytes)
 	{
-		var beforeBufferSize = expectedSize - 1;
-		int? afterBufferSize = null;
-
 		Serializer.Invoking(s =>
 				{
-					Span<byte> undersizedBuffer = new byte[beforeBufferSize];
-					try
-					{
-						s.Serialize(value, ref undersizedBuffer);
-					}
-					finally
-					{
-						afterBufferSize = undersizedBuffer.Length;
-					}
+					Span<byte> undersizedBuffer = new byte[expectedBytes.Length - 1];
+					s.Serialize(inputValue, ref undersizedBuffer);
 				}
 			)
 			.Should()
 			.Throw<ArgumentOutOfRangeException>();
-
-		afterBufferSize.Should()
-			.Be(beforeBufferSize,
-				"because when the buffer is too small, the serializer should not modify the passed in buffer reference"
-			);
 	}
 
 	/// <summary>
-	/// <para>Verifies the following about <see cref="IPrimitiveSerializer{T}.Deserialize"/>:</para>
-	///   1. That it will throw an <see cref="ArgumentOutOfRangeException"/> if the given buffer is smaller
-	///			than the size of the deserialized type.<br />
-	///   2. That when the buffer is too small, it does not resize the given span.
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.Serialize"/> will not alter
+	/// the given write buffer if it is too small to write a value to.
+	/// </summary>
+	[Theory]
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
+	public virtual void Serialize_should_not_alter_size_of_buffer_when_it_is_too_small(T inputValue, byte[] expectedBytes)
+	{
+		var beforeBufferSize = expectedBytes.Length - 1;
+		Span<byte> undersizedBuffer = stackalloc byte[beforeBufferSize];
+
+		try { Serializer.Serialize(inputValue, ref undersizedBuffer); }
+		catch (ArgumentOutOfRangeException) { } // this will throw but we don't care about the exception, we just want to test a post-condition
+
+		undersizedBuffer.Length.Should().Be(beforeBufferSize);
+	}
+
+	/// <summary>
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.Deserialize"/> reads the correct value from the given buffer.
+	/// </summary>
+	[Theory]
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
+	public virtual void Deserialize_should_produce_correct_value(T expectedValue, byte[] inputBytes)
+	{
+		Span<byte> nodeBytes = new byte[inputBytes.Length];
+		inputBytes.CopyTo(nodeBytes);
+		ReadOnlySpan<byte> readBuffer = nodeBytes;
+
+		var deserializationResult = Serializer.Deserialize(ref readBuffer);
+
+		deserializationResult.Should().BeEquivalentTo(expectedValue);
+	}
+
+#pragma warning disable xUnit1026 // ignore unused parameter warning; we want to use the same data for multiple tests
+
+	/// <summary>
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.Deserialize"/> will chop the read buffer to the slice remaining after the read.
+	/// </summary>
+	[Theory]
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
+	public virtual void Deserialize_should_chop_used_bytes_from_buffer(T _, byte[] inputBytes)
+	{
+		ReadOnlySpan<byte> readBuffer = new byte[inputBytes.Length + EXTRA_BUFFER_SPACE];
+		var __ = Serializer.Deserialize(ref readBuffer);
+		readBuffer.Length.Should().Be(EXTRA_BUFFER_SPACE);
+	}
+
+	/// <summary>
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.Deserialize"/> will throw an
+	/// <see cref="ArgumentOutOfRangeException"/> if the given buffer is too small to read a value from.
 	/// </summary>
 	/// <remarks>
 	/// This is trivial for fixed size serializers, but for variable size serializers, whether or not the buffer is
@@ -105,34 +118,37 @@ public abstract class BaseSerializerTest<T>
 	/// but must not chop the buffer in the case that the buffer is an incorrect size.
 	/// </remarks>
 	[Theory]
-	[MemberData(nameof(ISerializerTestData<T>.DeserializeUndersizedBufferTestData))]
-	public virtual void Deserialize_should_throw_when_buffer_is_too_small(byte[] undersizedBuffer)
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
+	public virtual void Deserialize_should_throw_when_buffer_is_too_small(T _, byte[] inputBytes)
 	{
-		var beforeBufferSize = undersizedBuffer.Length;
-		int? afterBufferSize = null;
-
 		Serializer.Invoking(s =>
 				{
-					var bufferSpan = new ReadOnlySpan<byte>(undersizedBuffer);
-
-					try
-					{
-						s.Deserialize(ref bufferSpan);
-					}
-					finally
-					{
-						afterBufferSize = bufferSpan.Length;
-					}
+					ReadOnlySpan<byte> undersizedBuffer = stackalloc byte[inputBytes.Length - 1]; // we don't care about the contents, just the size
+					s.Deserialize(ref undersizedBuffer);
 				}
 			)
 			.Should()
 			.Throw<ArgumentOutOfRangeException>();
-
-		afterBufferSize.Should()
-			.Be(beforeBufferSize,
-				"because when the buffer is too small, the serializer should not modify the passed in buffer reference"
-			);
 	}
+
+	/// <summary>
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.Deserialize"/> will not alter
+	/// the given read buffer if it is too small to read a value from.
+	/// </summary>
+	[Theory]
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
+	public virtual void Deserialize_should_not_alter_size_of_buffer_when_it_is_too_small(T _, byte[] inputBytes)
+	{
+		var beforeBufferSize = inputBytes.Length - 1;
+		ReadOnlySpan<byte> undersizedBuffer = stackalloc byte[beforeBufferSize]; // we don't care about the contents, just the size
+
+		try { Serializer.Deserialize(ref undersizedBuffer); }
+		catch (ArgumentOutOfRangeException) { } // this will throw but we don't care about the exception, we just want to test a post-condition
+
+		undersizedBuffer.Length.Should().Be(beforeBufferSize);
+	}
+
+#pragma warning restore xUnit1026 // unused parameter warning
 
 	/// <summary>
 	/// Verifies that <see cref="IPrimitiveSerializer{T}.ByteCount"/> returns the appropriate size.
@@ -145,13 +161,13 @@ public abstract class BaseSerializerTest<T>
 	}
 
 	/// <summary>
-	/// Verifies that <see cref="IPrimitiveSerializer{T}.ByteCountForValue"/> returns the appropriate size for the given value
+	/// Verifies that <see cref="IPrimitiveSerializer{T}.ByteCountForValue"/> returns the appropriate size for the given value.
 	/// </summary>
 	[Theory]
-	[MemberData(nameof(ISerializerTestData<T>.ByteCountForValueTestData))]
-	public virtual void ByteCountForValue_should_return_correct_size(T value, int expectedSize)
+	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
+	public virtual void ByteCountForValue_should_return_correct_size(T value, byte[] expectedBytes)
 	{
-		Serializer.ByteCountForValue(value).Should().Be(expectedSize);
+		Serializer.ByteCountForValue(value).Should().Be(expectedBytes.Length);
 	}
 }
 
@@ -161,11 +177,12 @@ public abstract class BaseSerializerTest<T>
 /// keep them abstract because abstract static is *only* supported in interfaces.</remarks>
 public interface ISerializerTestData<T>
 {
+	/// <summary>Defines valid pairs of value and serialized bytes.</summary>
+	/// <remarks>This is re-used for many tests in various forms.
+	/// Since each entry should represent a valid usage of both Serialize and Deserialize,
+	/// we can mutate the data to produce invalid data to test error cases.</remarks>
 	public abstract static TheoryData<T, byte[]> SerializationTestData { get; }
 
-	public abstract static TheoryData<T, int> SerializeUndersizedBufferTestData { get; }
-	public abstract static TheoryData<byte[]> DeserializeUndersizedBufferTestData { get; }
-
+	/// Defines the expected result of the ByteCount property
 	public abstract static TheoryData<int?> ByteCountTestData { get; }
-	public abstract static TheoryData<T, int> ByteCountForValueTestData { get; }
 }
