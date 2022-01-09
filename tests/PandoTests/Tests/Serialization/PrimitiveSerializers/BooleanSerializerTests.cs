@@ -6,15 +6,18 @@ using Xunit;
 
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
-public class BooleanSerializerTests : BaseSerializerTest<bool>, ISerializerTestData<bool>
+public partial class PrimitiveSerializerTests
 {
-	protected override IPrimitiveSerializer<bool> Serializer => new BooleanSerializer();
-
-	public static TheoryData<bool, byte[]> SerializationTestData => new()
+	public class BooleanSerializerTests : BaseSerializerTest<bool>, ISerializerTestData<bool>
 	{
-		{ true, new byte[] { 0x01 } },
-		{ false, new byte[] { 0x00 } },
-	};
+		protected override IPrimitiveSerializer<bool> Serializer => new BooleanSerializer();
 
-	public static TheoryData<int?> ByteCountTestData => new() { sizeof(bool) };
+		public static TheoryData<bool, byte[]> SerializationTestData => new()
+		{
+			{ true, new byte[] { 0x01 } },
+			{ false, new byte[] { 0x00 } },
+		};
+
+		public static TheoryData<int?> ByteCountTestData => new() { sizeof(bool) };
+	}
 }
