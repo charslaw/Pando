@@ -91,8 +91,12 @@ public abstract class BaseSerializerTest<T>
 
 		var deserializationResult = Serializer.Deserialize(ref readBuffer);
 
-		deserializationResult.Should().BeEquivalentTo(expectedValue);
+		AssertDeserializedValuesEquivalent(deserializationResult, expectedValue);
 	}
+
+	/// The method used to compare a deserialized result to the expected value.
+	/// By default, this just uses a BeEquivalentTo assertion, but for more complex types this may be overridden.
+	protected virtual void AssertDeserializedValuesEquivalent(T actualValue, T expectedValue) => actualValue.Should().BeEquivalentTo(expectedValue);
 
 #pragma warning disable xUnit1026 // ignore unused parameter warning; we want to use the same data for multiple tests
 
