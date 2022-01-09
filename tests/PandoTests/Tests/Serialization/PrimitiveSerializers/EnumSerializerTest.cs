@@ -1,5 +1,3 @@
-using System;
-using System.Buffers.Binary;
 using Pando.Serialization.PrimitiveSerializers;
 using Xunit;
 
@@ -23,23 +21,4 @@ public class EnumSerializerTests : BaseSerializerTest<TestEnum>, ISerializerTest
 public enum TestEnum : long
 {
 	Value = -36_240_869_367_020_799 // 0xFF_7F_3F_1F_0F_07_03_01
-}
-
-internal class SimpleLongSerializer : IPrimitiveSerializer<long>
-{
-	public int? ByteCount => sizeof(long);
-	public int ByteCountForValue(long value) => sizeof(long);
-
-	public void Serialize(long value, ref Span<byte> buffer)
-	{
-		BinaryPrimitives.WriteInt64BigEndian(buffer, value);
-		buffer = buffer[sizeof(ulong)..];
-	}
-
-	public long Deserialize(ref ReadOnlySpan<byte> buffer)
-	{
-		var result = BinaryPrimitives.ReadInt64BigEndian(buffer);
-		buffer = buffer[sizeof(ulong)..];
-		return result;
-	}
 }
