@@ -7,20 +7,20 @@ namespace Pando.Serialization.PrimitiveSerializers;
 /// Serializes/deserializes a <see cref="DateTime"/> via a <c>long</c> serializer
 /// to serialize the <c>DateTime</c>'s <see cref="DateTime.ToBinary"/> encoding.
 /// </summary>
-public class DateTimeUnixSerializer : IPrimitiveSerializer<DateTime>
+public class DateTimeToBinarySerializer : IPrimitiveSerializer<DateTime>
 {
-	/// <summary>A global default instance for <see cref="DateTimeUnixSerializer"/></summary>
-	public static DateTimeUnixSerializer Default { get; } = new();
+	/// <summary>A global default instance for <see cref="DateTimeToBinarySerializer"/></summary>
+	public static DateTimeToBinarySerializer Default { get; } = new();
 
 	private readonly IPrimitiveSerializer<long> _innerSerializer;
 
-	/// <summary>Create a <see cref="DateTimeUnixSerializer"/> with the default
+	/// <summary>Create a <see cref="DateTimeToBinarySerializer"/> with the default
 	/// <see cref="Int64LittleEndianSerializer"/> to serialize the ToBinary encoding of the DateTime.</summary>
-	public DateTimeUnixSerializer() : this(Int64LittleEndianSerializer.Default) { }
+	public DateTimeToBinarySerializer() : this(Int64LittleEndianSerializer.Default) { }
 
-	/// <summary>Create a <see cref="DateTimeUnixSerializer"/> with the given long serializer
+	/// <summary>Create a <see cref="DateTimeToBinarySerializer"/> with the given long serializer
 	/// to serialize the ToBinary encoding of the DateTime.</summary>
-	public DateTimeUnixSerializer(IPrimitiveSerializer<long> longSerializer)
+	public DateTimeToBinarySerializer(IPrimitiveSerializer<long> longSerializer)
 	{
 		_innerSerializer = longSerializer;
 		ByteCount = _innerSerializer.ByteCount;

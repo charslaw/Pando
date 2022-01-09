@@ -116,12 +116,12 @@ internal readonly struct DoubleTreeBSerializer : INodeSerializer<TestTree.B>
 
 	public DoubleTreeBSerializer()
 	{
-		NodeSize = DateTimeUnixSerializer.Default.ByteCount + Int32LittleEndianSerializer.Default.ByteCount;
+		NodeSize = DateTimeToBinarySerializer.Default.ByteCount + Int32LittleEndianSerializer.Default.ByteCount;
 	}
 
 	public ulong Serialize(TestTree.B obj, INodeDataSink dataSink)
 	{
-		var timeSerializer = DateTimeUnixSerializer.Default;
+		var timeSerializer = DateTimeToBinarySerializer.Default;
 		var timeSize = timeSerializer.ByteCount!.Value;
 		var centsSerializer = Int32LittleEndianSerializer.Default;
 		var centsSize = centsSerializer.ByteCount!.Value;
@@ -137,7 +137,7 @@ internal readonly struct DoubleTreeBSerializer : INodeSerializer<TestTree.B>
 
 	public TestTree.B Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource _)
 	{
-		var timeSerializer = DateTimeUnixSerializer.Default;
+		var timeSerializer = DateTimeToBinarySerializer.Default;
 		var centsSerializer = Int32LittleEndianSerializer.Default;
 
 		var date = timeSerializer.Deserialize(ref bytes);

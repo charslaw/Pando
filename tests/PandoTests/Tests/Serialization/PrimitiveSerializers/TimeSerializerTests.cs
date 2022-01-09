@@ -10,9 +10,9 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public class TimeSerializerTests
 {
-	public class DateTimeUnixSerializerTests : BaseSerializerTest<DateTime>, ISerializerTestData<DateTime>
+	public class DateTimeToBinarySerializerTests : BaseSerializerTest<DateTime>, ISerializerTestData<DateTime>
 	{
-		protected override IPrimitiveSerializer<DateTime> Serializer => new DateTimeUnixSerializer(new SimpleLongSerializer());
+		protected override IPrimitiveSerializer<DateTime> Serializer => new DateTimeToBinarySerializer(new SimpleLongSerializer());
 
 		public static TheoryData<DateTime, byte[]> SerializationTestData => new()
 		{
