@@ -2,6 +2,9 @@ using System;
 using Pando.Serialization.PrimitiveSerializers;
 using Xunit;
 
+// Rider doesn't detect subclasses of BaseSerializerTest as being used, because they inherit their test methods
+// ReSharper disable UnusedType.Global
+
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public partial class PrimitiveSerializerTests
@@ -28,5 +31,17 @@ public partial class PrimitiveSerializerTests
 		};
 
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(double) };
+	}
+
+	public class HalfLittleEndianSerializerTests : BaseSerializerTest<Half>, ISerializerTestData<Half>
+	{
+		protected override IPrimitiveSerializer<Half> Serializer => new HalfLittleEndianSerializer();
+
+		public static TheoryData<Half, byte[]> SerializationTestData => new()
+		{
+			{ (Half)Math.PI, new byte[] { 0x48, 0x42 } }
+		};
+
+		public static unsafe TheoryData<int?> ByteCountTestData => new() { sizeof(Half) };
 	}
 }
