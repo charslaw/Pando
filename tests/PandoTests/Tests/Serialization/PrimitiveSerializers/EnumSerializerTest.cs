@@ -6,16 +6,19 @@ using Xunit;
 
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
-public class EnumSerializerTests : BaseSerializerTest<TestEnum>, ISerializerTestData<TestEnum>
+public partial class PrimitiveSerializerTests
 {
-	protected override IPrimitiveSerializer<TestEnum> Serializer => new EnumSerializer<TestEnum, long>(new SimpleLongSerializer());
-
-	public static TheoryData<TestEnum, byte[]> SerializationTestData => new()
+	public class EnumSerializerTests : BaseSerializerTest<TestEnum>, ISerializerTestData<TestEnum>
 	{
-		{ TestEnum.Value, new byte[] { 0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01 } },
-	};
+		protected override IPrimitiveSerializer<TestEnum> Serializer => new EnumSerializer<TestEnum, long>(new SimpleLongSerializer());
 
-	public static TheoryData<int?> ByteCountTestData => new() { sizeof(ulong) };
+		public static TheoryData<TestEnum, byte[]> SerializationTestData => new()
+		{
+			{ TestEnum.Value, new byte[] { 0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01 } },
+		};
+
+		public static TheoryData<int?> ByteCountTestData => new() { sizeof(ulong) };
+	}
 }
 
 public enum TestEnum : long

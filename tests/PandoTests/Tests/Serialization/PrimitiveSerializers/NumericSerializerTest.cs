@@ -6,7 +6,7 @@ using Xunit;
 
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
-public class NumericSerializerTest
+public partial class PrimitiveSerializerTests
 {
 	public class SByteSerializerTest : BaseSerializerTest<sbyte>, ISerializerTestData<sbyte>
 	{

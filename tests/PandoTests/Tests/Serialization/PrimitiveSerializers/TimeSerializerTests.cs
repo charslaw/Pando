@@ -8,7 +8,7 @@ using Xunit;
 
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
-public class TimeSerializerTests
+public partial class PrimitiveSerializerTests
 {
 	public class DateTimeToBinarySerializerTests : BaseSerializerTest<DateTime>, ISerializerTestData<DateTime>
 	{

@@ -6,15 +6,18 @@ using Xunit;
 
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
-public class NullableInt64SerializerTest : BaseSerializerTest<long?>, ISerializerTestData<long?>
+public partial class PrimitiveSerializerTests
 {
-	protected override IPrimitiveSerializer<long?> Serializer => new NullableSerializer<long>(new SimpleLongSerializer());
-
-	public static TheoryData<long?, byte[]> SerializationTestData => new()
+	public class NullableInt64SerializerTest : BaseSerializerTest<long?>, ISerializerTestData<long?>
 	{
-		{ null, new byte[] { 0 } },
-		{ long.MaxValue, new byte[] { 0x01, 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } },
-	};
+		protected override IPrimitiveSerializer<long?> Serializer => new NullableSerializer<long>(new SimpleLongSerializer());
 
-	public static TheoryData<int?> ByteCountTestData => new() { null };
+		public static TheoryData<long?, byte[]> SerializationTestData => new()
+		{
+			{ null, new byte[] { 0 } },
+			{ long.MaxValue, new byte[] { 0x01, 0x7F, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } },
+		};
+
+		public static TheoryData<int?> ByteCountTestData => new() { null };
+	}
 }
