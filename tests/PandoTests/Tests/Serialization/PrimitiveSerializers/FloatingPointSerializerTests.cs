@@ -17,4 +17,16 @@ public partial class PrimitiveSerializerTests
 
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(float) };
 	}
+
+	public class DoubleLittleEndianSerializerTests : BaseSerializerTest<double>, ISerializerTestData<double>
+	{
+		protected override IPrimitiveSerializer<double> Serializer => new DoubleLittleEndianSerializer();
+
+		public static TheoryData<double, byte[]> SerializationTestData => new()
+		{
+			{ Math.PI, new byte[] { 0x18, 0x2D, 0x44, 0x54, 0xFB, 0x21, 0x09, 0x40 } }
+		};
+
+		public static TheoryData<int?> ByteCountTestData => new() { sizeof(double) };
+	}
 }
