@@ -1,5 +1,4 @@
 using System;
-using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
@@ -37,25 +36,35 @@ public class NullableSerializer<T> : IPrimitiveSerializer<T?>
 
 	public void Serialize(T? value, ref Span<byte> buffer)
 	{
-		var nullFlag = SpanHelpers.PopStart(ref buffer, NULL_FLAG_SIZE);
+		// Defensively take a copy of the bytes after removing the null flag byte.
+		// If the inner serializer throws, the given buffer will remain unmodified.
+		var remainingBuffer = buffer[1..];
+
 		if (value is not null)
 		{
-			nullFlag[0] = 1;
-			_innerSerializer.Serialize(value.Value, ref buffer);
+			buffer[0] = 1;
+			_innerSerializer.Serialize(value.Value, ref remainingBuffer);
 		}
 		else
 		{
-			nullFlag[0] = 0;
+			buffer[0] = 0;
 		}
+
+		// If we got this far, the serialization was successful, so set the buffer accordingly.
+		buffer = remainingBuffer;
 	}
 
 	public T? Deserialize(ref ReadOnlySpan<byte> buffer)
 	{
-		var nullFlag = SpanHelpers.PopStart(ref buffer, NULL_FLAG_SIZE);
+		// Defensively take a copy of the bytes after removing the null flag byte.
+		// If the inner serializer throws, the given buffer will remain unmodified.
+		var remainingBuffer = buffer[1..];
 
-		if (nullFlag[0] == 0) return null;
+		T? value = buffer[0] == 0 ? null : _innerSerializer.Deserialize(ref remainingBuffer);
 
-		var value = _innerSerializer.Deserialize(ref buffer);
+		// If we got this far, the deserialization was successful, so set the buffer accordingly.
+		buffer = remainingBuffer;
+
 		return value;
 	}
 }
