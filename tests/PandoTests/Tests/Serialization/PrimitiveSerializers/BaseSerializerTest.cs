@@ -103,7 +103,9 @@ public abstract class BaseSerializerTest<T>
 	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
 	public virtual void Deserialize_should_chop_used_bytes_from_buffer(T _, byte[] inputBytes)
 	{
-		ReadOnlySpan<byte> readBuffer = new byte[inputBytes.Length + EXTRA_BUFFER_SPACE];
+		Span<byte> oversizedBuffer = stackalloc byte[inputBytes.Length + EXTRA_BUFFER_SPACE];
+		inputBytes.CopyTo(oversizedBuffer);
+		ReadOnlySpan<byte> readBuffer = oversizedBuffer;
 		var __ = Serializer.Deserialize(ref readBuffer);
 		readBuffer.Length.Should().Be(EXTRA_BUFFER_SPACE);
 	}
@@ -123,7 +125,7 @@ public abstract class BaseSerializerTest<T>
 	{
 		Serializer.Invoking(s =>
 				{
-					ReadOnlySpan<byte> undersizedBuffer = stackalloc byte[inputBytes.Length - 1]; // we don't care about the contents, just the size
+					ReadOnlySpan<byte> undersizedBuffer = inputBytes.AsSpan(..^1);
 					s.Deserialize(ref undersizedBuffer);
 				}
 			)
@@ -140,7 +142,7 @@ public abstract class BaseSerializerTest<T>
 	public virtual void Deserialize_should_not_alter_size_of_buffer_when_it_is_too_small(T _, byte[] inputBytes)
 	{
 		var beforeBufferSize = inputBytes.Length - 1;
-		ReadOnlySpan<byte> undersizedBuffer = stackalloc byte[beforeBufferSize]; // we don't care about the contents, just the size
+		ReadOnlySpan<byte> undersizedBuffer = inputBytes.AsSpan(..^1);
 
 		try { Serializer.Deserialize(ref undersizedBuffer); }
 		catch (ArgumentOutOfRangeException) { } // this will throw but we don't care about the exception, we just want to test a post-condition
