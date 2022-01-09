@@ -6,6 +6,7 @@
 		<LangVersion>preview</LangVersion>
 		<TargetFramework>net6.0</TargetFramework>
 		<EnablePreviewFeatures>True</EnablePreviewFeatures> <!-- For abstract static interface members -->
+		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 
 	<ItemGroup>
