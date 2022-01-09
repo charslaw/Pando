@@ -29,4 +29,16 @@ public class TimeSerializerTests
 			actualValue.Kind.Should().Be(expectedValue.Kind);
 		}
 	}
+
+	public class TimeSpanTicksSerializerTests : BaseSerializerTest<TimeSpan>, ISerializerTestData<TimeSpan>
+	{
+		protected override IPrimitiveSerializer<TimeSpan> Serializer => new TimeSpanTicksSerializer(new SimpleLongSerializer());
+
+		public static TheoryData<TimeSpan, byte[]> SerializationTestData => new()
+		{
+			{ new TimeSpan(1234567, 89, 87, 65, 4321), new byte[] { 0x0E, 0xCD, 0x91, 0xEF, 0x92, 0x3A, 0xBD, 0x90 } }
+		};
+
+		public static TheoryData<int?> ByteCountTestData => new() { sizeof(long) };
+	}
 }
