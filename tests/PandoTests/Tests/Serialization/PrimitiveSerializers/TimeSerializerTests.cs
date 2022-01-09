@@ -1,4 +1,5 @@
 using System;
+using FluentAssertions;
 using Pando.Serialization.PrimitiveSerializers;
 using Xunit;
 
@@ -19,5 +20,13 @@ public class TimeSerializerTests
 		};
 
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(long) };
+
+		/// By default, date time comparison doesn't compare the Kind property,
+		/// but we want to make sure that the Kind property is serialized/deserialized properly so we manually check it
+		protected override void AssertDeserializedValuesEquivalent(DateTime actualValue, DateTime expectedValue)
+		{
+			base.AssertDeserializedValuesEquivalent(actualValue, expectedValue);
+			actualValue.Kind.Should().Be(expectedValue.Kind);
+		}
 	}
 }
