@@ -41,4 +41,16 @@ public class TimeSerializerTests
 
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(long) };
 	}
+
+	public class DateOnlyDayNumberSerializerTests : BaseSerializerTest<DateOnly>, ISerializerTestData<DateOnly>
+	{
+		protected override IPrimitiveSerializer<DateOnly> Serializer => new DateOnlyDayNumberSerializer(new SimpleIntSerializer());
+
+		public static TheoryData<DateOnly, byte[]> SerializationTestData => new()
+		{
+			{ DateOnly.MaxValue, new byte[] { 0x00, 0x37, 0xB9, 0xDA } }
+		};
+
+		public static TheoryData<int?> ByteCountTestData => new() { sizeof(int) };
+	}
 }
