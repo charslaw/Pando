@@ -1,14 +1,14 @@
 using Pando.Serialization.PrimitiveSerializers;
 using Xunit;
 
-// Rider doesn't detect subclasses of BaseSerializerTest as being used, because they inherit their test methods
+// Rider doesn't detect subclasses sof BaseSerializerTest as being used, because they inherit their test methods
 // ReSharper disable UnusedType.Global
 
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public partial class PrimitiveSerializerTests
 {
-	public class SByteSerializerTest : BaseSerializerTest<sbyte>, ISerializerTestData<sbyte>
+	public class SByteSerializerTests : BaseSerializerTest<sbyte>, ISerializerTestData<sbyte>
 	{
 		protected override IPrimitiveSerializer<sbyte> Serializer => new SByteSerializer();
 
@@ -20,7 +20,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(byte) };
 	}
 
-	public class ByteSerializerTest : BaseSerializerTest<byte>, ISerializerTestData<byte>
+	public class ByteSerializerTests : BaseSerializerTest<byte>, ISerializerTestData<byte>
 	{
 		protected override IPrimitiveSerializer<byte> Serializer => new ByteSerializer();
 
@@ -32,7 +32,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(byte) };
 	}
 
-	public class Int16LittleEndianSerializerTest : BaseSerializerTest<short>, ISerializerTestData<short>
+	public class Int16LittleEndianSerializerTests : BaseSerializerTest<short>, ISerializerTestData<short>
 	{
 		protected override IPrimitiveSerializer<short> Serializer => new Int16LittleEndianSerializer();
 
@@ -44,7 +44,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(short) };
 	}
 
-	public class UInt16LittleEndianSerializerTest : BaseSerializerTest<ushort>, ISerializerTestData<ushort>
+	public class UInt16LittleEndianSerializerTests : BaseSerializerTest<ushort>, ISerializerTestData<ushort>
 	{
 		protected override IPrimitiveSerializer<ushort> Serializer => new UInt16LittleEndianSerializer();
 
@@ -56,7 +56,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(ushort) };
 	}
 
-	public class Int32LittleEndianSerializerTest : BaseSerializerTest<int>, ISerializerTestData<int>
+	public class Int32LittleEndianSerializerTests : BaseSerializerTest<int>, ISerializerTestData<int>
 	{
 		protected override IPrimitiveSerializer<int> Serializer => new Int32LittleEndianSerializer();
 
@@ -68,7 +68,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(int) };
 	}
 
-	public class UInt32LittleEndianSerializerTest : BaseSerializerTest<uint>, ISerializerTestData<uint>
+	public class UInt32LittleEndianSerializerTests : BaseSerializerTest<uint>, ISerializerTestData<uint>
 	{
 		protected override IPrimitiveSerializer<uint> Serializer => new UInt32LittleEndianSerializer();
 
@@ -80,7 +80,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(uint) };
 	}
 
-	public class Int64LittleEndianSerializerTest : BaseSerializerTest<long>, ISerializerTestData<long>
+	public class Int64LittleEndianSerializerTests : BaseSerializerTest<long>, ISerializerTestData<long>
 	{
 		protected override IPrimitiveSerializer<long> Serializer => new Int64LittleEndianSerializer();
 
@@ -92,7 +92,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(long) };
 	}
 
-	public class UInt64LittleEndianSerializerTest : BaseSerializerTest<ulong>, ISerializerTestData<ulong>
+	public class UInt64LittleEndianSerializerTests : BaseSerializerTest<ulong>, ISerializerTestData<ulong>
 	{
 		protected override IPrimitiveSerializer<ulong> Serializer => new UInt64LittleEndianSerializer();
 
