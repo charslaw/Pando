@@ -24,3 +24,20 @@ retrive child's node data, which is passed to the child node serializer for dese
 
 To effectively author a Pando node serializer, you should have some knowledge of how data is stored in the data source
 (see [Pando Data Sources](data-sources.md)).
+
+## Primitive Serializers
+
+A primitive serializer is a more traditional serializer that converts a single primitive data type to or from a byte
+representation. Primitive serializers are used by node serializers to accomplish the actual task of serializing the data
+that makes up the node.
+
+Pando provides several built in primitive serializers for a number of dotnet types, including numeric types, enums,
+date/time related types, and strings.
+
+## Pando Serializer Source Generator
+
+*WIP*
+
+Pando comes with a source generator that will create a hierarchy of node serializers to match your state tree. The
+source generator will use the built in primitive serializers to serialize the base data, and you can manually write your
+own primitive serializers for your own custom primitive types for the source generator to use.
