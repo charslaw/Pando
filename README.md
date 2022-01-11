@@ -60,40 +60,6 @@ SnapshotTree history = myPandoRepository.GetSnapshotTree();
 
 ## Details
 
-### Data Sources
-
-An `IDataSource` defines how Pando will save data. Pando provides two implementations of `IDataSource`:
-
-- `MemoryDataSource`: stores snapshots and tree data in-memory without persistence.
-- `PersistenceBackedDataSource`: stores snapshots and tree data in-memory, but also mirrors the data to 3 streams, one
-  for each type of data Pando stores (the snapshot index, node index, and node data). These streams could be kind
-  of `Stream`, but it would be typical for them to be file stream.
-
-#### Storage in the Data Source
-
-A Pando data source stores 4 collections of data:
-
-- **The Snapshot Index:** maps a snapshot hash to a `SnapshotData` struct, which itself is composed of a parent hash (
-  which refers to this snapshot's parent snapshot) and a root node hash (which refers to the node index entry for the
-  tree root node at this snapshot).
-    - A snapshot's hash is computed by combining its two constituent hashes and hashing the resulting bytes.
-- **The Leaf Snapshot Set:** a set of snapshots that make up the "head" of all snapshot branches within the data source.
-- **The Node Index:** maps a node hash to a `DataSlice` struct, which is comprised of an offset into the stored node
-  data and the length of this node's data.
-    - Nodes in the index can take one of two semantic types: **leaf nodes (blobs)** and **branch nodes**. For a leaf
-      node, the corresponding data in the stored node data is "real" data. On the other hand, for a branch node, the
-      corresponding data in the stored node data is actually a collection of hashes referring to its child nodes in the
-      index.
-    - A node's hash in the index is computed from the bytes it refers to in the stored node data.
-- **Stored Node Data:** this is a big blob of raw `bytes`. These bytes are created by the node serializer when
-  serializing the node.
-    - The interpretation of these bytes is undefined by Pando itself, it must be determined structurally based on what
-      nodes refer to what slices of the data and the method by which the data was serialized.
-
-A Pando data source has methods for writing snapshots and tree nodes to the data source, which take in the data
-comprising the node or snapshot, and return the resulting hash within the corresponding index. It also has methods for
-reading snapshots and tree nodes from the data source given the corresponding index hash.
-
 ### Serializers
 
 The serializer given to the `PandoRepository` must implement `IPandoNodeSerializer<T>` where `T` is the same root node
