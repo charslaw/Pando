@@ -1,6 +1,6 @@
-<img style="float: right" width="160px" height="160px" src="docs/noun-tree-4494965.svg" alt="Tree by Diky Setiawan from NounProject.com">
-
 # Pando
+
+<img style="float: right" width="160px" height="160px" src="docs/noun-tree-4494965.svg" alt="Tree by Diky Setiawan from NounProject.com">
 
 Pando is a history-aware state tree serialization system. Using a Pando Repository, you can save a snapshot of your tree
 hierarchy, and Pando will keep track of the history of snapshots, including branching histories and backtracking.
