@@ -1,28 +1,26 @@
 # Serializers
 
-The serializer given to the `PandoRepository` must implement `IPandoNodeSerializer<T>` where `T` is the same root node
-type as the `PandoRepository` root type. This implementation must be provided by you because the logic for serialization
-will depend upon the specific shape of your tree.
+## Node Serializers
 
-A Pando Node serializer is unique compared to other serializers in that it is designed to progressively save tree nodes
-to the Pando data source starting from the leaf nodes (blobs) and returning the hash of the saved nodes so that the
-hashes may be used to compose the parent nodes. Each Pando serializer defines how to serialize and deserialize one level
-of the state tree.
+A Pando node serializer is responsible for two things:
 
-The Serialize method is passed the node to serialize and also an instance of `INodeDataSink`. For branch nodes, the
-serializer will delegate serialization of its contents to child serializers, then aggregate the hashes returned from
-serializing its children and writing that to the data sink.
+ - Serialization: Converting a node's data to a `Span` of raw bytes, then submitting that data to the Pando data source
+   via `AddNode`.
+ - Deserialization: Taking a given `ReadOnlySpan` of raw bytes and converting it back to the C# object those bytes
+   represent.
 
-The Deserialize method is passed a `ReadOnlySpan` of raw bytes and an instance of `INodeDataSource`. For branch nodes,
-the serializer will parse out the hashes of its children, then delegate deserialization of the children by
-using `GetNode` on the data source.
+Serializers implement the `IPandoNodSerializer<T>` interface, where `T` is the type of node that this serializer
+serializes. An `IPandoNodeSerializer` implementation is unique to the type the node that it serializes, and thus it must
+be specifically written for that node type, either manually or via the Pando source generator. Pando node serializers
+are **nested** to mirror the structure of the state tree.
 
-A pando node serializer will likely be composed of child serializers in a tree that mirrors the state tree, with each
-serializer node being responsible for delegating to its children, then composing its own serialized form and serializing
-itself.
+A Pando node serializer is unique compared to a traditional serializer in that Pando node serializer is responsible for
+both creating the serialized form of the node as well as submitting the serialized bytes to the data source. This is
+because when the node is submitted to the data source, the data source returns the id of the node, which can then
+included in the data for the parent node.
 
-To effectively author a Pando node serializer, you should have some knowledge of how data is stored in the data source.
-See the section on [how data is stored in the data source](#storage-in-the-data-source).
+Similarly, when deserializing, the incoming serialized node bytes can contain hashes of child nodes. These are used to
+retrive child's node data, which is passed to the child node serializer for deserialization.
 
-Also see `docs/PandoTreeExamples/README.md` for some guidelines on creating tree hierarchies that will play well with
-Pando and its serialization model.
+To effectively author a Pando node serializer, you should have some knowledge of how data is stored in the data source
+(see [Pando Data Sources](data-sources.md)).
