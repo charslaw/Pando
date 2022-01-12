@@ -5,8 +5,8 @@
 Pando is a history-aware state tree serialization system. Using a Pando Repository, you can save a snapshot of your tree
 hierarchy, and Pando will keep track of the history of snapshots, including branching histories and backtracking.
 
-Pando is intended for use cases where all of the data you want to save is stored in a single tree hierarchy and imposes
-some limitations on the organization of the data.
+Pando is intended for use cases where all of the data you want to save is stored in a single tree hierarchy, and it
+imposes some limitations on the organization of the data.
 
 It uses [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree) to store a complete history of a tree over a series of
 snapshots while avoiding data duplication (each unique blob is stored only once and referenced by hash).
@@ -14,7 +14,7 @@ snapshots while avoiding data duplication (each unique blob is stored only once 
 ## Usage
 
 The entry point to Pando is the `PandoRepository<T>` class, where `T` is the type of the tree that you want to save in
-this repository. The public interface surface is defined 
+this repository. The public interface surface is defined
 in [`Pando.Repositories.IRepository<T>`](src/Pando/Repositories/IRepository.cs).
 
 ### Creating a `PandoRepository`
@@ -23,8 +23,8 @@ In order to create a `PandoRepository`, you must define a *data source* and a *s
 the destination to which data will be saved, while the *serializer* defines how to convert the tree into binary data.
 
 The *data source* is of type `IDataSource` and the Pando library offers two built in options to fulfill this
-dependency  (see [data sources](docs/data-sources.md)). The *serializer* must be user defined as the logic will be specific to
-the type that you are serializing (see [serializers](docs/serializers.md)).
+dependency (see [data sources](docs/data-sources.md)). The *serializer* must be user defined as the logic will be
+specific to the type that you are serializing (see [serializers](docs/serializers.md)).
 
 ### Saving to a `PandoRepository`
 
