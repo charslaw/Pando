@@ -7,7 +7,6 @@ namespace ExamplesCode;
 
 internal record Person(
 	string Name,
-	string Email,
 	DateTime DateOfBirth,
 	Gender Gender,
 	EyeColor EyeColor
@@ -24,7 +23,7 @@ internal class PersonSerializer : INodeSerializer<Person>
 	// We use some hard coded default serializers here, but these could also be injected through a constructor.
 
 	// Use default UTF8 serializer for strings
-	private readonly StringSerializer _stringSerializer = StringSerializer.UTF8;
+	private readonly StringSerializer _nameSerializer = StringSerializer.UTF8;
 
 	// Use default DateTime serializer which will encode the date as a long using ToBinary
 	private readonly DateTimeToBinarySerializer _dateOfBirthSerializer = DateTimeToBinarySerializer.Default;
@@ -43,11 +42,10 @@ internal class PersonSerializer : INodeSerializer<Person>
 	/// then returns the hash of the newly added node, so that whatever node contains this can use the hash.
 	public ulong Serialize(Person obj, INodeDataSink dataSink)
 	{
-		var (name, email, dob, gender, eyeColor) = obj;
+		var (name, dob, gender, eyeColor) = obj;
 
 		// Get the size necessary to serialize this person
-		var numBytes = _stringSerializer.ByteCountForValue(name)
-			+ _stringSerializer.ByteCountForValue(email)
+		var numBytes = _nameSerializer.ByteCountForValue(name)
 			+ _dateOfBirthSerializer.ByteCountForValue(dob)
 			+ _genderSerializer.ByteCountForValue(gender)
 			+ _eyeColorSerializer.ByteCountForValue(eyeColor);
@@ -57,8 +55,7 @@ internal class PersonSerializer : INodeSerializer<Person>
 
 		// Write data to the buffer
 		var writeBuffer = bytes;
-		_stringSerializer.Serialize(name, ref writeBuffer);
-		_stringSerializer.Serialize(email, ref writeBuffer);
+		_nameSerializer.Serialize(name, ref writeBuffer);
 		_dateOfBirthSerializer.Serialize(dob, ref writeBuffer);
 		_genderSerializer.Serialize(gender, ref writeBuffer);
 		_eyeColorSerializer.Serialize(eyeColor, ref writeBuffer);
@@ -73,13 +70,12 @@ internal class PersonSerializer : INodeSerializer<Person>
 	public Person Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
 		// get member data out of the given byte buffer
-		var name = _stringSerializer.Deserialize(ref bytes);
-		var email = _stringSerializer.Deserialize(ref bytes);
+		var name = _nameSerializer.Deserialize(ref bytes);
 		var dob = _dateOfBirthSerializer.Deserialize(ref bytes);
 		var gender = _genderSerializer.Deserialize(ref bytes);
 		var eyeColor = _eyeColorSerializer.Deserialize(ref bytes);
 
 		// instantiate a person with all of its members
-		return new Person(name, email, dob, gender, eyeColor);
+		return new Person(name, dob, gender, eyeColor);
 	}
 }
