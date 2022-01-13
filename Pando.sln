@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pando", "src\Pando\Pando.cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoTests", "tests\PandoTests\PandoTests.csproj", "{6560ED6A-2520-4657-8ED5-7B07F24EDCAA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuidelinesExamplesCode", "docs\GuidelinesExamplesCode\GuidelinesExamplesCode.csproj", "{532220ED-6257-495E-A6F4-F969164568AB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplesCode", "docs\ExamplesCode\ExamplesCode.csproj", "{532220ED-6257-495E-A6F4-F969164568AB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoExampleProject", "docs\PandoExampleProject\PandoExampleProject.csproj", "{9C06CC4A-6BE4-4C58-9147-58CF0B3CC6E8}"
 EndProject

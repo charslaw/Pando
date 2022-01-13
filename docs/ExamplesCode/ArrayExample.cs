@@ -1,4 +1,4 @@
-namespace GuidelinesExamplesCode;
+namespace ExamplesCode;
 
 internal record Company(     // Company is a branch
 	string CompanyName,    // CompanyName is a blob
