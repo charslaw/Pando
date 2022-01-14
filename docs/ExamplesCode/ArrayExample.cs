@@ -1,6 +1,6 @@
 namespace ExamplesCode;
 
-internal record Company(     // Company is a branch
-	string CompanyName,    // CompanyName is a blob
-	string[] EmployeeNames // EmployeeNames is a branch; each employee name is a blob
+internal record Company(
+	string CompanyName, // CompanyName is a primitive value
+	Person[] Employees  // Employees is a node; each employee is a leaf node (see the basic example)
 );
