@@ -7,7 +7,7 @@ using Xunit;
 
 namespace PandoTests.Tests.Serialization;
 
-public class PrimitiveArrayNodeSerializerTests
+public class PrimitiveArraySerializerTests
 {
 	public class NodeSize
 	{
@@ -15,7 +15,7 @@ public class PrimitiveArrayNodeSerializerTests
 		public void Should_return_null()
 		{
 			var elementSerializer = new SimpleIntSerializer();
-			var nodeSerializer = new PrimitiveArrayNodeSerializer<int>(elementSerializer);
+			var nodeSerializer = new PrimitiveArraySerializer<int>(elementSerializer);
 			nodeSerializer.NodeSize.Should().BeNull();
 		}
 	}
@@ -26,7 +26,7 @@ public class PrimitiveArrayNodeSerializerTests
 		public void Should_write_correct_node_contents_when_elements_are_fixed_size()
 		{
 			var elementSerializer = new SimpleIntSerializer();
-			var nodeSerializer = new PrimitiveArrayNodeSerializer<int>(elementSerializer);
+			var nodeSerializer = new PrimitiveArraySerializer<int>(elementSerializer);
 			var dataSink = new NodeDataSinkSpy();
 
 			nodeSerializer.Serialize(new[] { 0, -42 }, dataSink);
@@ -43,7 +43,7 @@ public class PrimitiveArrayNodeSerializerTests
 		public void Should_write_correct_node_contents_when_elements_are_variable_size()
 		{
 			var elementSerializer = new NullableSerializer<int>(new SimpleIntSerializer());
-			var nodeSerializer = new PrimitiveArrayNodeSerializer<int?>(elementSerializer);
+			var nodeSerializer = new PrimitiveArraySerializer<int?>(elementSerializer);
 			var dataSink = new NodeDataSinkSpy();
 
 			nodeSerializer.Serialize(new int?[] { null, -42 }, dataSink);
@@ -63,7 +63,7 @@ public class PrimitiveArrayNodeSerializerTests
 		public void Should_read_correct_node_contents_when_elements_are_fixed_size()
 		{
 			var elementSerializer = new SimpleIntSerializer();
-			var nodeSerializer = new PrimitiveArrayNodeSerializer<int>(elementSerializer);
+			var nodeSerializer = new PrimitiveArraySerializer<int>(elementSerializer);
 
 			var actual = nodeSerializer.Deserialize(new byte[] { 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xD6 }, null!);
 
@@ -74,7 +74,7 @@ public class PrimitiveArrayNodeSerializerTests
 		public void Should_read_correct_node_contents_when_elements_are_variable_size()
 		{
 			var elementSerializer = new NullableSerializer<byte>(new ByteSerializer());
-			var nodeSerializer = new PrimitiveArrayNodeSerializer<byte?>(elementSerializer);
+			var nodeSerializer = new PrimitiveArraySerializer<byte?>(elementSerializer);
 
 			var actual = nodeSerializer.Deserialize(new byte[]
 				{

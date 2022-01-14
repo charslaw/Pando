@@ -6,13 +6,13 @@ using Pando.Serialization.PrimitiveSerializers;
 namespace Pando.Serialization;
 
 /// Serializes a node that is an array of primitive data types using the given primitive serializer.
-public class PrimitiveArrayNodeSerializer<T> : INodeSerializer<T[]>
+public class PrimitiveArraySerializer<T> : INodeSerializer<T[]>
 {
 	public int? NodeSize => null;
 
 	private readonly IPrimitiveSerializer<T> _elementSerializer;
 
-	public PrimitiveArrayNodeSerializer(IPrimitiveSerializer<T> elementSerializer) { _elementSerializer = elementSerializer; }
+	public PrimitiveArraySerializer(IPrimitiveSerializer<T> elementSerializer) { _elementSerializer = elementSerializer; }
 
 	public ulong Serialize(T[] array, INodeDataSink dataSink)
 	{
