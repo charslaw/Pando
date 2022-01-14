@@ -14,8 +14,7 @@ public class PrimitiveArraySerializerTests
 		[Fact]
 		public void Should_return_null()
 		{
-			var elementSerializer = new SimpleIntSerializer();
-			var nodeSerializer = new PrimitiveArraySerializer<int>(elementSerializer);
+			var nodeSerializer = new PrimitiveArraySerializer<int>(null!);
 			nodeSerializer.NodeSize.Should().BeNull();
 		}
 	}
