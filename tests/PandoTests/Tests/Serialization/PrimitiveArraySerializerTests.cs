@@ -14,8 +14,8 @@ public class PrimitiveArraySerializerTests
 		[Fact]
 		public void Should_return_null()
 		{
-			var nodeSerializer = new PrimitiveArraySerializer<int>(null!);
-			nodeSerializer.NodeSize.Should().BeNull();
+			var serializer = new PrimitiveArraySerializer<int>(null!);
+			serializer.NodeSize.Should().BeNull();
 		}
 	}
 
@@ -25,10 +25,10 @@ public class PrimitiveArraySerializerTests
 		public void Should_write_correct_node_contents_when_elements_are_fixed_size()
 		{
 			var elementSerializer = new SimpleIntSerializer();
-			var nodeSerializer = new PrimitiveArraySerializer<int>(elementSerializer);
+			var serializer = new PrimitiveArraySerializer<int>(elementSerializer);
 			var dataSink = new NodeDataSinkSpy();
 
-			nodeSerializer.Serialize(new[] { 0, -42 }, dataSink);
+			serializer.Serialize(new[] { 0, -42 }, dataSink);
 
 			dataSink.ReceivedNodeBytes.Should()
 				.BeEquivalentTo(new object[]
@@ -42,10 +42,10 @@ public class PrimitiveArraySerializerTests
 		public void Should_write_correct_node_contents_when_elements_are_variable_size()
 		{
 			var elementSerializer = new NullableSerializer<int>(new SimpleIntSerializer());
-			var nodeSerializer = new PrimitiveArraySerializer<int?>(elementSerializer);
+			var serializer = new PrimitiveArraySerializer<int?>(elementSerializer);
 			var dataSink = new NodeDataSinkSpy();
 
-			nodeSerializer.Serialize(new int?[] { null, -42 }, dataSink);
+			serializer.Serialize(new int?[] { null, -42 }, dataSink);
 
 			dataSink.ReceivedNodeBytes.Should()
 				.BeEquivalentTo(new object[]
@@ -62,9 +62,9 @@ public class PrimitiveArraySerializerTests
 		public void Should_read_correct_node_contents_when_elements_are_fixed_size()
 		{
 			var elementSerializer = new SimpleIntSerializer();
-			var nodeSerializer = new PrimitiveArraySerializer<int>(elementSerializer);
+			var serializer = new PrimitiveArraySerializer<int>(elementSerializer);
 
-			var actual = nodeSerializer.Deserialize(new byte[] { 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xD6 }, null!);
+			var actual = serializer.Deserialize(new byte[] { 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xD6 }, null!);
 
 			actual.Should().BeEquivalentTo(new[] { 0, -42 });
 		}
@@ -73,9 +73,9 @@ public class PrimitiveArraySerializerTests
 		public void Should_read_correct_node_contents_when_elements_are_variable_size()
 		{
 			var elementSerializer = new NullableSerializer<byte>(new ByteSerializer());
-			var nodeSerializer = new PrimitiveArraySerializer<byte?>(elementSerializer);
+			var serializer = new PrimitiveArraySerializer<byte?>(elementSerializer);
 
-			var actual = nodeSerializer.Deserialize(new byte[]
+			var actual = serializer.Deserialize(new byte[]
 				{
 					0,
 					1, 42,
