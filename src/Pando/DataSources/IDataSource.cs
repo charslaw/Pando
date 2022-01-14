@@ -26,6 +26,9 @@ public interface INodeDataSource
 	/// Gets the size in bytes of the node identified by the given hash.
 	int GetSizeOfNode(ulong hash);
 
+	/// Copies the binary representation of the node with the given hash into the given Span.
+	/// <exception cref="HashNotFoundException">If the given hash is not found in the data source.</exception>
+	/// <exception cref="ArgumentOutOfRangeException">If the given span is not large enough to contain</exception>
 	void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes);
 }
 
