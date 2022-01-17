@@ -5,7 +5,7 @@ namespace Pando.Serialization.PrimitiveSerializers;
 
 public abstract class FixedSizeBaseSerializer<T> : IPrimitiveSerializer<T>
 {
-	protected abstract int FixedSize
+	public abstract int FixedSize
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		get;

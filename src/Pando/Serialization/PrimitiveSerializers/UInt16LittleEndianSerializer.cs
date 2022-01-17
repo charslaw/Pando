@@ -9,7 +9,7 @@ public class UInt16LittleEndianSerializer : FixedSizeBaseSerializer<ushort>
 	/// <summary>A global default instance for <see cref="UInt16LittleEndianSerializer"/></summary>
 	public static UInt16LittleEndianSerializer Default { get; } = new();
 
-	protected override int FixedSize => sizeof(ushort);
+	public override int FixedSize => sizeof(ushort);
 	protected override void SerializeInner(ushort value, Span<byte> slice) => BinaryPrimitives.WriteUInt16LittleEndian(slice, value);
 	protected override ushort DeserializeInner(ReadOnlySpan<byte> slice) => BinaryPrimitives.ReadUInt16LittleEndian(slice);
 }
