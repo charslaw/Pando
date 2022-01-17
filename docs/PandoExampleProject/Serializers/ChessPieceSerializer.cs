@@ -1,6 +1,6 @@
 using System;
 using Pando.DataSources;
-using Pando.Serialization;
+using Pando.Serialization.NodeSerializers;
 
 namespace PandoExampleProject.Serializers;
 

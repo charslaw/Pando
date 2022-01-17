@@ -3,7 +3,7 @@ using System.Buffers;
 using Pando.DataSources;
 using Pando.Serialization.PrimitiveSerializers;
 
-namespace Pando.Serialization;
+namespace Pando.Serialization.NodeSerializers;
 
 /// Serializes a node that is an array of primitive data types using the given primitive serializer.
 public class PrimitiveArraySerializer<T> : INodeSerializer<T[]>

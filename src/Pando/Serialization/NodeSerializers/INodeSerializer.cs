@@ -1,7 +1,7 @@
 using System;
 using Pando.DataSources;
 
-namespace Pando.Serialization;
+namespace Pando.Serialization.NodeSerializers;
 
 public interface INodeSerializer<T>
 {
