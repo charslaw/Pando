@@ -45,7 +45,7 @@ internal readonly struct DoubleTreeASerializer : INodeSerializer<TestTree.A>
 
 	public DoubleTreeASerializer()
 	{
-		_size = Int32LittleEndianSerializer.Default.ByteCount!.Value;
+		_size = Int32LittleEndianSerializer.Default.FixedSize;
 	}
 
 	public int? NodeSize => _size;
@@ -73,7 +73,7 @@ internal readonly struct DoubleTreeBSerializer : INodeSerializer<TestTree.B>
 	public int? NodeSize { get; }
 
 	public int NodeSizeForObject(TestTree.B obj)
-		=> NodeSize ?? DateTimeToBinarySerializer.Default.ByteCountForValue(obj.Time) + Int32LittleEndianSerializer.Default.ByteCount!.Value;
+		=> NodeSize ?? DateTimeToBinarySerializer.Default.ByteCountForValue(obj.Time) + Int32LittleEndianSerializer.Default.FixedSize;
 
 	public void Serialize(TestTree.B obj, Span<byte> writeBuffer, INodeDataSink _)
 	{
