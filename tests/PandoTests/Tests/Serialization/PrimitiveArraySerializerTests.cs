@@ -18,6 +18,20 @@ public class PrimitiveArraySerializerTests
 		}
 	}
 
+	public class NodeSizeForObject
+	{
+		[Theory]
+		[InlineData(new int[] { }, 0)]
+		[InlineData(new[] { 1, 2 }, 8)]
+		public void Should_return_correct_size_for_array(int[] array, int expectedSize)
+		{
+			var serializer = new PrimitiveArraySerializer<int>(new SimpleIntSerializer());
+			var actualSize = serializer.NodeSizeForObject(array);
+
+			actualSize.Should().Be(expectedSize);
+		}
+	}
+
 	public class Serialize
 	{
 		[Fact]
