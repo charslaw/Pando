@@ -2,7 +2,6 @@ using FluentAssertions;
 using Pando.Serialization;
 using Pando.Serialization.PrimitiveSerializers;
 using PandoTests.Tests.Serialization.PrimitiveSerializers;
-using PandoTests.Utils;
 using Xunit;
 
 namespace PandoTests.Tests.Serialization;
@@ -26,16 +25,11 @@ public class PrimitiveArraySerializerTests
 		{
 			var elementSerializer = new SimpleIntSerializer();
 			var serializer = new PrimitiveArraySerializer<int>(elementSerializer);
-			var dataSink = new NodeDataSinkSpy();
 
-			serializer.Serialize(new[] { 0, -42 }, dataSink);
+			var writeBuffer = new byte[sizeof(int) * 2];
+			serializer.Serialize(new[] { 0, -42 }, writeBuffer, null!);
 
-			dataSink.ReceivedNodeBytes.Should()
-				.BeEquivalentTo(new object[]
-					{
-						new byte[] { 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xD6 }
-					}
-				);
+			writeBuffer.Should().BeEquivalentTo(new byte[] { 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xD6 });
 		}
 
 		[Fact]
@@ -43,16 +37,11 @@ public class PrimitiveArraySerializerTests
 		{
 			var elementSerializer = new NullableSerializer<int>(new SimpleIntSerializer());
 			var serializer = new PrimitiveArraySerializer<int?>(elementSerializer);
-			var dataSink = new NodeDataSinkSpy();
 
-			serializer.Serialize(new int?[] { null, -42 }, dataSink);
+			var writeBuffer = new byte[6];
+			serializer.Serialize(new int?[] { null, -42 }, writeBuffer, null!);
 
-			dataSink.ReceivedNodeBytes.Should()
-				.BeEquivalentTo(new object[]
-					{
-						new byte[] { 0, 1, 0xFF, 0xFF, 0xFF, 0xD6 }
-					}
-				);
+			writeBuffer.Should().BeEquivalentTo(new byte[] { 0, 1, 0xFF, 0xFF, 0xFF, 0xD6 });
 		}
 	}
 
