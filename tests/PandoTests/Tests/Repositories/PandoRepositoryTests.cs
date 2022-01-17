@@ -75,7 +75,7 @@ public class PandoRepositoryTests
 			// Arrange
 			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 
 			// Act
@@ -100,7 +100,7 @@ public class PandoRepositoryTests
 			var nodeData = new SpannableList<byte>();
 			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(nodeIndex: nodeIndex, nodeData: nodeData),
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 
 			// Act
@@ -108,7 +108,7 @@ public class PandoRepositoryTests
 			repository.SaveSnapshot(tree2, rootHash);
 
 			// Assert
-			nodeIndex.Count.Should().Be(4, "because a TestTree has 4 blobs");
+			nodeIndex.Count.Should().Be(3, "because a TestTree is made of 3 blobs");
 		}
 
 		[Fact]
@@ -121,7 +121,7 @@ public class PandoRepositoryTests
 			// Arrange
 			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 			repository.SaveRootSnapshot(tree);
 
@@ -144,7 +144,7 @@ public class PandoRepositoryTests
 			// Arrange
 			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 
 			// Act
@@ -163,7 +163,7 @@ public class PandoRepositoryTests
 			var source = new MemoryDataSource();
 			var repository = new PandoRepository<TestTree>(
 				source,
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 
 			repository.Invoking(repo => repo.SaveSnapshot(tree1, 0UL))
@@ -188,7 +188,7 @@ public class PandoRepositoryTests
 			// Arrange
 			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 			var rootHash = repository.SaveRootSnapshot(tree1);
 			var child1Hash = repository.SaveSnapshot(tree2, rootHash);
@@ -222,7 +222,7 @@ public class PandoRepositoryTests
 
 			var repository = new PandoRepository<TestTree>(
 				source,
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 
 			// Act
@@ -252,7 +252,7 @@ public class PandoRepositoryTests
 
 			var repository = new PandoRepository<TestTree>(
 				source,
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 
 			// Act
@@ -286,7 +286,7 @@ public class PandoRepositoryTests
 		{
 			var repository = new PandoRepository<TestTree>(
 				new MemoryDataSource(),
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 
 			repository.Invoking(repo => repo.GetSnapshotTree()).Should().Throw<NoRootSnapshotException>();
@@ -307,7 +307,7 @@ public class PandoRepositoryTests
 					new MemoryDataSource(),
 					new StreamDataSource(snapshotIndex, leafSnapshots, nodeIndex, nodeData)
 				),
-				TestTreeSerializer.Create()
+				new TestTreeSerializer()
 			);
 
 			var rootHash = repository.SaveRootSnapshot(MakeTestTree1());

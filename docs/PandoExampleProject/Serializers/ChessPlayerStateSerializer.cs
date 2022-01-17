@@ -6,21 +6,19 @@ namespace PandoExampleProject.Serializers;
 
 internal class ChessPlayerStateSerializer : INodeSerializer<ChessPlayerState>
 {
-	private const int SIZE = 2;
+	private const int SIZE = 2 * sizeof(byte);
 	public int? NodeSize => SIZE;
 
-	public ulong Serialize(ChessPlayerState obj, INodeDataSink dataSink)
+	public int NodeSizeForObject(ChessPlayerState obj) => SIZE;
+
+	public void Serialize(ChessPlayerState obj, Span<byte> writeBuffer, INodeDataSink dataSink)
 	{
-		Span<byte> buffer = stackalloc byte[SIZE];
-
-		buffer[0] = (byte)obj.CurrentTurn;
-		buffer[1] = (byte)obj.Winner;
-
-		return dataSink.AddNode(buffer);
+		writeBuffer[0] = (byte)obj.CurrentTurn;
+		writeBuffer[1] = (byte)obj.Winner;
 	}
 
-	public ChessPlayerState Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
+	public ChessPlayerState Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource)
 	{
-		return new ChessPlayerState((Player)bytes[0], (Winner)bytes[1]);
+		return new ChessPlayerState((Player)readBuffer[0], (Winner)readBuffer[1]);
 	}
 }

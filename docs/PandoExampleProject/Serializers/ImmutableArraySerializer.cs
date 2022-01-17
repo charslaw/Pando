@@ -8,8 +8,6 @@ namespace PandoExampleProject.Serializers;
 
 public class ImmutableArraySerializer<TNode> : INodeSerializer<ImmutableArray<TNode>>
 {
-	public int? NodeSize => null;
-
 	private readonly INodeSerializer<TNode> _elementSerializer;
 
 	public ImmutableArraySerializer(INodeSerializer<TNode> elementSerializer)
@@ -17,28 +15,27 @@ public class ImmutableArraySerializer<TNode> : INodeSerializer<ImmutableArray<TN
 		_elementSerializer = elementSerializer;
 	}
 
-	public ulong Serialize(ImmutableArray<TNode> obj, INodeDataSink dataSink)
+	public int? NodeSize => null;
+
+	public int NodeSizeForObject(ImmutableArray<TNode> array) => array.Length * sizeof(ulong);
+
+	public void Serialize(ImmutableArray<TNode> array, Span<byte> writeBuffer, INodeDataSink dataSink)
 	{
-		var len = obj.Length;
-		Span<byte> buffer = stackalloc byte[sizeof(ulong) * len];
-
-		for (int i = 0; i < len; i++)
+		for (int i = 0; i < array.Length; i++)
 		{
-			var hash = _elementSerializer.Serialize(obj[i], dataSink);
-			BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(i * sizeof(ulong), sizeof(ulong)), hash);
+			var hash = _elementSerializer.SerializeToHash(array[i], dataSink);
+			BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer.Slice(i * sizeof(ulong), sizeof(ulong)), hash);
 		}
-
-		return dataSink.AddNode(buffer);
 	}
 
-	public ImmutableArray<TNode> Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
+	public ImmutableArray<TNode> Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource)
 	{
-		var len = bytes.Length / sizeof(ulong);
+		var len = readBuffer.Length / sizeof(ulong);
 		var arrayBuilder = ImmutableArray.CreateBuilder<TNode>(len);
 
 		for (int i = 0; i < len; i++)
 		{
-			var hash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong) * i, sizeof(ulong)));
+			var hash = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer.Slice(sizeof(ulong) * i, sizeof(ulong)));
 			arrayBuilder.Add(_elementSerializer.DeserializeFromHash(hash, dataSource));
 		}
 
