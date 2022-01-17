@@ -30,6 +30,7 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TE
 
 	public unsafe void Serialize(TEnum value, ref Span<byte> buffer)
 	{
+		// pointer magic: get address of value, cast to pointer to underlying type, dereference pointer to underlying type.
 		var underlying = *(TUnderlying*)(&value);
 		_underlyingSerializer.Serialize(underlying, ref buffer);
 	}
@@ -37,6 +38,7 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TE
 	public unsafe TEnum Deserialize(ref ReadOnlySpan<byte> buffer)
 	{
 		var underlying = _underlyingSerializer.Deserialize(ref buffer);
+		// pointer magic: get address of underlying value, cast to pointer of enum type, dereference pointer to enum type.
 		return *(TEnum*)(&underlying);
 	}
 }

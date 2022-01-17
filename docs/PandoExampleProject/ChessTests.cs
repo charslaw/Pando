@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Pando.DataSources;
 using Pando.Repositories;
 using Pando.Serialization;
+using Pando.Serialization.PrimitiveSerializers;
 using PandoExampleProject.Serializers;
 using Xunit;
 
@@ -14,8 +16,8 @@ public class ChessTests
 {
 	private static INodeSerializer<ChessGameState> MakeSerializer() => new ChessStateTreeSerializer(
 		new ChessPlayerStateSerializer(),
-		new WhiteBlackPairTimespanSerializer(),
-		new WhiteBlackPairBranchSerializer<ImmutableArray<ChessPiece>>(
+		new PrimitiveWhiteBlackPairSerializer<TimeSpan>(new TimeSpanTicksSerializer()),
+		new NodeWhiteBlackPairSerializer<ImmutableArray<ChessPiece>>(
 			new ImmutableArraySerializer<ChessPiece>(
 				new ChessPieceSerializer()
 			)

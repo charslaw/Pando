@@ -2,66 +2,77 @@ using System;
 using System.Buffers.Binary;
 using Pando.DataSources;
 using Pando.Serialization;
+using Pando.Serialization.PrimitiveSerializers;
 
 namespace PandoExampleProject.Serializers;
 
-/// A specific implementation of a WhiteBlackPair serializer for TimeSpan
-/// Implementing a generic serializer for containers of primitive types is tough because it can be difficult to know how large the type is.
-/// It is made more difficult for TimeSpan because you have to convert it to a primitive value first (via the Ticks property)
-internal class WhiteBlackPairTimespanSerializer : INodeSerializer<WhiteBlackPair<TimeSpan>>
+/// A generic NodeSerializer implementation for WhiteBlackPairs that contain a specific primitive data type.
+/// The white and black values of the WhiteBlackPair are serialized by a provided primitive serializer.
+///
+/// The size of this node depends on the size of the elements stored within it, so the size must be calculated
+/// dynamically for variable size primitives.
+internal class PrimitiveWhiteBlackPairSerializer<T> : INodeSerializer<WhiteBlackPair<T>>
 {
-	private const int SIZE = sizeof(long) * 2;
-	public int? NodeSize => SIZE;
+	private readonly IPrimitiveSerializer<T> _innerSerializer;
 
-	public ulong Serialize(WhiteBlackPair<TimeSpan> obj, INodeDataSink dataSink)
+	public PrimitiveWhiteBlackPairSerializer(IPrimitiveSerializer<T> innerSerializer)
 	{
-		Span<byte> buffer = stackalloc byte[SIZE];
-		BinaryPrimitives.WriteInt64LittleEndian(buffer.Slice(0, sizeof(long)), obj.WhiteValue.Ticks);
-		BinaryPrimitives.WriteInt64LittleEndian(buffer.Slice(sizeof(long), sizeof(long)), obj.BlackValue.Ticks);
-		return dataSink.AddNode(buffer);
+		_innerSerializer = innerSerializer;
+		NodeSize = innerSerializer.ByteCount * 2;
 	}
-
-	public WhiteBlackPair<TimeSpan> Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
-	{
-		var whiteTicks = BinaryPrimitives.ReadInt64LittleEndian(bytes.Slice(0, sizeof(long)));
-		var blackTicks = BinaryPrimitives.ReadInt64LittleEndian(bytes.Slice(sizeof(long), sizeof(long)));
-		return new WhiteBlackPair<TimeSpan>(TimeSpan.FromTicks(whiteTicks), TimeSpan.FromTicks(blackTicks));
-	}
-}
-
-/// A generic implementation of a WhiteBlackPair serializer for when the WhiteBlackPair is a branch.
-/// In this case, we know for certain the size of the contents of the node, since the node simply contains hashes, which are always 8 bytes,
-/// even though we don't know anything about the size of the contained nodes themselves.
-/// The contained nodes could be either blobs or branches; it doesn't matter to us.
-internal class WhiteBlackPairBranchSerializer<TNode> : INodeSerializer<WhiteBlackPair<TNode>>
-{
-	private readonly INodeSerializer<TNode> _memberSerializer;
 
 	public int? NodeSize { get; }
 
-	public WhiteBlackPairBranchSerializer(INodeSerializer<TNode> memberSerializer)
+	public int NodeSizeForObject(WhiteBlackPair<T> obj)
+		=> NodeSize
+			?? _innerSerializer.ByteCountForValue(obj.WhiteValue)
+			+ _innerSerializer.ByteCountForValue(obj.BlackValue);
+
+	public void Serialize(WhiteBlackPair<T> obj, Span<byte> writeBuffer, INodeDataSink dataSink)
+	{
+		_innerSerializer.Serialize(obj.WhiteValue, ref writeBuffer);
+		_innerSerializer.Serialize(obj.BlackValue, ref writeBuffer);
+	}
+
+	public WhiteBlackPair<T> Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource)
+	{
+		var whiteValue = _innerSerializer.Deserialize(ref readBuffer);
+		var blackValue = _innerSerializer.Deserialize(ref readBuffer);
+		return new WhiteBlackPair<T>(whiteValue, blackValue);
+	}
+}
+
+/// A generic NodeSerializer implementation for WhiteBlackPairs that contain other nodes.
+/// In this case we know for certain the size of the binary representation is 16 bytes since it will contain the hashes of the two child nodes.
+/// We don't need to know anything about the size of the contained nodes themselves, just that they can be identified by a hash.
+internal class NodeWhiteBlackPairSerializer<TNode> : INodeSerializer<WhiteBlackPair<TNode>>
+{
+	private readonly INodeSerializer<TNode> _memberSerializer;
+
+	public NodeWhiteBlackPairSerializer(INodeSerializer<TNode> memberSerializer)
 	{
 		_memberSerializer = memberSerializer;
-		NodeSize = _memberSerializer.NodeSize * 2;
 	}
 
-	public ulong Serialize(WhiteBlackPair<TNode> obj, INodeDataSink dataSink)
+	private const int SIZE = sizeof(ulong) * 2;
+	public int? NodeSize => SIZE;
+	public int NodeSizeForObject(WhiteBlackPair<TNode> obj) => SIZE;
+
+	public void Serialize(WhiteBlackPair<TNode> obj, Span<byte> writeBuffer, INodeDataSink dataSink)
 	{
-		Span<byte> buffer = stackalloc byte[sizeof(ulong) * 2];
+		var (whiteValue, blackValue) = obj;
 
-		var whiteHash = _memberSerializer.Serialize(obj.WhiteValue, dataSink);
-		var blackHash = _memberSerializer.Serialize(obj.BlackValue, dataSink);
+		var whiteHash = _memberSerializer.SerializeToHash(whiteValue, dataSink);
+		var blackHash = _memberSerializer.SerializeToHash(blackValue, dataSink);
 
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(0, sizeof(ulong)), whiteHash);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer.Slice(sizeof(ulong), sizeof(ulong)), blackHash);
-
-		return dataSink.AddNode(buffer);
+		BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer.Slice(0, sizeof(ulong)), whiteHash);
+		BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer.Slice(sizeof(ulong), sizeof(ulong)), blackHash);
 	}
 
-	public WhiteBlackPair<TNode> Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
+	public WhiteBlackPair<TNode> Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource)
 	{
-		var whiteHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(0, sizeof(ulong)));
-		var blackHash = BinaryPrimitives.ReadUInt64LittleEndian(bytes.Slice(sizeof(ulong), sizeof(ulong)));
+		var whiteHash = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer.Slice(0, sizeof(ulong)));
+		var blackHash = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer.Slice(sizeof(ulong), sizeof(ulong)));
 
 		var whiteValue = _memberSerializer.DeserializeFromHash(whiteHash, dataSource);
 		var blackValue = _memberSerializer.DeserializeFromHash(blackHash, dataSource);

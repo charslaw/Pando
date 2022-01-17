@@ -9,7 +9,7 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 public abstract class BaseSerializerTest<T>
 {
 	/// Used to overallocate serialization/deserialization buffers so that we can verify that the serializers chop off the appropriate number of bytes.
-	private const int EXTRA_BUFFER_SPACE = 1;
+	private const int EXTRA_BUFFER_SPACE = 4;
 
 	/// Provides the serializer under test
 	protected abstract IPrimitiveSerializer<T> Serializer { get; }
@@ -85,7 +85,9 @@ public abstract class BaseSerializerTest<T>
 	[MemberData(nameof(ISerializerTestData<T>.SerializationTestData))]
 	public virtual void Deserialize_should_produce_correct_value(T expectedValue, byte[] inputBytes)
 	{
-		Span<byte> nodeBytes = new byte[inputBytes.Length];
+		// Over-allocate read buffer to ensure that the serializer doesn't get greedy with reading from the read buffer
+		// If the serializer reads into the extra buffer space, presumably it will not produce the correct result.
+		Span<byte> nodeBytes = new byte[inputBytes.Length + EXTRA_BUFFER_SPACE];
 		inputBytes.CopyTo(nodeBytes);
 		ReadOnlySpan<byte> readBuffer = nodeBytes;
 

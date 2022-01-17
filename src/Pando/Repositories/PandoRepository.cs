@@ -32,7 +32,7 @@ public class PandoRepository<T> : IRepository<T>
 	{
 		if (_dataSource.SnapshotCount > 0) throw new AlreadyHasRootSnapshotException();
 
-		var nodeHash = _serializer.Serialize(tree, _dataSource);
+		var nodeHash = _serializer.SerializeToHash(tree, _dataSource);
 		var snapshotHash = _dataSource.AddSnapshot(0UL, nodeHash);
 		AddToSnapshotTree(snapshotHash);
 		return snapshotHash;
@@ -47,7 +47,7 @@ public class PandoRepository<T> : IRepository<T>
 			);
 		}
 
-		var nodeHash = _serializer.Serialize(tree, _dataSource);
+		var nodeHash = _serializer.SerializeToHash(tree, _dataSource);
 		var snapshotHash = _dataSource.AddSnapshot(parentHash, nodeHash);
 		AddToSnapshotTree(snapshotHash, parentHash);
 		return snapshotHash;

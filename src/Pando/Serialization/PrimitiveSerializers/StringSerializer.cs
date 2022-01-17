@@ -60,7 +60,7 @@ public class StringSerializer : IPrimitiveSerializer<string>
 			);
 		}
 
-		var value = _encoding.GetString(remainingBuffer);
+		var value = _encoding.GetString(remainingBuffer[..stringByteCount]);
 		buffer = remainingBuffer[stringByteCount..];
 
 		return value;
