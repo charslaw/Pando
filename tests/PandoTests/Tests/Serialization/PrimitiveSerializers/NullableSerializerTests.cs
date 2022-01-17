@@ -8,7 +8,7 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public partial class PrimitiveSerializerTests
 {
-	public class NullableInt64SerializerTests : BaseSerializerTest<long?>, ISerializerTestData<long?>
+	public class NullableInt64SerializerTests : BasePrimitiveSerializerTest<long?>, ISerializerTestData<long?>
 	{
 		protected override IPrimitiveSerializer<long?> Serializer => new NullableSerializer<long>(new SimpleLongSerializer());
 

@@ -10,7 +10,7 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public partial class PrimitiveSerializerTests
 {
-	public class DateTimeToBinarySerializerTests : BaseSerializerTest<DateTime>, ISerializerTestData<DateTime>
+	public class DateTimeToBinarySerializerTests : BasePrimitiveSerializerTest<DateTime>, ISerializerTestData<DateTime>
 	{
 		protected override IPrimitiveSerializer<DateTime> Serializer => new DateTimeToBinarySerializer(new SimpleLongSerializer());
 
@@ -30,7 +30,7 @@ public partial class PrimitiveSerializerTests
 		}
 	}
 
-	public class TimeSpanTicksSerializerTests : BaseSerializerTest<TimeSpan>, ISerializerTestData<TimeSpan>
+	public class TimeSpanTicksSerializerTests : BasePrimitiveSerializerTest<TimeSpan>, ISerializerTestData<TimeSpan>
 	{
 		protected override IPrimitiveSerializer<TimeSpan> Serializer => new TimeSpanTicksSerializer(new SimpleLongSerializer());
 
@@ -42,7 +42,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(long) };
 	}
 
-	public class DateOnlyDayNumberSerializerTests : BaseSerializerTest<DateOnly>, ISerializerTestData<DateOnly>
+	public class DateOnlyDayNumberSerializerTests : BasePrimitiveSerializerTest<DateOnly>, ISerializerTestData<DateOnly>
 	{
 		protected override IPrimitiveSerializer<DateOnly> Serializer => new DateOnlyDayNumberSerializer(new SimpleIntSerializer());
 
@@ -54,7 +54,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(int) };
 	}
 
-	public class TimeOnlyDayNumberSerializerTests : BaseSerializerTest<TimeOnly>, ISerializerTestData<TimeOnly>
+	public class TimeOnlyDayNumberSerializerTests : BasePrimitiveSerializerTest<TimeOnly>, ISerializerTestData<TimeOnly>
 	{
 		protected override IPrimitiveSerializer<TimeOnly> Serializer => new TimeOnlyTicksSerializer(new SimpleLongSerializer());
 
