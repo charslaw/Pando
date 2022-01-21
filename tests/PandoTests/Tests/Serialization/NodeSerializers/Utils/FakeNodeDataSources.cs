@@ -22,10 +22,13 @@ public static class FakeNodeDataSources
 		}
 	}
 
-	/// Returns a hash for a given node from a look up table
+	/// Returns a pre-determined hash based on the given "binary representation".
+	/// The association between "binary representation" and hash is provided in the constructor.
 	public class AddNodeByLookup : INodeDataSink
 	{
 		private readonly IEnumerable<(byte[] bytes, ulong hash)> _lut;
+
+		/// <param name="entries">each entry maps a node binary representation to the hash that should be returned for that representation.</param>
 		public AddNodeByLookup(params (byte[] bytes, ulong hash)[] entries) { _lut = entries; }
 
 		public ulong AddNode(ReadOnlySpan<byte> bytes)
@@ -35,10 +38,13 @@ public static class FakeNodeDataSources
 		}
 	}
 
-	/// Copies bytes to the given output buffer from a look up table.
+	/// Updates the given output buffer with a pre-determined "binary representation" based on the given hash.
+	/// The association between hash and "binary representation" is provided in the constructor.
 	public class CopyNodeBytesByLookup : INodeDataSource
 	{
 		private readonly IEnumerable<(ulong hash, byte[] bytes)> _lut;
+
+		/// <param name="entries">each entry maps a hash to the node binary representation that should be returned for that hash.</param>
 		public CopyNodeBytesByLookup(params (ulong hash, byte[] bytes)[] entries) { _lut = entries; }
 
 		public bool HasNode(ulong hash) => _lut.Any(entry => entry.hash == hash);

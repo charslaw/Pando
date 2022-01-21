@@ -83,8 +83,8 @@ public partial class NodeSerializerTests
 
 				Span<byte> readBuffer = stackalloc byte[]
 				{
-					0x40, 0x1F, 0, 0, 0, 0, 0, 0,
-					0x10, 0x27, 0, 0, 0, 0, 0, 0,
+					0x40, 0x1F, 0, 0, 0, 0, 0, 0, // 8000
+					0x10, 0x27, 0, 0, 0, 0, 0, 0, // 10000
 				};
 				var actual = serializer.Deserialize(readBuffer, dataSource);
 
