@@ -33,7 +33,5 @@ public class NodeArraySerializer<T> : BaseNodeListSerializer<T[], T, NodeArraySe
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public T[] Build() => _array;
-
-		public void Dispose() { }
 	}
 }

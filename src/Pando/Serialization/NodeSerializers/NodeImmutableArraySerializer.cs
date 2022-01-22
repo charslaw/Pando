@@ -37,7 +37,5 @@ public class NodeImmutableArraySerializer<T>
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public ImmutableArray<T> Build() => Unsafe.As<T[], ImmutableArray<T>>(ref _array);
-
-		public void Dispose() { }
 	}
 }

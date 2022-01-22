@@ -40,10 +40,8 @@ public abstract class BaseNodeListSerializer<TList, T, TListBuilder> : INodeSeri
 
 	/// A builder object for lists of type TList that contain elements of type T.
 	/// Used to generically construct an instance of the resulting list type when deserializing.
-	/// Implements IDisposable because the INodeListBuilder might have resources it needs to dispose of,
-	/// e.g. returning an array rented from ArrayPool, etc.
 	/// INodeListBuilders are intended to be single-use (i.e. they're created, used, then disposed).
-	public interface INodeListBuilder : IDisposable
+	public interface INodeListBuilder
 	{
 		public void Add(T value);
 		public TList Build();
@@ -69,7 +67,7 @@ public abstract class BaseNodeListSerializer<TList, T, TListBuilder> : INodeSeri
 	{
 		var elementCount = readBuffer.Length / sizeof(ulong);
 
-		using var result = CreateListBuilder(elementCount);
+		var result = CreateListBuilder(elementCount);
 		for (int i = 0; i < elementCount; i++)
 		{
 			var hash = ByteEncoder.GetUInt64(readBuffer.Slice(i * sizeof(ulong), sizeof(ulong)));
