@@ -1,4 +1,5 @@
 using System;
+using System.Buffers;
 using System.Runtime.CompilerServices;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
@@ -19,10 +20,7 @@ namespace Pando.Serialization.NodeSerializers;
 /// </summary>
 /// <typeparam name="TList">The type of the list that will be serialized.</typeparam>
 /// <typeparam name="T">The type of the elements in the list.</typeparam>
-/// <typeparam name="TListBuilder">The type of the INodeListBuilder used to create a new instance of the list when deserializing.
-/// This is a generic parameter so that we can avoid boxing struct implementations of INodeListBuilder.</typeparam>
-public abstract class BaseNodeListSerializer<TList, T, TListBuilder> : INodeSerializer<TList>
-	where TListBuilder : BaseNodeListSerializer<TList, T, TListBuilder>.INodeListBuilder
+public abstract class BaseNodeListSerializer<TList, T> : INodeSerializer<TList>
 {
 	private readonly INodeSerializer<T> _elementSerializer;
 
@@ -34,18 +32,7 @@ public abstract class BaseNodeListSerializer<TList, T, TListBuilder> : INodeSeri
 	/// When overridden in a derived class, gets the element at the given index from the given list.
 	protected abstract T ListGetElement(TList list, int index);
 
-	/// When overridden in a derived class, returns a single-use instance of the INodeListBuilder designated for this class.
-	/// <param name="size">The size of the final list. The list is guaranteed to be exactly this length.</param>
-	protected abstract TListBuilder CreateListBuilder(int size);
-
-	/// A builder object for lists of type TList that contain elements of type T.
-	/// Used to generically construct an instance of the resulting list type when deserializing.
-	/// INodeListBuilders are intended to be single-use (i.e. they're created, used, then disposed).
-	public interface INodeListBuilder
-	{
-		public void Add(T value);
-		public TList Build();
-	}
+	protected abstract TList CreateList(ReadOnlySpan<T> items);
 
 	public int? NodeSize => null;
 
@@ -67,13 +54,15 @@ public abstract class BaseNodeListSerializer<TList, T, TListBuilder> : INodeSeri
 	{
 		var elementCount = readBuffer.Length / sizeof(ulong);
 
-		var result = CreateListBuilder(elementCount);
+		var items = ArrayPool<T>.Shared.Rent(elementCount);
 		for (int i = 0; i < elementCount; i++)
 		{
 			var hash = ByteEncoder.GetUInt64(readBuffer.Slice(i * sizeof(ulong), sizeof(ulong)));
-			result.Add(_elementSerializer.DeserializeFromHash(hash, dataSource));
+			items[i] = _elementSerializer.DeserializeFromHash(hash, dataSource);
 		}
 
-		return result.Build();
+		var result = CreateList(items.AsSpan(0, elementCount));
+		ArrayPool<T>.Shared.Return(items);
+		return result;
 	}
 }
