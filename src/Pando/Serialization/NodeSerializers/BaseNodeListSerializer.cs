@@ -24,7 +24,7 @@ public abstract class BaseNodeListSerializer<TList, T> : INodeSerializer<TList>
 {
 	private readonly INodeSerializer<T> _elementSerializer;
 
-	internal BaseNodeListSerializer(INodeSerializer<T> elementSerializer) { _elementSerializer = elementSerializer; }
+	protected BaseNodeListSerializer(INodeSerializer<T> elementSerializer) { _elementSerializer = elementSerializer; }
 
 	/// When overridden in a derived class, returns the number of elements in the given list.
 	protected abstract int ListCount(TList list);
@@ -32,6 +32,7 @@ public abstract class BaseNodeListSerializer<TList, T> : INodeSerializer<TList>
 	/// When overridden in a derived class, gets the element at the given index from the given list.
 	protected abstract T ListGetElement(TList list, int index);
 
+	/// When overridden in a derived class, converts a span of items into the appropriate type for this serializer.
 	protected abstract TList CreateList(ReadOnlySpan<T> items);
 
 	public int? NodeSize => null;
