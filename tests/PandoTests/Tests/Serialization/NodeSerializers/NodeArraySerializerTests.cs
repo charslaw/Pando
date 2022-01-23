@@ -15,7 +15,7 @@ public partial class NodeSerializerTests
 			[Fact]
 			public void Should_return_null()
 			{
-				var serializer = new NodeArraySerializer<object>(null!);
+				var serializer = new NodeIndexableSerializer<object[], object>(null!, null!);
 				serializer.NodeSize.Should().BeNull();
 			}
 		}
@@ -27,7 +27,8 @@ public partial class NodeSerializerTests
 			[InlineData(2, 16)]
 			public void Should_return_correct_size_for_array(int elementCount, int expectedNodeSize)
 			{
-				var serializer = new NodeArraySerializer<object>(null!);
+				var indexableAdapter = new ArrayAdapter<object>();
+				var serializer = new NodeIndexableSerializer<object[], object>(null!, indexableAdapter);
 
 				var array = new object[elementCount];
 
@@ -50,7 +51,8 @@ public partial class NodeSerializerTests
 					(new byte[] { 1 }, 42),
 					(new byte[] { 5 }, 43)
 				);
-				var serializer = new NodeArraySerializer<object>(elementSerializer);
+				var indexableAdapter = new ArrayAdapter<object>();
+				var serializer = new NodeIndexableSerializer<object[], object>(elementSerializer, indexableAdapter);
 
 				var testData = new object[] { "one", 5 };
 				byte[] writeBuffer = new byte[testData.Length * sizeof(ulong)];
@@ -79,7 +81,8 @@ public partial class NodeSerializerTests
 					(new byte[] { 42 }, "item1"),
 					(new byte[] { 44 }, "item2")
 				);
-				var serializer = new NodeArraySerializer<object>(elementDeserializer);
+				var indexableAdapter = new ArrayAdapter<object>();
+				var serializer = new NodeIndexableSerializer<object[], object>(elementDeserializer, indexableAdapter);
 
 				Span<byte> readBuffer = stackalloc byte[]
 				{
