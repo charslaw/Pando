@@ -15,7 +15,7 @@ public partial class NodeSerializerTests
 			[Fact]
 			public void Should_return_null()
 			{
-				var serializer = new PrimitiveArraySerializer<int>(null!);
+				var serializer = new PrimitiveIndexableSerializer<object[], object>(null!, null!);
 				serializer.NodeSize.Should().BeNull();
 			}
 		}
@@ -27,7 +27,9 @@ public partial class NodeSerializerTests
 			[InlineData(new[] { 1, 2 }, 8)]
 			public void Should_return_correct_size_for_array(int[] array, int expectedSize)
 			{
-				var serializer = new PrimitiveArraySerializer<int>(new SimpleIntSerializer());
+				var elementSerializer = new SimpleIntSerializer();
+				var indexableAdapter = new ArrayAdapter<int>();
+				var serializer = new PrimitiveIndexableSerializer<int[], int>(elementSerializer, indexableAdapter);
 				var actualSize = serializer.NodeSizeForObject(array);
 
 				actualSize.Should().Be(expectedSize);
@@ -40,7 +42,8 @@ public partial class NodeSerializerTests
 			public void Should_write_correct_node_contents_when_elements_are_fixed_size()
 			{
 				var elementSerializer = new SimpleIntSerializer();
-				var serializer = new PrimitiveArraySerializer<int>(elementSerializer);
+				var indexableAdapter = new ArrayAdapter<int>();
+				var serializer = new PrimitiveIndexableSerializer<int[], int>(elementSerializer, indexableAdapter);
 
 				var writeBuffer = new byte[sizeof(int) * 2];
 				serializer.Serialize(new[] { 0, -42 }, writeBuffer, null!);
@@ -52,7 +55,8 @@ public partial class NodeSerializerTests
 			public void Should_write_correct_node_contents_when_elements_are_variable_size()
 			{
 				var elementSerializer = new NullableSerializer<int>(new SimpleIntSerializer());
-				var serializer = new PrimitiveArraySerializer<int?>(elementSerializer);
+				var indexableAdapter = new ArrayAdapter<int?>();
+				var serializer = new PrimitiveIndexableSerializer<int?[], int?>(elementSerializer, indexableAdapter);
 
 				var writeBuffer = new byte[6];
 				serializer.Serialize(new int?[] { null, -42 }, writeBuffer, null!);
@@ -67,7 +71,8 @@ public partial class NodeSerializerTests
 			public void Should_read_correct_node_contents_when_elements_are_fixed_size()
 			{
 				var elementSerializer = new SimpleIntSerializer();
-				var serializer = new PrimitiveArraySerializer<int>(elementSerializer);
+				var indexableAdapter = new ArrayAdapter<int>();
+				var serializer = new PrimitiveIndexableSerializer<int[], int>(elementSerializer, indexableAdapter);
 
 				var actual = serializer.Deserialize(new byte[] { 0, 0, 0, 0, 0xFF, 0xFF, 0xFF, 0xD6 }, null!);
 
@@ -78,7 +83,8 @@ public partial class NodeSerializerTests
 			public void Should_read_correct_node_contents_when_elements_are_variable_size()
 			{
 				var elementSerializer = new NullableSerializer<byte>(new ByteSerializer());
-				var serializer = new PrimitiveArraySerializer<byte?>(elementSerializer);
+				var indexableAdapter = new ArrayAdapter<byte?>();
+				var serializer = new PrimitiveIndexableSerializer<byte?[], byte?>(elementSerializer, indexableAdapter);
 
 				var actual = serializer.Deserialize(new byte[]
 					{
@@ -102,7 +108,7 @@ public partial class NodeSerializerTests
 					}, null!
 				);
 
-				actual.Should().BeEquivalentTo(new int?[] { null, 42, null, 123, null, 1, 2, 3, 4, null, 5, 6, 7, 8, null, 9, 10 });
+				actual.Should().BeEquivalentTo(new byte?[] { null, 42, null, 123, null, 1, 2, 3, 4, null, 5, 6, 7, 8, null, 9, 10 });
 			}
 		}
 	}
