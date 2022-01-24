@@ -1,6 +1,7 @@
 using System;
 using FluentAssertions;
 using Pando.Serialization.NodeSerializers;
+using Pando.Serialization.NodeSerializers.EnumerableFactory;
 using PandoTests.Tests.Serialization.NodeSerializers.Utils;
 using Xunit;
 
@@ -8,14 +9,14 @@ namespace PandoTests.Tests.Serialization.NodeSerializers;
 
 public partial class NodeSerializerTests
 {
-	public class NodeArraySerializerTests
+	public class NodeListSerializerTests
 	{
 		public class NodeSize
 		{
 			[Fact]
 			public void Should_return_null()
 			{
-				var serializer = new NodeIndexableSerializer<object[], object>(null!, null!);
+				var serializer = new NodeListSerializer<object[], object>(null!, null!);
 				serializer.NodeSize.Should().BeNull();
 			}
 		}
@@ -27,8 +28,8 @@ public partial class NodeSerializerTests
 			[InlineData(2, 16)]
 			public void Should_return_correct_size_for_array(int elementCount, int expectedNodeSize)
 			{
-				var indexableAdapter = new ArrayAdapter<object>();
-				var serializer = new NodeIndexableSerializer<object[], object>(null!, indexableAdapter);
+				var arrayFactory = new ArrayFactory<object>();
+				var serializer = new NodeListSerializer<object[], object>(null!, arrayFactory);
 
 				var array = new object[elementCount];
 
@@ -51,8 +52,8 @@ public partial class NodeSerializerTests
 					(new byte[] { 1 }, 42),
 					(new byte[] { 5 }, 43)
 				);
-				var indexableAdapter = new ArrayAdapter<object>();
-				var serializer = new NodeIndexableSerializer<object[], object>(elementSerializer, indexableAdapter);
+				var arrayFactory = new ArrayFactory<object>();
+				var serializer = new NodeListSerializer<object[], object>(elementSerializer, arrayFactory);
 
 				var testData = new object[] { "one", 5 };
 				byte[] writeBuffer = new byte[testData.Length * sizeof(ulong)];
@@ -81,8 +82,8 @@ public partial class NodeSerializerTests
 					(new byte[] { 42 }, "item1"),
 					(new byte[] { 44 }, "item2")
 				);
-				var indexableAdapter = new ArrayAdapter<object>();
-				var serializer = new NodeIndexableSerializer<object[], object>(elementDeserializer, indexableAdapter);
+				var arrayFactory = new ArrayFactory<object>();
+				var serializer = new NodeListSerializer<object[], object>(elementDeserializer, arrayFactory);
 
 				Span<byte> readBuffer = stackalloc byte[]
 				{
