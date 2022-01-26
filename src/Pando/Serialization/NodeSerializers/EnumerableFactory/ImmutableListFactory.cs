@@ -13,7 +13,7 @@ public class ImmutableListFactory<T> : IEnumerableFactory<ImmutableList<T>, T>
 		{
 			for (int i = 0; i < elements.Length; i++)
 			{
-				_builder[i] = elements[i];
+				_builder.Add(elements[i]);
 			}
 
 			var result = _builder.ToImmutable();
