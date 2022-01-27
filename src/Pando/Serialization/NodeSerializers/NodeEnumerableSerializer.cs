@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Serialization.NodeSerializers.EnumerableFactory;
+using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.NodeSerializers;
 
@@ -47,15 +48,15 @@ public class NodeEnumerableSerializer<TEnumerable, T> : INodeSerializer<TEnumera
 	{
 		var elementCount = readBuffer.Length / sizeof(ulong);
 
-		var items = ArrayPool<T>.Shared.Rent(elementCount);
+		using var arrHandle = ArrayPool<T>.Shared.RentHandle(elementCount);
+		var items = arrHandle.Span;
 		for (int i = 0; i < elementCount; i++)
 		{
 			var hash = ByteEncoder.GetUInt64(readBuffer.Slice(i * sizeof(ulong), sizeof(ulong)));
 			items[i] = ElementSerializer.DeserializeFromHash(hash, dataSource);
 		}
 
-		var result = EnumerableFactory.Create(items.AsSpan(0, elementCount));
-		ArrayPool<T>.Shared.Return(items);
+		var result = EnumerableFactory.Create(items);
 		return result;
 	}
 }
