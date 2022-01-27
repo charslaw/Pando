@@ -9,12 +9,10 @@ using Pando.Serialization.NodeSerializers.EnumerableFactory;
 
 namespace Pando.Serialization.NodeSerializers;
 
-/// <summary>
-/// Serializes and deserializes an enumerable type of state tree nodes using the given element serializer.
-/// </summary>
+/// <summary>Serializes and deserializes an enumerable type of state tree nodes using the given element serializer.</summary>
 /// <remarks>
 /// This class can incur some boxing allocation overhead for struct enumerables, and will allocate when getting an enumerator for the enumerable.
-/// Consider using <see cref="NodeListSerializer{TList,T}"/> for collection types that can be int indexed.
+/// Consider using <see cref="NodeListSerializer{TList,T}"/> for collection types that can be int indexed for better performance.
 /// </remarks>
 /// <typeparam name="TEnumerable">The concrete type of the enumerable that will be serialized by this serializer.</typeparam>
 /// <typeparam name="T">The type of the elements in the collection serialized by this serializer.</typeparam>

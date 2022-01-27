@@ -28,7 +28,7 @@ public interface INodeDataSource
 
 	/// Copies the binary representation of the node with the given hash into the given Span.
 	/// <exception cref="HashNotFoundException">If the given hash is not found in the data source.</exception>
-	/// <exception cref="ArgumentOutOfRangeException">If the given span is not large enough to contain</exception>
+	/// <exception cref="ArgumentOutOfRangeException">If the given span is not large enough to contain the node data.</exception>
 	void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes);
 }
 

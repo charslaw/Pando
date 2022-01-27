@@ -40,21 +40,21 @@ public interface INodeSerializer<T>
 	/// <code>
 	/// ulong Serialize(MyLeafNode obj, Span&lt;byte&gt; writeBuffer, INodeDataSink dataSink)
 	/// {
-	///     var primitiveMember = obj.PrimitiveMember
+	///     var primitiveMember = obj.PrimitiveMember;
 	///	    BinaryPrimitives.WriteInt32LittleEndian(writeBuffer, primitiveMember);
 	/// }
 	/// </code>
 	/// </example>
 	void Serialize(T obj, Span<byte> writeBuffer, INodeDataSink dataSink);
 
-	/// Converts a binary representation of a node into an instance of that node.
-	/// <returns>An instance of type T that is represented by the given binary representation</returns>
+	/// <summary>Converts a binary representation of a node into an instance of that node.</summary>
+	/// <returns>An instance of type T that is represented by the given binary representation.</returns>
 	/// <remarks>
 	/// <p>If this node type contains other nodes, this method will first have to deserialize
 	/// the child nodes' IDs from the given binary representation and use those IDs to retrieve
-	/// the binary representation of the child nodes, then delegate deserialization of the
-	/// child nodes' binary representation to child deserializers, the result of which can be
-	/// used to create an instance of the node type.</p>
+	/// the binary representation of the child nodes from the data source, then delegate
+	/// deserialization of the child nodes' binary representation to child deserializers, the
+	/// result of which can be used to create an instance of the node type.</p>
 	/// <p>If this node type contains primitive data, this method should deserialize the
 	/// primitive data from the given binary representation and use it to create an instance
 	/// of the node type.</p>
@@ -76,7 +76,7 @@ public interface INodeSerializer<T>
 	/// <code>
 	/// MyLeafNode Deserialize(ReadOnlySpan&lt;byte&gt; bytes, INodeDataSource dataSource)
 	/// {
-	///	    var primitiveMember = BinaryPrimitives.ReadUInt64LittleEndian(bytes);
+	///	    var primitiveMember = BinaryPrimitives.ReadInt32LittleEndian(bytes);
 	///	    return new MyLeafNode(primitiveMember);
 	/// }
 	/// </code>

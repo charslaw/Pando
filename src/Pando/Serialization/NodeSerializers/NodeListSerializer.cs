@@ -7,10 +7,7 @@ using Pando.Serialization.NodeSerializers.EnumerableFactory;
 
 namespace Pando.Serialization.NodeSerializers;
 
-/// <summary>
-/// Serializes and deserializes an IList of state tree nodes using the given element serializer.
-/// Creation of the specific concrete list type is facilitated by a given <see cref="IEnumerableFactory{TEnumerable,T}"/>
-/// </summary>
+/// <summary>Serializes and deserializes an <see cref="IList{T}"/> of state tree nodes using the given element serializer.</summary>
 /// <remarks>
 /// This is a subclass of <see cref="NodeEnumerableSerializer{TEnumerable,T}"/> that contains optimizations for
 /// enumerables that implement <see cref="IList{T}"/>. This implementation avoids boxing and enumeration in cases where it is not
