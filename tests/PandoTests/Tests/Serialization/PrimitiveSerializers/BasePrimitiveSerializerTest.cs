@@ -6,7 +6,7 @@ using Xunit;
 namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 /// A base class declaring a number of tests that all primitive serializers should pass
-public abstract class BaseSerializerTest<T>
+public abstract class BasePrimitiveSerializerTest<T>
 {
 	/// Used to overallocate serialization/deserialization buffers so that we can verify that the serializers chop off the appropriate number of bytes.
 	private const int EXTRA_BUFFER_SPACE = 4;

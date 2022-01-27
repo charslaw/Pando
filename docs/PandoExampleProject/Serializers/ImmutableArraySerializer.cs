@@ -2,7 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Immutable;
 using Pando.DataSources;
-using Pando.Serialization;
+using Pando.Serialization.NodeSerializers;
 
 namespace PandoExampleProject.Serializers;
 

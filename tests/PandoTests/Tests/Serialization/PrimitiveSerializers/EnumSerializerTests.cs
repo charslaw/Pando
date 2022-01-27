@@ -8,7 +8,7 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public partial class PrimitiveSerializerTests
 {
-	public class EnumSerializerTests : BaseSerializerTest<TestEnum>, ISerializerTestData<TestEnum>
+	public class EnumSerializerTests : BasePrimitiveSerializerTest<TestEnum>, ISerializerTestData<TestEnum>
 	{
 		protected override IPrimitiveSerializer<TestEnum> Serializer => new EnumSerializer<TestEnum, long>(new SimpleLongSerializer());
 

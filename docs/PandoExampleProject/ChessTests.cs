@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Pando.DataSources;
 using Pando.Repositories;
-using Pando.Serialization;
+using Pando.Serialization.NodeSerializers;
 using Pando.Serialization.PrimitiveSerializers;
 using PandoExampleProject.Serializers;
 using Xunit;

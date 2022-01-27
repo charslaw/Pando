@@ -9,7 +9,7 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public partial class PrimitiveSerializerTests
 {
-	public class AsciiStringSerializerTests : BaseSerializerTest<string>, ISerializerTestData<string>
+	public class AsciiStringSerializerTests : BasePrimitiveSerializerTest<string>, ISerializerTestData<string>
 	{
 		protected override IPrimitiveSerializer<string> Serializer => new StringSerializer(new SimpleIntSerializer(), Encoding.ASCII);
 
@@ -30,7 +30,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { null };
 	}
 
-	public class Utf8StringSerializerTests : BaseSerializerTest<string>, ISerializerTestData<string>
+	public class Utf8StringSerializerTests : BasePrimitiveSerializerTest<string>, ISerializerTestData<string>
 	{
 		protected override IPrimitiveSerializer<string> Serializer => new StringSerializer(new SimpleIntSerializer(), Encoding.UTF8);
 

@@ -8,7 +8,7 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public partial class PrimitiveSerializerTests
 {
-	public class BooleanSerializerTests : BaseSerializerTest<bool>, ISerializerTestData<bool>
+	public class BooleanSerializerTests : BasePrimitiveSerializerTest<bool>, ISerializerTestData<bool>
 	{
 		protected override IPrimitiveSerializer<bool> Serializer => new BooleanSerializer();
 

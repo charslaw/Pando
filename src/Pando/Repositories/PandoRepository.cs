@@ -3,7 +3,7 @@ using System.Collections.Immutable;
 using Pando.DataSources;
 using Pando.Exceptions;
 using Pando.Repositories.Utils;
-using Pando.Serialization;
+using Pando.Serialization.NodeSerializers;
 
 namespace Pando.Repositories;
 

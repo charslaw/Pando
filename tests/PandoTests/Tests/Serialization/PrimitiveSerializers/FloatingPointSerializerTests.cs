@@ -9,7 +9,7 @@ namespace PandoTests.Tests.Serialization.PrimitiveSerializers;
 
 public partial class PrimitiveSerializerTests
 {
-	public class SingleLittleEndianSerializerTests : BaseSerializerTest<float>, ISerializerTestData<float>
+	public class SingleLittleEndianSerializerTests : BasePrimitiveSerializerTest<float>, ISerializerTestData<float>
 	{
 		protected override IPrimitiveSerializer<float> Serializer => new SingleLittleEndianSerializer();
 
@@ -21,7 +21,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(float) };
 	}
 
-	public class DoubleLittleEndianSerializerTests : BaseSerializerTest<double>, ISerializerTestData<double>
+	public class DoubleLittleEndianSerializerTests : BasePrimitiveSerializerTest<double>, ISerializerTestData<double>
 	{
 		protected override IPrimitiveSerializer<double> Serializer => new DoubleLittleEndianSerializer();
 
@@ -33,7 +33,7 @@ public partial class PrimitiveSerializerTests
 		public static TheoryData<int?> ByteCountTestData => new() { sizeof(double) };
 	}
 
-	public class HalfLittleEndianSerializerTests : BaseSerializerTest<Half>, ISerializerTestData<Half>
+	public class HalfLittleEndianSerializerTests : BasePrimitiveSerializerTest<Half>, ISerializerTestData<Half>
 	{
 		protected override IPrimitiveSerializer<Half> Serializer => new HalfLittleEndianSerializer();
 
