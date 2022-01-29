@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Pando.DataSources;
 using Pando.Repositories;
 using Pando.Serialization.NodeSerializers;
+using Pando.Serialization.NodeSerializers.EnumerableFactory;
 using Pando.Serialization.PrimitiveSerializers;
 using PandoExampleProject.Serializers;
 using Xunit;
@@ -18,8 +19,8 @@ public class ChessTests
 		new ChessPlayerStateSerializer(),
 		new PrimitiveWhiteBlackPairSerializer<TimeSpan>(new TimeSpanTicksSerializer()),
 		new NodeWhiteBlackPairSerializer<ImmutableArray<ChessPiece>>(
-			new ImmutableArraySerializer<ChessPiece>(
-				new ChessPieceSerializer()
+			new NodeListSerializer<ImmutableArray<ChessPiece>, ChessPiece>(
+				new ChessPieceSerializer(), new ImmutableArrayFactory<ChessPiece>()
 			)
 		)
 	);
