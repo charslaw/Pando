@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Serialization.NodeSerializers.EnumerableFactory;
@@ -22,7 +21,6 @@ public class NodeListSerializer<TList, T> : NodeEnumerableSerializer<TList, T>
 	public NodeListSerializer(INodeSerializer<T> elementSerializer, IEnumerableFactory<TList, T> enumerableFactory)
 		: base(elementSerializer, enumerableFactory) { }
 
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public override int NodeSizeForObject(TList list) => list.Count * sizeof(ulong);
 
 	public override void Serialize(TList list, Span<byte> writeBuffer, INodeDataSink dataSink)
