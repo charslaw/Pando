@@ -28,6 +28,7 @@ public class ChessTests
 	[Fact]
 	public void MakeSomeMoves()
 	{
+		// Initialize a pando repository that stores data in memory and uses our serializer
 		var pandoRepository = new PandoRepository<ChessGameState>(
 			new MemoryDataSource(),
 			MakeSerializer()
@@ -74,5 +75,6 @@ public class ChessTests
 		Assert.Equal(firstMoveExpected, firstMoveActual);
 	}
 
+	// This just exists to make writing out a board state more convenient
 	private static string TrimBoardLines(string board) => Regex.Replace(board.Trim(), @"\s*\n\s*", "\n");
 }

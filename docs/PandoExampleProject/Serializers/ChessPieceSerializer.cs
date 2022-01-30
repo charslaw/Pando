@@ -4,6 +4,7 @@ using Pando.Serialization.NodeSerializers;
 
 namespace PandoExampleProject.Serializers;
 
+/// ChessPiece only contains primitive data in the form of enums, so this is a pretty simple serializer.
 internal class ChessPieceSerializer : INodeSerializer<ChessPiece>
 {
 	private const int SIZE = 5 * sizeof(byte);
@@ -11,6 +12,7 @@ internal class ChessPieceSerializer : INodeSerializer<ChessPiece>
 
 	public int NodeSizeForObject(ChessPiece obj) => SIZE;
 
+	/// Sequentially writes each enum member of the chess piece into a buffer and submits the node to the data sink.
 	public void Serialize(ChessPiece obj, Span<byte> writeBuffer, INodeDataSink dataSink)
 	{
 		// We *could* use an EnumSerializer for each of these enums, though I think in this case that would be less readable
@@ -22,6 +24,7 @@ internal class ChessPieceSerializer : INodeSerializer<ChessPiece>
 		writeBuffer[4] = (byte)obj.State;
 	}
 
+	/// Gets the sequential byte values and converts them to their enum values, then creates a chess piece.
 	public ChessPiece Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource)
 	{
 		return new ChessPiece(

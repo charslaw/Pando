@@ -4,9 +4,15 @@ using System.Text;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
-/// Serializes a string encoded as ASCII
+/// Serializes a string using a given encoding
 public class StringSerializer : IPrimitiveSerializer<string>
 {
+	/// A default serializer for strings that uses the UTF8 encoding and 4 little endian bytes for encoding string length.
+	public static StringSerializer UTF8 { get; } = new(Int32LittleEndianSerializer.Default, Encoding.UTF8);
+
+	/// A default serializer for strings that uses the ASCII encoding and 4 little endian bytes for encoding string length.
+	public static StringSerializer ASCII { get; } = new(Int32LittleEndianSerializer.Default, Encoding.ASCII);
+
 	private readonly IPrimitiveSerializer<int> _lengthSerializer;
 	private readonly Encoding _encoding;
 
