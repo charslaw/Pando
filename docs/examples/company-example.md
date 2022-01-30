@@ -29,7 +29,7 @@ The primitive value is stored inline alongside the hash which refers to the arra
 
 ### `Employees`
 
-`Employees`, being an array of nodes, is a node unto itself,
+`Employees`, being an array of nodes, is a node itself,
 and thus stores hashes for each of the nodes contained within it.
 
 ```
