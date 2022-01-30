@@ -18,8 +18,8 @@ public enum EyeColor : byte { Blue, Green, Brown, Hazel, Black, Other }
 
 ## Serialization
 
-You can read the full serializer class [here](../ExamplesCode/Person.cs), however here we will just include the
-implementation of the `Serialize` and `Deserialize` methods.
+You can read the full serializer class [here](../ExamplesCode/Person.cs),
+however here we will just include the implementation of the `Serialize` and `Deserialize` methods.
 
 ### Serialize
 
@@ -72,9 +72,9 @@ public Person Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 
 ## Memory Layout
 
-The example `PersonSerializer` lays out the properties of a `Person` in memory like so. Note that most of this behavior
-is defined by the specific primitive serializers used, the node serializer itself just coordinates the primitive
-serializes and decides what order to put each member into the buffer.
+The example `PersonSerializer` lays out the properties of a `Person` in memory like so.
+Note that most of this behavior is defined by the specific primitive serializers used,
+the node serializer itself just coordinates the primitive serializes and decides what order to put each member into the buffer.
 
 ```
    Name Length      Name      Date Of Birth  ┌─ Gender (1 byte)

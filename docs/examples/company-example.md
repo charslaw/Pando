@@ -1,11 +1,12 @@
-# Array Example
+# Company Example
 
-A simple example of an array in a pando state tree.
+A simple example of a node that contains both primitive data
+and another node in the form of a collection of `Person` nodes.
 
 ```csharp
 public record Company(
-    string CompanyName,     // CompanyName is a primitive value
-    Person[] Employees      // Employees is a node; each employee is a leaf node (see the basic example)
+    string CompanyName, // CompanyName is a primitive value
+    Person[] Employees  // Employees is a node; each employee is a leaf node (see the basic example)
 );
 ```
 
@@ -13,8 +14,8 @@ public record Company(
 
 ### `Company`
 
-Company is a node that contains both a primitive value (`CompanyName`) and another node (`Employees`). The primitive
-value is stored inline alongside the hash which refers to the array of employees.
+Company is a node that contains both a primitive value (`CompanyName`) and another node (`Employees`).
+The primitive value is stored inline alongside the hash which refers to the array of employees.
 
 ```
  CompanyName Length  CompanyName   Employees Hash
@@ -28,8 +29,8 @@ value is stored inline alongside the hash which refers to the array of employees
 
 ### `Employees`
 
-`Employees`, being an array of nodes, is a node unto itself, and thus stores hashes for each of the nodes contained
-within it.
+`Employees`, being an array of nodes, is a node unto itself,
+and thus stores hashes for each of the nodes contained within it.
 
 ```
         [0] Hash                [1] Hash             [N] Hash        
