@@ -1,6 +1,6 @@
 using System;
 using Pando.DataSources;
-using Pando.Serialization;
+using Pando.Serialization.NodeSerializers;
 using Pando.Serialization.PrimitiveSerializers;
 
 namespace ExamplesCode;
@@ -38,35 +38,36 @@ internal class PersonSerializer : INodeSerializer<Person>
 	/// Strings can be variable length, so we don't know the size ahead of time.
 	public int? NodeSize => null;
 
-	/// Converts the given person to binary representation (a byte array), submits it as a new node to the data sink,
-	/// then returns the hash of the newly added node, so that whatever node contains this can use the hash.
-	public ulong Serialize(Person obj, INodeDataSink dataSink)
+	/// Returns the size of a specific person.
+	/// Since Person contains only primitive types, we just defer to each primitive serializer for the size of each member,
+	/// then add them up.
+	public int NodeSizeForObject(Person person)
+	{
+		var (name, dob, gender, eyeColor) = person;
+		var nameSize = _nameSerializer.ByteCountForValue(name);
+		var dobSize = _dateOfBirthSerializer.ByteCount ?? _dateOfBirthSerializer.ByteCountForValue(dob);
+		var genderSize = _genderSerializer.ByteCount ?? _genderSerializer.ByteCountForValue(gender);
+		var eyeColorSize = _eyeColorSerializer.ByteCount ?? _eyeColorSerializer.ByteCountForValue(eyeColor);
+
+		return nameSize + dobSize + genderSize + eyeColorSize;
+	}
+
+	/// Writes the binary representation of the person's properties into the given write buffer.
+	/// In this case, since Person only contains primitive data types,
+	/// it just calls the serializer for each member and uses the given write buffer.
+	/// Note that since this node does not contain other nodes, the dataSink parameter is not used.
+	public void Serialize(Person obj, Span<byte> writeBuffer, INodeDataSink dataSink)
 	{
 		var (name, dob, gender, eyeColor) = obj;
 
-		// Get the size necessary to serialize this person
-		var numBytes = _nameSerializer.ByteCountForValue(name)
-			+ _dateOfBirthSerializer.ByteCountForValue(dob)
-			+ _genderSerializer.ByteCountForValue(gender)
-			+ _eyeColorSerializer.ByteCountForValue(eyeColor);
-
-		// Allocate the byte buffer to use
-		Span<byte> bytes = stackalloc byte[numBytes];
-
-		// Write data to the buffer
-		var writeBuffer = bytes;
 		_nameSerializer.Serialize(name, ref writeBuffer);
 		_dateOfBirthSerializer.Serialize(dob, ref writeBuffer);
 		_genderSerializer.Serialize(gender, ref writeBuffer);
 		_eyeColorSerializer.Serialize(eyeColor, ref writeBuffer);
-
-		// Add the node to the data sink and return the node hash.
-		return dataSink.AddNode(bytes);
 	}
 
 	/// Gets each of the values out of the given bytes array.
 	/// Note that since this node does not contain other nodes, the dataSource parameter is not used.
-	/// The dataSource parameter is used for nodes that contain other nodes so that they can retrieve their child nodes from the data source.
 	public Person Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
 	{
 		// get member data out of the given byte buffer
