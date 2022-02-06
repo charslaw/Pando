@@ -9,7 +9,7 @@ namespace PandoExampleProject.Serializers;
 /// This is a manually implemented serializer.
 /// Generally, this should probably be implemented by a source generator, with manual overrides where necessary.
 /// However for this example we are including a manual serializer for illustrative purposes
-///
+/// 
 /// Since this is a branch node, its data is composed of the hashes of all of its child nodes
 internal class ChessStateTreeSerializer : INodeSerializer<ChessGameState>
 {
@@ -27,19 +27,16 @@ internal class ChessStateTreeSerializer : INodeSerializer<ChessGameState>
 		_playerStateSerializer = playerStateSerializer;
 		_remainingTimeSerializer = remainingTimeSerializer;
 		_playerPiecesSerializer = playerPiecesSerializer;
-		NodeSize = _playerStateSerializer.NodeSize + _remainingTimeSerializer.NodeSize + _playerPiecesSerializer.NodeSize;
 	}
 
-	public int? NodeSize { get; }
-
-	public int NodeSizeForObject(ChessGameState obj)
-		=> NodeSize
-			?? _playerStateSerializer.NodeSizeForObject(obj.PlayerState)
-			+ _remainingTimeSerializer.NodeSizeForObject(obj.RemainingTime)
-			+ _playerPiecesSerializer.NodeSizeForObject(obj.PlayerPieces);
+	private const int SIZE = sizeof(ulong) * 3;
+	public int? NodeSize => SIZE;
+	public int NodeSizeForObject(ChessGameState obj) => SIZE;
 
 	/// <param name="obj">ChessGameState that we want to serialize to the data sink</param>
-	/// <param name="writeBuffer">The buffer into which to write the binary representation of the given <paramref name="obj"/></param>
+	/// <param name="writeBuffer">
+	///     The buffer into which to write the binary representation of the given <paramref name="obj" />
+	/// </param>
 	/// <param name="dataSink">Data sink we want to serialize to</param>
 	public void Serialize(ChessGameState obj, Span<byte> writeBuffer, INodeDataSink dataSink)
 	{
