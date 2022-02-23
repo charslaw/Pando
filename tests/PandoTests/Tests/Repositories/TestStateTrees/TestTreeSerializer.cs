@@ -7,7 +7,7 @@ using Pando.Serialization.PrimitiveSerializers;
 
 namespace PandoTests.Tests.Repositories.TestStateTrees;
 
-internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
+internal class TestTreeSerializer : INodeSerializer<TestTree>
 {
 	private readonly IPrimitiveSerializer<string> _nameSerializer = new StringSerializer(Encoding.UTF8);
 	private readonly INodeSerializer<TestTree.A> _aSerializer = new DoubleTreeASerializer();
@@ -39,7 +39,7 @@ internal readonly struct TestTreeSerializer : INodeSerializer<TestTree>
 	}
 }
 
-internal readonly struct DoubleTreeASerializer : INodeSerializer<TestTree.A>
+internal class DoubleTreeASerializer : INodeSerializer<TestTree.A>
 {
 	private readonly int _size;
 
@@ -63,7 +63,7 @@ internal readonly struct DoubleTreeASerializer : INodeSerializer<TestTree.A>
 	}
 }
 
-internal readonly struct DoubleTreeBSerializer : INodeSerializer<TestTree.B>
+internal class DoubleTreeBSerializer : INodeSerializer<TestTree.B>
 {
 	public DoubleTreeBSerializer()
 	{
