@@ -63,24 +63,18 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 		=> context.SyntaxProvider.CreateSyntaxProvider(
 				predicate: static (syntax, _) =>
 				{
-					switch (syntax)
-					{
-						// Type declarations with the marker attribute
-						case TypeDeclarationSyntax { AttributeLists.Count: > 0 } tds:
-							foreach (var attrList in tds.AttributeLists)
-							{
-								foreach (var attr in attrList.Attributes)
-								{
-									var attrName = attr.Name.ToString();
-									if (attrName is MARKER_ATTRIBUTE_SHORT or MARKER_ATTRIBUTE) return true;
-								}
-							}
+					if (syntax is not TypeDeclarationSyntax { AttributeLists.Count: > 0 } tds) return false;
 
-							return false;
-						// *Any* Deconstruct method
-						case MethodDeclarationSyntax { Identifier.Text: "Deconstruct" }: return true;
-						default: return false;
+					foreach (var attrList in tds.AttributeLists)
+					{
+						foreach (var attr in attrList.Attributes)
+						{
+							var attrName = attr.Name.ToString();
+							if (attrName is MARKER_ATTRIBUTE_SHORT or MARKER_ATTRIBUTE) return true;
+						}
 					}
+
+					return false;
 				},
 				transform: static (ctx, _) => ctx.SemanticModel.GetDeclaredSymbol(ctx.Node)
 			)
