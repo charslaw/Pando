@@ -28,3 +28,5 @@ obj/
 
 # Test Results
 TestResults/
+# VerifyTests received test output
+*.received.*
