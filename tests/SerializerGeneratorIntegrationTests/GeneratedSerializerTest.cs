@@ -1,6 +1,6 @@
 using FluentAssertions;
+using GeneratedSerializers;
 using Pando.SerializerGenerator.Attributes;
-using SerializerGeneratorIntegrationTests.Generated;
 using Xunit;
 
 namespace SerializerGeneratorIntegrationTests;
