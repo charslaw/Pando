@@ -47,30 +47,31 @@ namespace GeneratedSerializers;
 [GeneratedCode(""{{ assembly.name }}"", ""{{ assembly.version }}"")]
 public class {{ serializerName }} : INodeSerializer<{{ nestedTypeString }}>
 {
-	{{~ for param in paramList ~}}
-private INodeSerializer<{{ param.type }}> _{{ param.name }}Serializer;
+{{~ for param in paramList ~}}
+	private INodeSerializer<{{ param.type }}> _{{ param.name }}Serializer;
 {{~ end ~}}
 
-public {{ serializerName }}({{- for param in paramList -}}
-INodeSerializer<{{ param.type }}> {{ param.name }}Serializer {{- if !for.last; ','; end; -}}
-{{- end -}})
-{
-	{{~ for param in paramList ~}}
-	_{{ param.name }}Serializer = {{ param.name }}Serializer;
-	{{~ end ~}}
+	public {{ serializerName }}(
+{{- for param in paramList -}}
+	INodeSerializer<{{ param.type }}> {{ param.name }}Serializer {{- if !for.last; ', '; end; -}}
+{{- end -}}
+	)
+	{
+{{~ for param in paramList ~}}
+		_{{ param.name }}Serializer = {{ param.name }}Serializer;
+{{~ end ~}}
 
-	NodeSize = {{ paramList.size }} * sizeof(ulong);
-}
+		NodeSize = {{ paramList.size }} * sizeof(ulong);
+	}
 
-public int? NodeSize { get; }
+	public int? NodeSize { get; }
 
-public int NodeSizeForObject({{ nestedTypeString }} obj) =>
-throw new NotImplementedException();
+	public int NodeSizeForObject({{ nestedTypeString }} obj) => NodeSize!.Value;
 
-public void Serialize({{ nestedTypeString }} obj, Span<byte> writeBuffer, INodeDataSink dataSink) =>
-throw new NotImplementedException();
+	public void Serialize({{ nestedTypeString }} obj, Span<byte> writeBuffer, INodeDataSink dataSink) =>
+		throw new NotImplementedException();
 
-public {{ nestedTypeString }} Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource) =>
-	throw new NotImplementedException();
+	public {{ nestedTypeString }} Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource) =>
+		throw new NotImplementedException();
 }";
 }
