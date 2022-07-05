@@ -8,7 +8,11 @@ namespace SerializerGeneratorIntegrationTests;
 public class GeneratedSerializerTest
 {
 	[GenerateNodeSerializer]
-	public sealed record TestNode(object stuff, int value);
+	public sealed record TestNode
+	{
+		public object Stuff { get; init; }
+		[Primitive] public int Value { get; init; }
+	}
 
 	public class NodeSize
 	{

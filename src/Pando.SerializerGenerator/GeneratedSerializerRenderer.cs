@@ -8,13 +8,13 @@ using Scriban.Runtime;
 
 namespace Pando.SerializerGenerator;
 
-public record Param(string Type, string Name);
+public record SerializedProp(string Type, string Name, bool IsPrimitive);
 
 public static class GeneratedSerializerRenderer
 {
-	private static readonly Lazy<Template> renderedTemplate = new(() => Template.Parse(TEMPLATE));
+	private static readonly Lazy<Template> parsedTemplate = new(() => Template.Parse(TEMPLATE));
 
-	public static (string filename, string contents) Render(AssemblyName assembly, INamedTypeSymbol type, List<Param> paramList)
+	public static string Render(AssemblyName assembly, INamedTypeSymbol type, List<SerializedProp> propList)
 	{
 		var serializerName = $"{type.Name}Serializer";
 		var nestedTypeString = type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
@@ -28,10 +28,10 @@ public static class GeneratedSerializerRenderer
 			{ nameof(nestedTypeString), nestedTypeString },
 			{ nameof(fullyQualifiedTypeString), fullyQualifiedTypeString },
 			{ nameof(typeNamespaceString), typeNamespaceString },
-			{ nameof(paramList), paramList }
+			{ nameof(propList), propList }
 		};
 
-		return ($"{fullyQualifiedTypeString}Serializer.g.cs", renderedTemplate.Value.Render(contextObject));
+		return parsedTemplate.Value.Render(contextObject);
 	}
 
 	private const string TEMPLATE = @"#nullable enable

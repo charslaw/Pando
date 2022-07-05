@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -13,106 +12,139 @@ namespace Pando.SerializerGenerator;
 [Generator]
 public class SerializerIncrementalGenerator : IIncrementalGenerator
 {
-	private const string MARKER_ATTRIBUTE_SHORT = "GenerateNodeSerializer";
-	private const string MARKER_ATTRIBUTE = "GenerateNodeSerializerAttribute";
+	private const string MARKER_ATTRIBUTE = "Pando.SerializerGenerator.Attributes.GenerateNodeSerializerAttribute";
+	private const string PRIMITIVE_ATTRIBUTE = "Pando.SerializerGenerator.Attributes.PrimitiveAttribute";
 
 	private static readonly AssemblyName assembly = typeof(SerializerIncrementalGenerator).Assembly.GetName();
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
-#if DEBUG
-		// if (!Debugger.IsAttached) Debugger.Launch();
-#endif
+		var candidateTypes = CollectCandidateTypes(context);
 
-		var symbols = CollectSymbols(context);
-
-		context.RegisterSourceOutput(symbols,
-			static (ctx, symbols) =>
+		context.RegisterSourceOutput(candidateTypes,
+			static (ctx, candidates) =>
 			{
-				if (symbols.IsDefaultOrEmpty) return;
+				if (candidates.IsDefaultOrEmpty) return;
 
-				var typesAndCtorParams = CollectTypeCtorParams(symbols, ctx);
+				var validCandidates = IdentifyValidTypes(candidates, ctx);
 
-				WriteSources(typesAndCtorParams, ctx);
+				WriteSources(validCandidates, ctx);
 			}
 		);
 	}
 
-	/// Collect types that have the generate serializer marker attribute *and* all Deconstruct methods.
-	/// We collect deconstruct methods explicitly rather than going through the type directly because a deconstructor can be an extension method,
-	/// which will not be on the type itself.
-	/// We'll filter the deconstruct methods to only those on the types in question later.
-	private static IncrementalValueProvider<ImmutableArray<INamedTypeSymbol>> CollectSymbols(IncrementalGeneratorInitializationContext context)
+	/// Collect types that have the generate serializer marker attribute
+	private static IncrementalValueProvider<ImmutableArray<INamedTypeSymbol>> CollectCandidateTypes(IncrementalGeneratorInitializationContext context)
 		=> context.SyntaxProvider.CreateSyntaxProvider(
-				predicate: static (syntax, _) =>
+				predicate: static (syntax, _) => syntax is TypeDeclarationSyntax { AttributeLists.Count: > 0 },
+				transform: static (ctx, _) =>
 				{
-					if (syntax is not TypeDeclarationSyntax { AttributeLists.Count: > 0 } tds) return false;
+					if (ctx.SemanticModel.GetDeclaredSymbol(ctx.Node) is not INamedTypeSymbol type) return null;
 
-					foreach (var attrList in tds.AttributeLists)
-					{
-						foreach (var attr in attrList.Attributes)
-						{
-							var attrName = attr.Name.ToString();
-							if (attrName is MARKER_ATTRIBUTE_SHORT or MARKER_ATTRIBUTE) return true;
-						}
-					}
-
-					return false;
-				},
-				transform: static (ctx, _) => (INamedTypeSymbol)ctx.SemanticModel.GetDeclaredSymbol(ctx.Node)
+					var attr = GetAttributeByFullName(type, MARKER_ATTRIBUTE);
+					return attr is not null ? type : null;
+				}
 			)
 			.Where(static sym => sym is not null)
 			.Collect();
 
-	/// Given a collection of types, return types that are valid candidates for a serializer to be generated along with the parameters on that type
-	/// used to construct/deconstruct them.
+	/// Given a collection of types, return types that are valid candidates for a serializer to be generated.
 	/// If a type is not a valid candidate, emits a diagnostic for that type.
-	private static Dictionary<INamedTypeSymbol, ImmutableArray<IParameterSymbol>> CollectTypeCtorParams(ImmutableArray<INamedTypeSymbol> types,
-		SourceProductionContext ctx)
+	private static Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>> IdentifyValidTypes(
+		ImmutableArray<INamedTypeSymbol> types,
+		SourceProductionContext ctx
+	)
 	{
-		var typesAndCtorParams = new Dictionary<INamedTypeSymbol, ImmutableArray<IParameterSymbol>>(SymbolEqualityComparer.IncludeNullability);
+		var validTypes = new Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>>(SymbolEqualityComparer.IncludeNullability);
 
 		foreach (var typeSymbol in types)
 		{
-			var attribute = typeSymbol.GetAttributes().First(static it => it.AttributeClass?.Name == MARKER_ATTRIBUTE);
-			var attributeSyntax = attribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-
-			var validationResult = CandidateTypeValidator.ValidateCandidateType(typeSymbol, attributeSyntax);
-
-			switch (validationResult)
+			if (!typeSymbol.IsSealed)
 			{
-				case CandidateTypeValidator.ValidateResult.Valid validResult:
-					typesAndCtorParams[typeSymbol] = validResult.ParamArray;
-					break;
-				case CandidateTypeValidator.ValidateResult.Invalid invalidResult:
-					ctx.ReportDiagnostic(invalidResult.Diagnostic);
-					break;
+				var attrLocation = GetMarkerAttributeLocation(typeSymbol);
+				ctx.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.TypeNotSealedDescriptor, attrLocation, typeSymbol));
+				continue;
 			}
+
+			bool hasValidCtor = false;
+			foreach (var ctor in typeSymbol.Constructors)
+			{
+				if (ctor.Parameters.Length != 0) continue;
+
+				hasValidCtor = true;
+				break;
+			}
+
+			if (!hasValidCtor)
+			{
+				var attrLocation = GetMarkerAttributeLocation(typeSymbol);
+				ctx.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.TypeHasNoParameterlessCtorDescriptor, attrLocation, typeSymbol));
+				continue;
+			}
+
+			validTypes.Add(typeSymbol, GetTypeProperties(typeSymbol));
 		}
 
-		return typesAndCtorParams;
+		return validTypes;
+	}
+
+	/// Returns an enumerable of property symbols on the given type that have accessible getters and setters
+	private static IEnumerable<IPropertySymbol> GetTypeProperties(INamedTypeSymbol type)
+	{
+		foreach (var member in type.GetMembers())
+		{
+			if (member is IPropertySymbol
+			    {
+				    IsStatic: false, IsIndexer: false,
+				    GetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public,
+				    SetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public
+			    } propertySymbol)
+			{
+				yield return propertySymbol;
+			}
+		}
+	}
+
+	/// Returns the <see cref="Location"/> of the marker attribute on this type, or <see cref="Location.None"/> if it does not have the attribute.
+	private static Location GetMarkerAttributeLocation(INamedTypeSymbol type)
+	{
+		var attribute = GetAttributeByFullName(type, MARKER_ATTRIBUTE);
+		var attributeSyntax = attribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
+		return attributeSyntax?.GetLocation() ?? Location.None;
+	}
+
+	/// Returns the attribute data for an attribute on the given symbol with the given fully qualified name, if it exists.
+	private static AttributeData GetAttributeByFullName(ISymbol symbol, string name)
+	{
+		foreach (var attr in symbol.GetAttributes())
+		{
+			var attrType = attr.AttributeClass;
+			if (attrType is null) continue;
+
+			var attrFullName = attrType.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
+			if (attrFullName == name) return attr;
+		}
+
+		return null;
 	}
 
 	/// Given a collection of valid serializer generation candidate types, outputs generated serializers for each type.
-	private static void WriteSources(Dictionary<INamedTypeSymbol, ImmutableArray<IParameterSymbol>> types, SourceProductionContext spCtx)
+	private static void WriteSources(Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>> types, SourceProductionContext spCtx)
 	{
-		foreach (var (type, ctorParams) in types)
+		foreach (var (type, properties) in types)
 		{
-			AddSerializerSource(type, ctorParams, spCtx);
+			var paramList = new List<SerializedProp>();
+			foreach (var prop in properties)
+			{
+				var paramTypeString = prop.Type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
+				var isPrimitive = GetAttributeByFullName(prop, PRIMITIVE_ATTRIBUTE) is not null;
+				paramList.Add(new SerializedProp(paramTypeString, prop.Name, isPrimitive));
+			}
+
+			var text = GeneratedSerializerRenderer.Render(assembly, type, paramList);
+			var fullyQualifiedTypeString = type.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
+			var filename = $"{fullyQualifiedTypeString}Serializer.g.cs";
+			spCtx.AddSource(filename, SourceText.From(text, Encoding.UTF8));
 		}
-	}
-
-	private static void AddSerializerSource(INamedTypeSymbol type, ImmutableArray<IParameterSymbol> ctorParams, SourceProductionContext spCtx)
-	{
-		var paramList = new List<Param>();
-		foreach (var ctorParam in ctorParams)
-		{
-			var paramTypeString = ctorParam.Type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
-			paramList.Add(new Param(paramTypeString, ctorParam.Name));
-		}
-
-		var (filename, text) = GeneratedSerializerRenderer.Render(assembly, type, paramList);
-
-		spCtx.AddSource(filename, SourceText.From(text, Encoding.UTF8));
 	}
 }
