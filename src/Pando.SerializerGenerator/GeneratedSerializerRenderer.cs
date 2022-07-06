@@ -47,21 +47,21 @@ namespace GeneratedSerializers;
 [GeneratedCode(""{{ assembly.name }}"", ""{{ assembly.version }}"")]
 public class {{ serializerName }} : INodeSerializer<{{ nestedTypeString }}>
 {
-{{~ for param in paramList ~}}
-	private INodeSerializer<{{ param.type }}> _{{ param.name }}Serializer;
+{{~ for prop in propList ~}}
+	private INodeSerializer<{{ prop.type }}> _{{ prop.name }}Serializer;
 {{~ end ~}}
 
 	public {{ serializerName }}(
-{{- for param in paramList -}}
-	INodeSerializer<{{ param.type }}> {{ param.name }}Serializer {{- if !for.last; ', '; end; -}}
+{{- for prop in propList -}}
+	INodeSerializer<{{ prop.type }}> {{ prop.name }}Serializer {{- if !for.last; ', '; end; -}}
 {{- end -}}
 	)
 	{
-{{~ for param in paramList ~}}
-		_{{ param.name }}Serializer = {{ param.name }}Serializer;
+{{~ for prop in propList ~}}
+		_{{ prop.name }}Serializer = {{ prop.name }}Serializer;
 {{~ end ~}}
 
-		NodeSize = {{ paramList.size }} * sizeof(ulong);
+		NodeSize = {{ propList.size }} * sizeof(ulong);
 	}
 
 	public int? NodeSize { get; }
