@@ -1,13 +1,9 @@
-using Pando.SerializerGenerator.Attributes;
-
 namespace SerializerGeneratorUnitTests.TestClasses;
 
-[GenerateNodeSerializer]
+[Pando.SerializerGenerator.Attributes.GenerateNodeSerializerAttribute]
 internal struct ValidStruct
 {
-	public int Prop { get; }
+	public int Prop { get; init; } = default;
 
-	public ValidStruct(int prop) { Prop = prop; }
-
-	public void Deconstruct(out int prop) { prop = Prop; }
+	public ValidStruct() {}
 }

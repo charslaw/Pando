@@ -4,7 +4,7 @@ namespace Pando.SerializerGenerator;
 
 public static class DiagnosticDescriptors
 {
-	private static string DescriptorId(int number) => $"Pando_SG_{number:D4}";
+	private static string DescriptorId(int number) => $"PANDO_SG_{number:D4}";
 
 	public static DiagnosticDescriptor TypeNotSealedDescriptor => new(
 		id: DescriptorId(number: 1),

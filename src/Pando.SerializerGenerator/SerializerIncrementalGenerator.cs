@@ -12,8 +12,8 @@ namespace Pando.SerializerGenerator;
 [Generator]
 public class SerializerIncrementalGenerator : IIncrementalGenerator
 {
-	private const string MARKER_ATTRIBUTE = "Pando.SerializerGenerator.Attributes.GenerateNodeSerializerAttribute";
-	private const string PRIMITIVE_ATTRIBUTE = "Pando.SerializerGenerator.Attributes.PrimitiveAttribute";
+	public const string MARKER_ATTRIBUTE = "Pando.SerializerGenerator.Attributes.GenerateNodeSerializerAttribute";
+	public const string PRIMITIVE_ATTRIBUTE = "Pando.SerializerGenerator.Attributes.PrimitiveAttribute";
 
 	private static readonly AssemblyName assembly = typeof(SerializerIncrementalGenerator).Assembly.GetName();
 
@@ -41,7 +41,7 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 				{
 					if (ctx.SemanticModel.GetDeclaredSymbol(ctx.Node) is not INamedTypeSymbol type) return null;
 
-					var attr = GetAttributeByFullName(type, MARKER_ATTRIBUTE);
+					var attr = type.GetAttributeByFullName(MARKER_ATTRIBUTE);
 					return attr is not null ? type : null;
 				}
 			)
@@ -50,39 +50,16 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 
 	/// Given a collection of types, return types that are valid candidates for a serializer to be generated.
 	/// If a type is not a valid candidate, emits a diagnostic for that type.
-	private static Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>> IdentifyValidTypes(
-		ImmutableArray<INamedTypeSymbol> types,
-		SourceProductionContext ctx
-	)
+	private static Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>> IdentifyValidTypes(ImmutableArray<INamedTypeSymbol> types, SourceProductionContext context)
 	{
 		var validTypes = new Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>>(SymbolEqualityComparer.IncludeNullability);
 
 		foreach (var typeSymbol in types)
 		{
-			if (!typeSymbol.IsSealed)
+			if (CandidateTypeValidator.TypeIsValid(typeSymbol, out _))
 			{
-				var attrLocation = GetMarkerAttributeLocation(typeSymbol);
-				ctx.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.TypeNotSealedDescriptor, attrLocation, typeSymbol));
-				continue;
+				validTypes.Add(typeSymbol, GetTypeProperties(typeSymbol));
 			}
-
-			bool hasValidCtor = false;
-			foreach (var ctor in typeSymbol.Constructors)
-			{
-				if (ctor.Parameters.Length != 0) continue;
-
-				hasValidCtor = true;
-				break;
-			}
-
-			if (!hasValidCtor)
-			{
-				var attrLocation = GetMarkerAttributeLocation(typeSymbol);
-				ctx.ReportDiagnostic(Diagnostic.Create(DiagnosticDescriptors.TypeHasNoParameterlessCtorDescriptor, attrLocation, typeSymbol));
-				continue;
-			}
-
-			validTypes.Add(typeSymbol, GetTypeProperties(typeSymbol));
 		}
 
 		return validTypes;
@@ -105,29 +82,6 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 		}
 	}
 
-	/// Returns the <see cref="Location"/> of the marker attribute on this type, or <see cref="Location.None"/> if it does not have the attribute.
-	private static Location GetMarkerAttributeLocation(INamedTypeSymbol type)
-	{
-		var attribute = GetAttributeByFullName(type, MARKER_ATTRIBUTE);
-		var attributeSyntax = attribute.ApplicationSyntaxReference?.GetSyntax() as AttributeSyntax;
-		return attributeSyntax?.GetLocation() ?? Location.None;
-	}
-
-	/// Returns the attribute data for an attribute on the given symbol with the given fully qualified name, if it exists.
-	private static AttributeData GetAttributeByFullName(ISymbol symbol, string name)
-	{
-		foreach (var attr in symbol.GetAttributes())
-		{
-			var attrType = attr.AttributeClass;
-			if (attrType is null) continue;
-
-			var attrFullName = attrType.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
-			if (attrFullName == name) return attr;
-		}
-
-		return null;
-	}
-
 	/// Given a collection of valid serializer generation candidate types, outputs generated serializers for each type.
 	private static void WriteSources(Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>> types, SourceProductionContext spCtx)
 	{
@@ -137,8 +91,8 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 			foreach (var prop in properties)
 			{
 				var paramTypeString = prop.Type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
-				var isPrimitive = GetAttributeByFullName(prop, PRIMITIVE_ATTRIBUTE) is not null;
-				paramList.Add(new SerializedProp(paramTypeString, prop.Name, isPrimitive));
+				var isPrimitive = prop.GetAttributeByFullName(PRIMITIVE_ATTRIBUTE) is not null;
+				paramList.Add(new SerializedProp(paramTypeString, prop.Name.ToCamelCase(), isPrimitive));
 			}
 
 			var text = GeneratedSerializerRenderer.Render(assembly, type, paramList);

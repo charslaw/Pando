@@ -1,6 +1,4 @@
-using Pando.SerializerGenerator.Attributes;
-
 namespace SerializerGeneratorUnitTests.TestClasses;
 
-[GenerateNodeSerializer]
+[Pando.SerializerGenerator.Attributes.GenerateNodeSerializerAttribute]
 internal class InvalidBecauseNotSealed { }
