@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
 
 namespace Pando.SerializerGenerator.Utils;
@@ -17,5 +18,22 @@ internal static class SymbolHelpers
 		}
 
 		return null;
+	}
+
+	/// Returns an enumerable of property symbols on the given type that have accessible getters and setters
+	public static IEnumerable<IPropertySymbol> GetAccessibleProperties(this INamedTypeSymbol type)
+	{
+		foreach (var member in type.GetMembers())
+		{
+			if (member is IPropertySymbol
+			    {
+				    IsStatic: false, IsIndexer: false,
+				    GetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public,
+				    SetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public
+			    } propertySymbol)
+			{
+				yield return propertySymbol;
+			}
+		}
 	}
 }

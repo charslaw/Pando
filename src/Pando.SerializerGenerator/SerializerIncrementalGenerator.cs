@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -19,86 +18,49 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
-		var candidateTypes = CollectCandidateTypes(context);
-
-		context.RegisterSourceOutput(candidateTypes,
-			static (ctx, candidates) =>
-			{
-				if (candidates.IsDefaultOrEmpty) return;
-
-				var validCandidates = IdentifyValidTypes(candidates, ctx);
-
-				WriteSources(validCandidates, ctx);
-			}
-		);
-	}
-
-	/// Collect types that have the generate serializer marker attribute
-	private static IncrementalValueProvider<ImmutableArray<INamedTypeSymbol>> CollectCandidateTypes(IncrementalGeneratorInitializationContext context)
-		=> context.SyntaxProvider.CreateSyntaxProvider(
+		var candidateTypes = context.SyntaxProvider.CreateSyntaxProvider(
 				predicate: static (syntax, _) => syntax is TypeDeclarationSyntax { AttributeLists.Count: > 0 },
 				transform: static (ctx, _) =>
 				{
 					if (ctx.SemanticModel.GetDeclaredSymbol(ctx.Node) is not INamedTypeSymbol type) return null;
 
 					var attr = type.GetAttributeByFullName(MARKER_ATTRIBUTE);
-					return attr is not null ? type : null;
+					if (attr is null) return null;
+					
+					if (!CandidateTypeValidator.TypeIsValid(type, out var __)) return null;
+					
+					return type;
 				}
 			)
 			.Where(static sym => sym is not null)
 			.Collect();
 
-	/// Given a collection of types, return types that are valid candidates for a serializer to be generated.
-	/// If a type is not a valid candidate, emits a diagnostic for that type.
-	private static Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>> IdentifyValidTypes(ImmutableArray<INamedTypeSymbol> types, SourceProductionContext context)
-	{
-		var validTypes = new Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>>(SymbolEqualityComparer.IncludeNullability);
-
-		foreach (var typeSymbol in types)
-		{
-			if (CandidateTypeValidator.TypeIsValid(typeSymbol, out _))
+		context.RegisterSourceOutput(candidateTypes,
+			static (spCtx, candidates) =>
 			{
-				validTypes.Add(typeSymbol, GetTypeProperties(typeSymbol));
-			}
-		}
+				if (candidates.IsDefaultOrEmpty) return;
 
-		return validTypes;
+				foreach (var typeSymbol in candidates)
+				{
+					WriteSourceForType(typeSymbol, spCtx);
+				}
+			}
+		);
 	}
 
-	/// Returns an enumerable of property symbols on the given type that have accessible getters and setters
-	private static IEnumerable<IPropertySymbol> GetTypeProperties(INamedTypeSymbol type)
+	private static void WriteSourceForType(INamedTypeSymbol typeSymbol, SourceProductionContext spCtx)
 	{
-		foreach (var member in type.GetMembers())
+		var paramList = new List<SerializedProp>();
+		foreach (var prop in typeSymbol.GetAccessibleProperties())
 		{
-			if (member is IPropertySymbol
-			    {
-				    IsStatic: false, IsIndexer: false,
-				    GetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public,
-				    SetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public
-			    } propertySymbol)
-			{
-				yield return propertySymbol;
-			}
+			var paramTypeString = prop.Type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
+			var isPrimitive = prop.GetAttributeByFullName(PRIMITIVE_ATTRIBUTE) is not null;
+			paramList.Add(new SerializedProp(paramTypeString, prop.Name.ToCamelCase(), isPrimitive));
 		}
-	}
 
-	/// Given a collection of valid serializer generation candidate types, outputs generated serializers for each type.
-	private static void WriteSources(Dictionary<INamedTypeSymbol, IEnumerable<IPropertySymbol>> types, SourceProductionContext spCtx)
-	{
-		foreach (var (type, properties) in types)
-		{
-			var paramList = new List<SerializedProp>();
-			foreach (var prop in properties)
-			{
-				var paramTypeString = prop.Type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
-				var isPrimitive = prop.GetAttributeByFullName(PRIMITIVE_ATTRIBUTE) is not null;
-				paramList.Add(new SerializedProp(paramTypeString, prop.Name.ToCamelCase(), isPrimitive));
-			}
-
-			var text = GeneratedSerializerRenderer.Render(assembly, type, paramList);
-			var fullyQualifiedTypeString = type.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
-			var filename = $"{fullyQualifiedTypeString}Serializer.g.cs";
-			spCtx.AddSource(filename, SourceText.From(text, Encoding.UTF8));
-		}
+		var text = GeneratedSerializerRenderer.Render(assembly, typeSymbol, paramList);
+		var fullyQualifiedTypeString = typeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
+		var filename = $"{fullyQualifiedTypeString}Serializer.g.cs";
+		spCtx.AddSource(filename, SourceText.From(text, Encoding.UTF8));
 	}
 }
