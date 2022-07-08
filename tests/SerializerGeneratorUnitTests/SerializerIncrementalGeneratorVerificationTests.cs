@@ -1,15 +1,12 @@
-using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Pando.SerializerGenerator;
 using SerializerGeneratorUnitTests.Utils;
-using VerifyXunit;
 using Xunit;
 
 namespace SerializerGeneratorUnitTests;
 
-[UsesVerify]
 public class SerializerIncrementalGeneratorVerificationTests
 {
 	private static GeneratorDriver CreateAndRunDriverForFile(string filename)
@@ -25,17 +22,6 @@ public class SerializerIncrementalGeneratorVerificationTests
 				result => result.Exception.Should().BeNull(),
 				because: "the generator should not throw exceptions"
 			);
-
-	[Fact]
-	public Task Should_produce_correct_output_for_valid_class()
-	{
-		var generatorDriver = CreateAndRunDriverForFile("TestClasses/ValidClass.cs");
-
-		var runResult = generatorDriver.GetRunResult();
-		AssertNoErrors(runResult);
-
-		return Verifier.Verify(generatorDriver);
-	}
 
 	[Theory]
 	[InlineData("TestClasses/InvalidBecauseAbstract.cs")]
