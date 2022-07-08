@@ -30,7 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ContentWithTargetPath Include="**\TestClasses\**" Exclude="**\bin\**">
+		<ContentWithTargetPath Include="**\TestFiles\**" Exclude="**\bin\**">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<TargetPath>%(RecursiveDir)\%(Filename)%(Extension)</TargetPath>
 		</ContentWithTargetPath>

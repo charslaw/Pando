@@ -26,9 +26,9 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 
 					var attr = type.GetAttributeByFullName(MARKER_ATTRIBUTE);
 					if (attr is null) return null;
-					
+
 					if (!CandidateTypeValidator.TypeIsValid(type, out var __)) return null;
-					
+
 					return type;
 				}
 			)
