@@ -16,6 +16,7 @@ public static class GeneratedSerializerRenderer
 		var serializerName = $"{type.Name}Serializer";
 		var nestedTypeString = type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
 		var typeNamespaceString = type.ContainingNamespace.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
+		var (primitives, nodes) = GetPropCollections(propList);
 
 		var writer = new IndentedTextWriter(new StringWriter(), "\t");
 
@@ -24,7 +25,8 @@ public static class GeneratedSerializerRenderer
 		writer.WriteLine("using System;");
 		writer.WriteLine("using System.CodeDom.Compiler;");
 		writer.WriteLine("using Pando.DataSources;");
-		writer.WriteLine("using Pando.Serialization.NodeSerializers;");
+		if (nodes.Count > 0) writer.WriteLine("using Pando.Serialization.NodeSerializers;");
+		if (primitives.Count > 0) writer.WriteLine("using Pando.Serialization.PrimitiveSerializers;");
 		writer.WriteLine("using {0};", typeNamespaceString);
 		writer.BlankLine();
 
@@ -37,7 +39,7 @@ public static class GeneratedSerializerRenderer
 			{
 				foreach (var prop in propList)
 				{
-					writer.WriteLine("private INodeSerializer<{0}> _{1}Serializer;", prop.Type, prop.Name);
+					writer.WriteLine("private {0} _{1}Serializer;", prop.SerializerType.GenericName, prop.Name);
 				}
 
 				writer.BlankLine();
@@ -49,7 +51,7 @@ public static class GeneratedSerializerRenderer
 						{
 							var prop = propList[i];
 							var comma = (i + 1 == propList.Count) ? string.Empty : ",";
-							writer.WriteLine("INodeSerializer<{0}> {1}Serializer{2}", prop.Type, prop.Name, comma);
+							writer.WriteLine("{0} {1}Serializer{2}", prop.SerializerType.GenericName, prop.Name, comma);
 						}
 					}
 				);
@@ -87,10 +89,22 @@ public static class GeneratedSerializerRenderer
 			}
 		);
 
-		writer.BlankLine();
-		writer.WriteLine("}");
-
 		writer.Close();
 		return SourceText.From(writer.InnerWriter.ToString(), Encoding.UTF8);
+	}
+
+	private static (List<SerializedProp> primitives, List<SerializedProp> nodes) GetPropCollections(List<SerializedProp> propList)
+	{
+		List<SerializedProp> primitives = new();
+		List<SerializedProp> nodes = new();
+		foreach (var prop in propList)
+		{
+			if (prop.IsPrimitive)
+				primitives.Add(prop);
+			else
+				nodes.Add(prop);
+		}
+
+		return (primitives, nodes);
 	}
 }

@@ -1,7 +1,6 @@
+using Pando.SerializerGenerator.Attributes;
+
 namespace SerializerGeneratorUnitTests.TestClasses;
 
-[Pando.SerializerGenerator.Attributes.GenerateNodeSerializerAttribute]
-internal sealed record ValidClass(int Prop, string Prop2)
-{
-	public ValidClass() : this(default, default!) { }
-}
+[GenerateNodeSerializer]
+internal sealed record ValidClass([property: Primitive] int Prop, string Prop2);
