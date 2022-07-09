@@ -22,13 +22,15 @@ public class SerializerIncrementalGeneratorOutputTests
 	}
 	
 	[Theory]
-	[InlineData("TestFiles/TestSubjects/InvalidBecauseAbstract.cs")]
-	[InlineData("TestFiles/TestSubjects/InvalidBecauseNotSealed.cs")]
-	public void Should_produce_no_results_when_target_type_is_invalid(string filename)
+	[InlineData("TestFiles/TestSubjects/InvalidBecauseAbstract.cs", "PANDO_0001")]
+	[InlineData("TestFiles/TestSubjects/InvalidBecauseNotSealed.cs", "PANDO_0001")]
+	[InlineData("TestFiles/TestSubjects/InvalidBecauseNoAppropriateConstructor.cs", "PANDO_0002")]
+	public void Should_produce_no_results_when_target_type_is_invalid(string filename, string diagnosticId)
 	{
 		var runResult = new SerializerIncrementalGenerator().GenerateFromSourceFile(filename);
 
 		runResult.Exception.Should().BeNull();
+		runResult.Diagnostics.Should().HaveCount(1).And.AllSatisfy(d => d.Id.Should().Be(diagnosticId));
 		runResult.GeneratedSources.Should().BeEmpty();
 	}
 }

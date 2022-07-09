@@ -6,8 +6,6 @@ using Pando.SerializerGenerator.Utils;
 
 namespace Pando.SerializerGenerator;
 
-public record SerializedProp(string Type, string Name, bool IsPrimitive);
-
 public static class GeneratedSerializerRenderer
 {
 	public static string Render(AssemblyName assembly, INamedTypeSymbol type, List<SerializedProp> propList)

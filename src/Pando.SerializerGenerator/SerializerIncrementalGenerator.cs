@@ -27,8 +27,6 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 					var attr = type.GetAttributeByFullName(MARKER_ATTRIBUTE);
 					if (attr is null) return null;
 
-					if (!CandidateTypeValidator.TypeIsValid(type, out var __)) return null;
-
 					return type;
 				}
 			)
@@ -42,25 +40,49 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 
 				foreach (var typeSymbol in candidates)
 				{
-					WriteSourceForType(typeSymbol, spCtx);
+					if (!CandidateTypeValidator.TypeIsSealed(typeSymbol, out var sealedDiagnostic))
+					{
+						spCtx.ReportDiagnostic(sealedDiagnostic);
+						continue;
+					}
+					
+					var propList = CollectProperties(typeSymbol);
+					if (!CandidateTypeValidator.HasValidConstructor(typeSymbol, propList, out var ctorDiagnostic))
+					{
+						spCtx.ReportDiagnostic(ctorDiagnostic);
+						continue;
+					}
+
+					var text = GeneratedSerializerRenderer.Render(assembly, typeSymbol, propList);
+					var fullyQualifiedTypeString = typeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
+					var filename = $"{fullyQualifiedTypeString}Serializer.g.cs";
+
+					spCtx.AddSource(filename, SourceText.From(text, Encoding.UTF8));
 				}
 			}
 		);
 	}
 
-	private static void WriteSourceForType(INamedTypeSymbol typeSymbol, SourceProductionContext spCtx)
+	/// Creates an initial list of properties for a type with no constructor param set,
+	/// along with potential candidate names for matching constructor params
+	public static List<SerializedProp> CollectProperties(INamedTypeSymbol typeSymbol)
 	{
-		var paramList = new List<SerializedProp>();
-		foreach (var prop in typeSymbol.GetAccessibleProperties())
+		var propList = new List<SerializedProp>();
+		foreach (var member in typeSymbol.GetMembers())
 		{
-			var paramTypeString = prop.Type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
-			var isPrimitive = prop.GetAttributeByFullName(PRIMITIVE_ATTRIBUTE) is not null;
-			paramList.Add(new SerializedProp(paramTypeString, prop.Name.ToCamelCase(), isPrimitive));
+			if (member is IPropertySymbol
+			    {
+				    IsStatic: false, IsIndexer: false,
+				    DeclaredAccessibility: Accessibility.Internal or Accessibility.Public,
+				    GetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public
+			    } propertySymbol)
+			{
+				var name = propertySymbol.Name;
+				var isPrimitive = propertySymbol.GetAttributeByFullName(PRIMITIVE_ATTRIBUTE) is not null;
+				propList.Add(new SerializedProp((INamedTypeSymbol)propertySymbol.Type, name, isPrimitive));
+			}
 		}
 
-		var text = GeneratedSerializerRenderer.Render(assembly, typeSymbol, paramList);
-		var fullyQualifiedTypeString = typeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
-		var filename = $"{fullyQualifiedTypeString}Serializer.g.cs";
-		spCtx.AddSource(filename, SourceText.From(text, Encoding.UTF8));
+		return propList;
 	}
 }

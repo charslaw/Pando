@@ -11,7 +11,7 @@ public class SerializerAnalyzer : DiagnosticAnalyzer
 	public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; }
 		= ImmutableArray.Create(
 			DiagnosticDescriptors.TypeNotSealedDescriptor,
-			DiagnosticDescriptors.TypeHasNoParameterlessCtorDescriptor
+			DiagnosticDescriptors.TypeHasNoAppropriateConstructor
 		);
 
 	public override void Initialize(AnalysisContext context)

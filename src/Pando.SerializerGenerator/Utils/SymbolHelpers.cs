@@ -28,8 +28,8 @@ internal static class SymbolHelpers
 			if (member is IPropertySymbol
 			    {
 				    IsStatic: false, IsIndexer: false,
-				    GetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public,
-				    SetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public
+				    DeclaredAccessibility: Accessibility.Internal or Accessibility.Public,
+				    GetMethod.DeclaredAccessibility: Accessibility.Internal or Accessibility.Public
 			    } propertySymbol)
 			{
 				yield return propertySymbol;
