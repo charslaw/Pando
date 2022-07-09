@@ -2,13 +2,14 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 using Pando.SerializerGenerator.Utils;
 
 namespace Pando.SerializerGenerator;
 
 public static class GeneratedSerializerRenderer
 {
-	public static string Render(AssemblyName assembly, INamedTypeSymbol type, List<SerializedProp> propList)
+	public static SourceText Render(AssemblyName assembly, INamedTypeSymbol type, List<SerializedProp> propList)
 	{
 		var serializerName = $"{type.Name}Serializer";
 		var nestedTypeString = type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
@@ -74,6 +75,6 @@ using Pando.Serialization.NodeSerializers;
 
 		sb.AppendLine("\n}");
 
-		return sb.ToString();
+		return SourceText.From(sb.ToString(), Encoding.UTF8);
 	}
 }

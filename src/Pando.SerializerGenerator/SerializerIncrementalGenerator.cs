@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
 using Pando.SerializerGenerator.Utils;
 
 namespace Pando.SerializerGenerator;
@@ -57,7 +55,7 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 					var fullyQualifiedTypeString = typeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
 					var filename = $"{fullyQualifiedTypeString}Serializer.g.cs";
 
-					spCtx.AddSource(filename, SourceText.From(text, Encoding.UTF8));
+					spCtx.AddSource(filename, text);
 				}
 			}
 		);
