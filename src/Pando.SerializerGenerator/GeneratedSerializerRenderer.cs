@@ -113,10 +113,33 @@ public static class GeneratedSerializerRenderer
 				writer.BlankLine();
 
 				// Serialize method
-				writer.WriteLine(
-					"public void Serialize({0} obj, Span<byte> writeBuffer, INodeDataSink dataSink) => throw new NotImplementedException();",
-					nestedTypeString
-				);
+				writer.WriteLine("public void Serialize({0} obj, Span<byte> writeBuffer, INodeDataSink dataSink)", nestedTypeString);
+				writer.BodyIndent(() =>
+				{
+					var count = propList.Count;
+					foreach (var prop in propList)
+					{
+						count--;
+						if (prop.IsPrimitive)
+						{
+							writer.WriteLine("_{0}.Serialize(obj.{1}, ref writeBuffer);", prop.SerializerName, prop.Name);
+						}
+						else
+						{
+							writer.WriteLine("ulong {0}Hash = _{1}.SerializeToHash(obj.{2}, dataSink);", prop.CamelCaseName, prop.SerializerName, prop.Name);
+							writer.WriteLine("BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer[..sizeof(ulong)], {0}Hash);", prop.CamelCaseName);
+							if (count > 0)
+							{
+								writer.WriteLine("writeBuffer = writeBuffer[sizeof(ulong)..]");
+							}
+						}
+
+						if (count > 0)
+						{
+							writer.BlankLine();
+						}
+					}
+				});
 				writer.BlankLine();
 
 				// Deserialize method

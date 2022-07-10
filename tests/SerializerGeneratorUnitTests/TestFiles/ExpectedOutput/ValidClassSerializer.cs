@@ -47,17 +47,17 @@ internal class ValidClassSerializer : INodeSerializer<ValidClass>
 	{
 		_primitivePropSerializer.Serialize(obj.PrimitiveProp, ref writeBuffer);
 
-		ulong prop2Hash = _nodePropSerializer.SerializeToHash(obj.NodeProp, dataSink);
-		BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer.Slice(0, sizeof(ulong)), prop2Hash);
+		ulong nodePropHash = _nodePropSerializer.SerializeToHash(obj.NodeProp, dataSink);
+		BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer[..sizeof(ulong)], nodePropHash);
 	}
 
 	public ValidClass Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource)
 	{
-		var prop = _primitivePropSerializer.Deserialize(ref readBuffer);
+		var primitiveProp = _primitivePropSerializer.Deserialize(ref readBuffer);
 
-		ulong prop2Hash = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer.Slice(0, sizeof(ulong)));
-		var prop2 = _nodePropSerializer.DeserializeFromHash(prop2Hash, dataSource);
+		ulong nodePropHash = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer[..sizeof(ulong)]);
+		var nodeProp = _nodePropSerializer.DeserializeFromHash(nodePropHash, dataSource);
 
-		return new ValidClass(prop, prop2);
+		return new ValidClass(primitiveProp, nodeProp);
 	}
 }
