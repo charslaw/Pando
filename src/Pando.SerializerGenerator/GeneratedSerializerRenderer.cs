@@ -40,7 +40,7 @@ public static class GeneratedSerializerRenderer
 				// Declare child serializers
 				foreach (var prop in propList)
 				{
-					writer.WriteLine("private readonly {0} _{1}Serializer;", prop.SerializerType.GenericName, prop.Name);
+					writer.WriteLine("private readonly {0} _{1}Serializer;", prop.SerializerType.GenericName, prop.CamelCaseName);
 				}
 
 				writer.BlankLine();
@@ -53,7 +53,7 @@ public static class GeneratedSerializerRenderer
 						{
 							var prop = propList[i];
 							var comma = (i + 1 == propList.Count) ? string.Empty : ",";
-							writer.WriteLine("{0} {1}Serializer{2}", prop.SerializerType.GenericName, prop.Name, comma);
+							writer.WriteLine("{0} {1}Serializer{2}", prop.SerializerType.GenericName, prop.CamelCaseName, comma);
 						}
 					}
 				);
@@ -64,7 +64,7 @@ public static class GeneratedSerializerRenderer
 					{
 						foreach (var prop in propList)
 						{
-							writer.WriteLine("_{0}Serializer = {0}Serializer;", prop.Name);
+							writer.WriteLine("_{0}Serializer = {0}Serializer;", prop.CamelCaseName);
 						}
 
 						writer.BlankLine();

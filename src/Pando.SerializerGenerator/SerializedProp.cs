@@ -8,6 +8,7 @@ public class SerializedProp
 {
 	public INamedTypeSymbol Type { get; }
 	public string Name { get; }
+	public string CamelCaseName { get; }
 	public bool IsPrimitive { get; }
 	public SerializerType SerializerType { get; } 
 	
@@ -15,6 +16,7 @@ public class SerializedProp
 	{
 		Type = type;
 		Name = name;
+		CamelCaseName = name.ToCamelCase();
 		IsPrimitive = isPrimitive;
 		var typeDisplayString = type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
 		SerializerType = isPrimitive
