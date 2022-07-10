@@ -39,114 +39,12 @@ public static class GeneratedSerializerRenderer
 		// Class body
 		writer.BodyIndent(() =>
 			{
-				// Declare child serializers
-				foreach (var prop in propList)
-				{
-					writer.WriteLine("private readonly {0} _{1};", prop.SerializerType.GenericName, prop.SerializerName);
-				}
-
-				writer.BlankLine();
-
-				// Constructor
-				writer.WriteLine("public {0}(", serializerName);
-				writer.DoIndent(() =>
-					{
-						for (var i = 0; i < propList.Count; i++)
-						{
-							var prop = propList[i];
-							var comma = (i + 1 == propList.Count) ? string.Empty : ",";
-							writer.WriteLine("{0} {1}{2}", prop.SerializerType.GenericName, prop.SerializerName, comma);
-						}
-					}
-				);
-				writer.WriteLine(")");
-
-				// Constructor body
-				writer.BodyIndent(() =>
-					{
-						foreach (var prop in propList)
-						{
-							writer.WriteLine("_{0} = {0};", prop.SerializerName);
-						}
-
-						writer.BlankLine();
-
-						// Calculate node size
-						writer.WriteLine("int? size = 0;");
-
-						foreach (var prop in primitives)
-						{
-							writer.WriteLine("size += _{0}.ByteCount;", prop.SerializerName);
-						}
-
-						writer.WriteLine("size += {0} * sizeof(ulong);", nodes.Count);
-
-						writer.WriteLine("NodeSize = size;");
-					}
-				);
-				writer.BlankLine();
-
-				// NodeSize property
-				writer.WriteLine("public int? NodeSize { get; }");
-				writer.BlankLine();
-
-				// NodeSizeForObject method
-				writer.WriteLine("public int NodeSizeForObject({0} obj)", nestedTypeString);
-				writer.BodyIndent(() =>
-					{
-						writer.WriteLine("if (NodeSize is not null) return NodeSize.Value;");
-						writer.BlankLine();
-
-						// Calculate node size
-						writer.WriteLine("int size = 0;");
-
-						foreach (var prop in primitives)
-						{
-							writer.WriteLine("size += _{0}.ByteCountForValue(obj.{1});", prop.SerializerName, prop.Name);
-						}
-
-						writer.WriteLine("size += {0} * sizeof(ulong);", nodes.Count);
-
-						writer.WriteLine("return size;");
-					}
-				);
-				writer.BlankLine();
-
-				// Serialize method
-				writer.WriteLine("public void Serialize({0} obj, Span<byte> writeBuffer, INodeDataSink dataSink)", nestedTypeString);
-				writer.BodyIndent(() =>
-				{
-					var count = propList.Count;
-					foreach (var prop in propList)
-					{
-						count--;
-						if (prop.IsPrimitive)
-						{
-							writer.WriteLine("_{0}.Serialize(obj.{1}, ref writeBuffer);", prop.SerializerName, prop.Name);
-						}
-						else
-						{
-							writer.WriteLine("ulong {0}Hash = _{1}.SerializeToHash(obj.{2}, dataSink);", prop.CamelCaseName, prop.SerializerName, prop.Name);
-							writer.WriteLine("BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer[..sizeof(ulong)], {0}Hash);", prop.CamelCaseName);
-							if (count > 0)
-							{
-								writer.WriteLine("writeBuffer = writeBuffer[sizeof(ulong)..]");
-							}
-						}
-
-						if (count > 0)
-						{
-							writer.BlankLine();
-						}
-					}
-				});
-				writer.BlankLine();
-
-				// Deserialize method
-				writer.WriteLine(
-					"public {0} Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource) => throw new NotImplementedException();",
-					nestedTypeString
-				);
+				WriteChildSerializerFields(writer, propList);
+				WriteConstructor(writer, serializerName, propList, primitives, nodes);
+				WriteNodeSize(writer);
+				WriteNodeSizeForObject(writer, nestedTypeString, primitives, nodes);
+				WriteSerialize(writer, propList, nestedTypeString);
+				WriteDeserialize(writer, nestedTypeString);
 			}
 		);
 
@@ -183,6 +81,136 @@ public static class GeneratedSerializerRenderer
 		{
 			writer.WriteLine("using {0};", u);
 		}
+	}
+
+	private static void WriteChildSerializerFields(IndentedTextWriter writer, List<SerializedProp> propList)
+	{
+		foreach (var prop in propList)
+		{
+			writer.WriteLine("private readonly {0} _{1};", prop.SerializerType.GenericName, prop.SerializerName);
+		}
+
+		writer.BlankLine();
+	}
+
+	private static void WriteConstructor(
+		IndentedTextWriter writer,
+		string serializerName,
+		List<SerializedProp> propList,
+		List<SerializedProp> primitives,
+		List<SerializedProp> nodes
+	)
+	{
+		writer.WriteLine("public {0}(", serializerName);
+		writer.DoIndent(() =>
+			{
+				for (var i = 0; i < propList.Count; i++)
+				{
+					var prop = propList[i];
+					var comma = (i + 1 == propList.Count) ? string.Empty : ",";
+					writer.WriteLine("{0} {1}{2}", prop.SerializerType.GenericName, prop.SerializerName, comma);
+				}
+			}
+		);
+		writer.WriteLine(")");
+
+		writer.BodyIndent(() =>
+			{
+				foreach (var prop in propList)
+				{
+					writer.WriteLine("_{0} = {0};", prop.SerializerName);
+				}
+
+				writer.BlankLine();
+
+				writer.WriteLine("int? size = 0;");
+
+				foreach (var prop in primitives)
+				{
+					writer.WriteLine("size += _{0}.ByteCount;", prop.SerializerName);
+				}
+
+				writer.WriteLine("size += {0} * sizeof(ulong);", nodes.Count);
+
+				writer.WriteLine("NodeSize = size;");
+			}
+		);
+		writer.BlankLine();
+	}
+
+	private static void WriteNodeSize(IndentedTextWriter writer)
+	{
+		writer.WriteLine("public int? NodeSize { get; }");
+		writer.BlankLine();
+	}
+
+	private static void WriteNodeSizeForObject(IndentedTextWriter writer, string nestedTypeString, List<SerializedProp> primitives, List<SerializedProp> nodes)
+	{
+		writer.WriteLine("public int NodeSizeForObject({0} obj)", nestedTypeString);
+		writer.BodyIndent(() =>
+			{
+				writer.WriteLine("if (NodeSize is not null) return NodeSize.Value;");
+				writer.BlankLine();
+
+				// Calculate node size
+				writer.WriteLine("int size = 0;");
+
+				foreach (var prop in primitives)
+				{
+					writer.WriteLine("size += _{0}.ByteCountForValue(obj.{1});", prop.SerializerName, prop.Name);
+				}
+
+				writer.WriteLine("size += {0} * sizeof(ulong);", nodes.Count);
+
+				writer.WriteLine("return size;");
+			}
+		);
+		writer.BlankLine();
+	}
+
+	private static void WriteSerialize(IndentedTextWriter writer, List<SerializedProp> propList, string nestedTypeString)
+	{
+		writer.WriteLine("public void Serialize({0} obj, Span<byte> writeBuffer, INodeDataSink dataSink)", nestedTypeString);
+		writer.BodyIndent(() =>
+			{
+				var count = propList.Count;
+				foreach (var prop in propList)
+				{
+					count--;
+					if (prop.IsPrimitive)
+					{
+						writer.WriteLine("_{0}.Serialize(obj.{1}, ref writeBuffer);", prop.SerializerName, prop.Name);
+					}
+					else
+					{
+						writer.WriteLine("ulong {0}Hash = _{1}.SerializeToHash(obj.{2}, dataSink);", prop.CamelCaseName, prop.SerializerName,
+							prop.Name
+						);
+						writer.WriteLine("BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer[..sizeof(ulong)], {0}Hash);",
+							prop.CamelCaseName
+						);
+						if (count > 0)
+						{
+							writer.WriteLine("writeBuffer = writeBuffer[sizeof(ulong)..]");
+						}
+					}
+
+					if (count > 0)
+					{
+						writer.BlankLine();
+					}
+				}
+			}
+		);
+		writer.BlankLine();
+	}
+
+	private static void WriteDeserialize(IndentedTextWriter writer, string nestedTypeString)
+	{
+		writer.WriteLine(
+			"public {0} Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource) => throw new NotImplementedException();",
+			nestedTypeString
+		);
 	}
 
 	private static (List<SerializedProp> primitives, List<SerializedProp> nodes) GetPropCollections(List<SerializedProp> propList)
