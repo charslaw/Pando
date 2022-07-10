@@ -37,7 +37,7 @@ public static class GeneratedSerializerRenderer
 			{
 				foreach (var prop in propList)
 				{
-					writer.WriteLine("private {0} _{1}Serializer;", prop.SerializerType.GenericName, prop.Name);
+					writer.WriteLine("private readonly {0} _{1}Serializer;", prop.SerializerType.GenericName, prop.Name);
 				}
 
 				writer.BlankLine();
@@ -87,7 +87,6 @@ public static class GeneratedSerializerRenderer
 			}
 		);
 
-		writer.Close();
 		return SourceText.From(writer.InnerWriter.ToString(), Encoding.UTF8);
 	}
 

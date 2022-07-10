@@ -14,12 +14,12 @@ namespace GeneratedSerializers;
 [GeneratedCode("Pando.SerializerGenerator", "1.0.0.0")]
 internal class ValidClassSerializer : INodeSerializer<ValidClass>
 {
-	private IPrimitiveSerializer<Int32> _propSerializer;
-	private INodeSerializer<String> _prop2Serializer;
+	private readonly IPrimitiveSerializer<int> _propSerializer;
+	private readonly INodeSerializer<string> _prop2Serializer;
 
 	public ValidClassSerializer(
-		IPrimitiveSerializer<Int32> propSerializer,
-		INodeSerializer<String> prop2Serializer
+		IPrimitiveSerializer<int> propSerializer,
+		INodeSerializer<string> prop2Serializer
 	)
 	{
 		_propSerializer = propSerializer;

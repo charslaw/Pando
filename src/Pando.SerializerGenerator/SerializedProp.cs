@@ -16,7 +16,7 @@ public class SerializedProp
 		Type = type;
 		Name = name;
 		IsPrimitive = isPrimitive;
-		var typeDisplayString = type.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
+		var typeDisplayString = type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
 		SerializerType = isPrimitive
 			? new PrimitiveSerializerType(typeDisplayString)
 			: new NodeSerializerType(typeDisplayString);

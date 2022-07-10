@@ -8,12 +8,16 @@ public static class CustomSymbolDisplayFormats
 	public static readonly SymbolDisplayFormat FullyQualifiedTypeName = new(
 		globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
 		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters
+		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+		miscellaneousOptions: SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
 	);
 
 	/// Displays a type with containing types, but not namespaces.
 	public static readonly SymbolDisplayFormat NestedTypeName = new(
 		typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
-		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters
+		genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+		miscellaneousOptions:
+			SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
+			SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
 	);
 }
