@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using Pando.SerializerGenerator.Utils;
 
@@ -31,7 +32,7 @@ public static class GeneratedSerializerRenderer
 		writer.BlankLine();
 
 		writer.WriteLine("[GeneratedCode(\"{0}\", \"{1}\")]", assembly.Name, assembly.Version);
-		writer.WriteLine("public class {0} : INodeSerializer<{1}>", serializerName, nestedTypeString);
+		writer.WriteLine("{0} class {1} : INodeSerializer<{2}>", SyntaxFacts.GetText(type.DeclaredAccessibility), serializerName, nestedTypeString);
 
 		writer.BodyIndent(() =>
 			{
