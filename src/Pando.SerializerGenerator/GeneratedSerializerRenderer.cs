@@ -19,6 +19,8 @@ public static class GeneratedSerializerRenderer
 		var serializerName = $"{type.Name}Serializer";
 		var nestedTypeString = type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
 
+		var (primitives, nodes) = GetPropCollections(propList);
+
 		var writer = new IndentedTextWriter(new StringWriter(), "\t");
 
 		writer.WriteLine("#nullable enable");
@@ -40,7 +42,7 @@ public static class GeneratedSerializerRenderer
 				// Declare child serializers
 				foreach (var prop in propList)
 				{
-					writer.WriteLine("private readonly {0} _{1}Serializer;", prop.SerializerType.GenericName, prop.CamelCaseName);
+					writer.WriteLine("private readonly {0} _{1};", prop.SerializerType.GenericName, prop.SerializerName);
 				}
 
 				writer.BlankLine();
@@ -53,7 +55,7 @@ public static class GeneratedSerializerRenderer
 						{
 							var prop = propList[i];
 							var comma = (i + 1 == propList.Count) ? string.Empty : ",";
-							writer.WriteLine("{0} {1}Serializer{2}", prop.SerializerType.GenericName, prop.CamelCaseName, comma);
+							writer.WriteLine("{0} {1}{2}", prop.SerializerType.GenericName, prop.SerializerName, comma);
 						}
 					}
 				);
@@ -64,11 +66,21 @@ public static class GeneratedSerializerRenderer
 					{
 						foreach (var prop in propList)
 						{
-							writer.WriteLine("_{0}Serializer = {0}Serializer;", prop.CamelCaseName);
+							writer.WriteLine("_{0} = {0};", prop.SerializerName);
 						}
-
 						writer.BlankLine();
-						writer.WriteLine("NodeSize = {0} * sizeof(ulong);", propList.Count);
+						
+						// Calculate node size
+						writer.WriteLine("int? size = 0;");
+
+						foreach (var prop in primitives)
+						{
+							writer.WriteLine("size += _{0}.ByteCount;", prop.SerializerName);
+						}
+						
+						writer.WriteLine("size += {0} * sizeof(ulong);", nodes.Count);
+						
+						writer.WriteLine("NodeSize = size;");
 					}
 				);
 				writer.BlankLine();

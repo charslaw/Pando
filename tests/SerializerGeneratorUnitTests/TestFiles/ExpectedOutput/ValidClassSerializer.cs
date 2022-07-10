@@ -25,7 +25,10 @@ internal class ValidClassSerializer : INodeSerializer<ValidClass>
 		_propSerializer = propSerializer;
 		_prop2Serializer = prop2Serializer;
 
-		NodeSize = 1 * sizeof(ulong) + _propSerializer.ByteCount;
+		int? size = 0;
+		size += _propSerializer.ByteCount;
+		size += 1 * sizeof(ulong);
+		NodeSize = size;
 	}
 
 	public int? NodeSize { get; }
