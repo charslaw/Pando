@@ -34,8 +34,10 @@ public static class GeneratedSerializerRenderer
 		writer.WriteLine("[GeneratedCode(\"{0}\", \"{1}\")]", assembly.Name, assembly.Version);
 		writer.WriteLine("{0} class {1} : INodeSerializer<{2}>", SyntaxFacts.GetText(type.DeclaredAccessibility), serializerName, nestedTypeString);
 
+		// Class body
 		writer.BodyIndent(() =>
 			{
+				// Declare child serializers
 				foreach (var prop in propList)
 				{
 					writer.WriteLine("private readonly {0} _{1}Serializer;", prop.SerializerType.GenericName, prop.Name);
@@ -43,6 +45,7 @@ public static class GeneratedSerializerRenderer
 
 				writer.BlankLine();
 
+				// Constructor
 				writer.WriteLine("public {0}(", serializerName);
 				writer.DoIndent(() =>
 					{
@@ -56,6 +59,7 @@ public static class GeneratedSerializerRenderer
 				);
 				writer.WriteLine(")");
 
+				// Constructor body
 				writer.BodyIndent(() =>
 					{
 						foreach (var prop in propList)
@@ -67,20 +71,24 @@ public static class GeneratedSerializerRenderer
 						writer.WriteLine("NodeSize = {0} * sizeof(ulong);", propList.Count);
 					}
 				);
-
 				writer.BlankLine();
+
+				// NodeSize property
 				writer.WriteLine("public int? NodeSize { get; }");
-
 				writer.BlankLine();
+
+				// NodeSizeForObject method
 				writer.WriteLine("public int NodeSizeForObject({0} obj) => NodeSize!.Value;", nestedTypeString);
-
 				writer.BlankLine();
+
+				// Serialize method
 				writer.WriteLine(
 					"public void Serialize({0} obj, Span<byte> writeBuffer, INodeDataSink dataSink) => throw new NotImplementedException();",
 					nestedTypeString
 				);
-
 				writer.BlankLine();
+
+				// Deserialize method
 				writer.WriteLine(
 					"public {0} Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource) => throw new NotImplementedException();",
 					nestedTypeString
