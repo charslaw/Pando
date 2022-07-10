@@ -14,19 +14,19 @@ namespace GeneratedSerializers;
 [GeneratedCode("Pando.SerializerGenerator", "1.0.0.0")]
 internal class ValidClassSerializer : INodeSerializer<ValidClass>
 {
-	private readonly IPrimitiveSerializer<int> _propSerializer;
-	private readonly INodeSerializer<string> _prop2Serializer;
+	private readonly IPrimitiveSerializer<int> _primitivePropSerializer;
+	private readonly INodeSerializer<string> _nodePropSerializer;
 
 	public ValidClassSerializer(
-		IPrimitiveSerializer<int> propSerializer,
-		INodeSerializer<string> prop2Serializer
+		IPrimitiveSerializer<int> primitivePropSerializer,
+		INodeSerializer<string> nodePropSerializer
 	)
 	{
-		_propSerializer = propSerializer;
-		_prop2Serializer = prop2Serializer;
+		_primitivePropSerializer = primitivePropSerializer;
+		_nodePropSerializer = nodePropSerializer;
 
 		int? size = 0;
-		size += _propSerializer.ByteCount;
+		size += _primitivePropSerializer.ByteCount;
 		size += 1 * sizeof(ulong);
 		NodeSize = size;
 	}
@@ -38,25 +38,25 @@ internal class ValidClassSerializer : INodeSerializer<ValidClass>
 		if (NodeSize is not null) return NodeSize.Value;
 
 		int size = 0;
-		size += _propSerializer.ByteCountForValue(obj.Prop);
+		size += _primitivePropSerializer.ByteCountForValue(obj.PrimitiveProp);
 		size += 1 * sizeof(ulong);
 		return size;
 	}
 
 	public void Serialize(ValidClass obj, Span<byte> writeBuffer, INodeDataSink dataSink)
 	{
-		_propSerializer.Serialize(obj.Prop, ref writeBuffer);
+		_primitivePropSerializer.Serialize(obj.PrimitiveProp, ref writeBuffer);
 
-		ulong prop2Hash = _prop2Serializer.SerializeToHash(obj.Prop2, dataSink);
+		ulong prop2Hash = _nodePropSerializer.SerializeToHash(obj.NodeProp, dataSink);
 		BinaryPrimitives.WriteUInt64LittleEndian(writeBuffer.Slice(0, sizeof(ulong)), prop2Hash);
 	}
 
 	public ValidClass Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource)
 	{
-		var prop = _propSerializer.Deserialize(ref readBuffer);
+		var prop = _primitivePropSerializer.Deserialize(ref readBuffer);
 
 		ulong prop2Hash = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer.Slice(0, sizeof(ulong)));
-		var prop2 = _prop2Serializer.DeserializeFromHash(prop2Hash, dataSource);
+		var prop2 = _nodePropSerializer.DeserializeFromHash(prop2Hash, dataSource);
 
 		return new ValidClass(prop, prop2);
 	}
