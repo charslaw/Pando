@@ -16,11 +16,13 @@ public class SerializerIncrementalGeneratorOutputTests
 		var expected = File.ReadAllText(outFile);
 		var runResult = new SerializerIncrementalGenerator().GenerateFromSourceFile(inFile);
 
+		runResult.WriteGeneratedSourceToFiles("TestResults");
 		runResult.Exception.Should().BeNull();
+
 		var actual = runResult.GeneratedSources.Select(gs => gs.SyntaxTree.ToString());
 		actual.Should().BeEquivalentTo(expected);
 	}
-	
+
 	[Theory]
 	[InlineData("TestFiles/TestSubjects/InvalidBecauseAbstract.cs", "PANDO_0001")]
 	[InlineData("TestFiles/TestSubjects/InvalidBecauseNotSealed.cs", "PANDO_0001")]

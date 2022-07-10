@@ -38,7 +38,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Verified" />
+	  <Compile Remove="TestResults\**" />
 	</ItemGroup>
 
 </Project>
