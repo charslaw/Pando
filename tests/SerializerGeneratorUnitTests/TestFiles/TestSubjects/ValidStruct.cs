@@ -1,9 +1,4 @@
 namespace SerializerGeneratorUnitTests.TestClasses;
 
 [Pando.SerializerGenerator.Attributes.GenerateNodeSerializerAttribute]
-internal struct ValidStruct
-{
-	public int Prop { get; init; } = default;
-
-	public ValidStruct() {}
-}
+internal record struct ValidStruct(object ObjectProp, [property: Pando.SerializerGenerator.Attributes.Primitive] float FloatProp);

@@ -193,7 +193,7 @@ public static class GeneratedSerializerRenderer
 						);
 						if (count > 0)
 						{
-							writer.WriteLine("writeBuffer = writeBuffer[sizeof(ulong)..]");
+							writer.WriteLine("writeBuffer = writeBuffer[sizeof(ulong)..];");
 						}
 					}
 
@@ -225,7 +225,7 @@ public static class GeneratedSerializerRenderer
 						writer.WriteLine("var {0} = _{1}.DeserializeFromHash({0}Hash, dataSource);", prop.CamelCaseName, prop.SerializerName);
 						if (count > 0)
 						{
-							writer.WriteLine("readBuffer = readBuffer[sizeof(ulong)..]");
+							writer.WriteLine("readBuffer = readBuffer[sizeof(ulong)..];");
 						}
 					}
 

@@ -11,6 +11,7 @@ public class SerializerIncrementalGeneratorOutputTests
 {
 	[Theory]
 	[InlineData("TestFiles/TestSubjects/ValidClass.cs", "TestFiles/ExpectedOutput/ValidClassSerializer.cs")]
+	[InlineData("TestFiles/TestSubjects/ValidStruct.cs", "TestFiles/ExpectedOutput/ValidStructSerializer.cs")]
 	public void Should_produce_correct_output_when_type_is_valid(string inFile, string outFile)
 	{
 		var expected = File.ReadAllText(outFile);
