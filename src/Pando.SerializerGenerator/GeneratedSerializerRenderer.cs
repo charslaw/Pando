@@ -68,8 +68,9 @@ public static class GeneratedSerializerRenderer
 						{
 							writer.WriteLine("_{0} = {0};", prop.SerializerName);
 						}
+
 						writer.BlankLine();
-						
+
 						// Calculate node size
 						writer.WriteLine("int? size = 0;");
 
@@ -77,9 +78,9 @@ public static class GeneratedSerializerRenderer
 						{
 							writer.WriteLine("size += _{0}.ByteCount;", prop.SerializerName);
 						}
-						
+
 						writer.WriteLine("size += {0} * sizeof(ulong);", nodes.Count);
-						
+
 						writer.WriteLine("NodeSize = size;");
 					}
 				);
@@ -90,7 +91,25 @@ public static class GeneratedSerializerRenderer
 				writer.BlankLine();
 
 				// NodeSizeForObject method
-				writer.WriteLine("public int NodeSizeForObject({0} obj) => NodeSize!.Value;", nestedTypeString);
+				writer.WriteLine("public int NodeSizeForObject({0} obj)", nestedTypeString);
+				writer.BodyIndent(() =>
+					{
+						writer.WriteLine("if (NodeSize is not null) return NodeSize.Value;");
+						writer.BlankLine();
+
+						// Calculate node size
+						writer.WriteLine("int size = 0;");
+
+						foreach (var prop in primitives)
+						{
+							writer.WriteLine("size += _{0}.ByteCountForValue(obj.{1});", prop.SerializerName, prop.Name);
+						}
+
+						writer.WriteLine("size += {0} * sizeof(ulong);", nodes.Count);
+
+						writer.WriteLine("return size;");
+					}
+				);
 				writer.BlankLine();
 
 				// Serialize method

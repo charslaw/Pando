@@ -40,7 +40,6 @@ internal class ValidClassSerializer : INodeSerializer<ValidClass>
 		int size = 0;
 		size += _propSerializer.ByteCountForValue(obj.Prop);
 		size += 1 * sizeof(ulong);
-
 		return size;
 	}
 
