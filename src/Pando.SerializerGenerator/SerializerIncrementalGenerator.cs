@@ -77,7 +77,7 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 			{
 				var name = propertySymbol.Name;
 				var isPrimitive = propertySymbol.GetAttributeByFullName(PRIMITIVE_ATTRIBUTE) is not null;
-				propList.Add(new SerializedProp((INamedTypeSymbol)propertySymbol.Type, name, isPrimitive));
+				propList.Add(new SerializedProp(propertySymbol.Type, name, isPrimitive));
 			}
 		}
 

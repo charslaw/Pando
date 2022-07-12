@@ -6,14 +6,14 @@ namespace Pando.SerializerGenerator;
 
 public class SerializedProp
 {
-	public INamedTypeSymbol Type { get; }
+	public ITypeSymbol Type { get; }
 	public string Name { get; }
 	public string CamelCaseName { get; }
 	public string SerializerName { get; }
 	public bool IsPrimitive { get; }
 	public SerializerType SerializerType { get; } 
 	
-	public SerializedProp(INamedTypeSymbol type, string name, bool isPrimitive)
+	public SerializedProp(ITypeSymbol type, string name, bool isPrimitive)
 	{
 		Type = type;
 		Name = name;

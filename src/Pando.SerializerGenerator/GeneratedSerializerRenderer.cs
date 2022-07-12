@@ -80,11 +80,15 @@ public static class GeneratedSerializerRenderer
 				usings.Add(binaryBuffersNs);
 			}
 
-			usings.Add(prop.Type.ContainingNamespace.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName));
+			if (prop.Type.ContainingNamespace is not null)
+			{
+				usings.Add(prop.Type.ContainingNamespace.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName));
+			}
 		}
 
 		foreach (var u in usings)
 		{
+			if (u is null) continue;
 			writer.WriteLine("using {0};", u);
 		}
 	}

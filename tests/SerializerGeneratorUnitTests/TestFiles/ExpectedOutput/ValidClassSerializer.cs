@@ -7,7 +7,7 @@ using System.CodeDom.Compiler;
 using Pando.DataSources;
 using Pando.Serialization.NodeSerializers;
 using Pando.Serialization.PrimitiveSerializers;
-using SerializerGeneratorUnitTests.TestClasses;
+using SerializerGeneratorUnitTests.TestFiles.TestSubjects;
 
 namespace GeneratedSerializers;
 
