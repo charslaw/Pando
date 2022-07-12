@@ -1,32 +1,10 @@
-using System;
 using FluentAssertions;
 using GeneratedSerializers;
-using Pando.DataSources;
-using Pando.Serialization.NodeSerializers;
-using Pando.Serialization.PrimitiveSerializers;
-using Pando.SerializerGenerator.Attributes;
+using SerializerGeneratorIntegrationTests.FakeSerializers;
+using SerializerGeneratorIntegrationTests.TestSubjects;
 using Xunit;
 
 namespace SerializerGeneratorIntegrationTests;
-
-[GenerateNodeSerializer]
-public sealed record TestNode(object Stuff, [property: Primitive] int Value);
-
-internal class NoopObjectSerializer : INodeSerializer<object>
-{
-	public int? NodeSize => null;
-	public int NodeSizeForObject(object obj) => throw new NotImplementedException();
-	public void Serialize(object obj, Span<byte> writeBuffer, INodeDataSink dataSink) => throw new NotImplementedException();
-	public object Deserialize(ReadOnlySpan<byte> readBuffer, INodeDataSource dataSource) => throw new NotImplementedException();
-}
-
-internal class NoopIntSerializer : IPrimitiveSerializer<int>
-{
-	public int? ByteCount => null;
-	public int ByteCountForValue(int value) => throw new NotImplementedException();
-	public void Serialize(int value, ref Span<byte> buffer) => throw new NotImplementedException();
-	public int Deserialize(ref ReadOnlySpan<byte> buffer) => throw new NotImplementedException();
-}
 
 public class GeneratedSerializerTest
 {
@@ -35,8 +13,47 @@ public class GeneratedSerializerTest
 		[Fact]
 		public void Should_return_correct_value_for_fixed_size_node()
 		{
-			var testNodeSerializer = new TestNodeSerializer(new NoopObjectSerializer(), new NoopIntSerializer());
-			testNodeSerializer.NodeSize.Should().Be(sizeof(ulong) * 2);
+			var primitiveSize = 5;
+			var testNodeSerializer = new SimpleMixedNodeSerializer(new NoopObjectSerializer(), new FixedSizePrimitiveSerializer<int>(primitiveSize));
+			testNodeSerializer.NodeSize.Should().Be(sizeof(ulong) + primitiveSize);
+		}
+
+		[Fact]
+		public void Should_return_null_for_node_with_variable_size_primitive_serializer()
+		{
+			var testNodeSerializer = new SimpleMixedNodeSerializer(new NoopObjectSerializer(), new NoopIntSerializer());
+			testNodeSerializer.NodeSize.Should().BeNull();
+		}
+
+		[Fact]
+		public void Size_of_node_should_not_depend_on_size_of_child_nodes()
+		{
+			var testNodeSerializer = new SimpleMixedNodeSerializer(
+				new FixedSizeObjectSerializer<object>(42),
+				new FixedSizePrimitiveSerializer<int>(0)
+			);
+			testNodeSerializer.NodeSize.Should().Be(sizeof(ulong));
+		}
+	}
+
+	public class NodeSizeForObject
+	{
+		[Fact]
+		public void Should_return_correct_fixed_size_when_contents_are_fixed_size()
+		{
+			var primitiveSize = 5;
+			var testNodeSerializer = new SimpleMixedNodeSerializer(new NoopObjectSerializer(), new FixedSizePrimitiveSerializer<int>(primitiveSize));
+			var subject = new SimpleMixedNode(new { a = "Random", b = "Object" }, 42);
+			testNodeSerializer.NodeSizeForObject(subject).Should().Be(sizeof(ulong) + primitiveSize);
+		}
+
+		[Fact]
+		public void Should_return_correct_value_for_node_with_variable_size_primitive()
+		{
+			var primitiveSize = 42;
+			var testNodeSerializer = new SimpleMixedNodeSerializer(new NoopObjectSerializer(), new RelaySizeIntSerializer());
+			var subject = new SimpleMixedNode(new { a = "Random", b = "Object" }, primitiveSize);
+			testNodeSerializer.NodeSizeForObject(subject).Should().Be(sizeof(ulong) + primitiveSize);
 		}
 	}
 }
