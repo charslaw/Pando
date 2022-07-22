@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Pando.SerializerGenerator.Utils;
@@ -11,8 +10,6 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 {
 	public const string MARKER_ATTRIBUTE = "Pando.SerializerGenerator.Attributes.GenerateNodeSerializerAttribute";
 	public const string PRIMITIVE_ATTRIBUTE = "Pando.SerializerGenerator.Attributes.PrimitiveAttribute";
-
-	private static readonly AssemblyName assembly = typeof(SerializerIncrementalGenerator).Assembly.GetName();
 
 	public void Initialize(IncrementalGeneratorInitializationContext context)
 	{
@@ -51,7 +48,7 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 						continue;
 					}
 
-					var text = GeneratedSerializerRenderer.Render(assembly, typeSymbol, propList);
+					var text = GeneratedSerializerRenderer.Render(typeSymbol, propList);
 					var fullyQualifiedTypeString = typeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
 					var filename = $"{fullyQualifiedTypeString}Serializer.g.cs";
 

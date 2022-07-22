@@ -15,7 +15,9 @@ namespace Pando.SerializerGenerator;
 
 public static class GeneratedSerializerRenderer
 {
-	public static SourceText Render(AssemblyName assembly, INamedTypeSymbol type, List<SerializedProp> propList)
+	private static readonly AssemblyName currentAssembly = typeof(SerializerIncrementalGenerator).Assembly.GetName();
+
+	public static SourceText Render(INamedTypeSymbol type, List<SerializedProp> propList)
 	{
 		var serializerName = $"{type.Name}Serializer";
 		var nestedTypeString = type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
@@ -34,7 +36,7 @@ public static class GeneratedSerializerRenderer
 		writer.WriteLine("namespace GeneratedSerializers;");
 		writer.BlankLine();
 
-		writer.WriteLine("[GeneratedCode(\"{0}\", \"{1}\")]", assembly.Name, assembly.Version);
+		writer.WriteLine("[GeneratedCode(\"{0}\", \"{1}\")]", currentAssembly.Name, currentAssembly.Version);
 		writer.WriteLine("{0} class {1} : INodeSerializer<{2}>", SyntaxFacts.GetText(type.DeclaredAccessibility), serializerName, nestedTypeString);
 
 		// Class body
