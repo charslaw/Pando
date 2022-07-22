@@ -32,19 +32,14 @@ public static class SourceGeneratorTestUtils
 		return generator.GenerateFromSource(source);
 	}
 
+	/// Creates a directory for the caller under the given path and saves all generated sources from the given run result to that directory.
 	/// <param name="runResult">The run result to output generated source for.</param>
 	/// <param name="relativePath">The path relative to the project root that files should be written to.</param>
 	/// <param name="caller">The method calling this method. The caller name is included in the output path.</param>
 	public static void WriteGeneratedSourceToFiles(this GeneratorRunResult runResult, string relativePath, [CallerMemberName] string caller = "")
 	{
-		var dir = Path.DirectorySeparatorChar.ToString();
-		if (dir == @"\") dir = @"\\";
-		
-		var match = new Regex(@$"(?<projPath>.*){dir}bin{dir}(.*)").Match(Directory.GetCurrentDirectory());
+		var destinationDir = GetDestinationDir(relativePath, caller);
 
-		if (!match.Success) return;
-
-		var destinationDir = Path.Combine(match.Groups["projPath"].Value, relativePath, caller);
 		if (runResult.Exception is null && runResult.Diagnostics.IsEmpty)
 		{
 			Directory.CreateDirectory(destinationDir);
@@ -60,5 +55,18 @@ public static class SourceGeneratorTestUtils
 			var filePath = Path.Combine(destinationDir, generatedSource.HintName);
 			File.WriteAllText(filePath, generatedSource.SyntaxTree.ToString());
 		}
+	}
+
+	/// Returns the destination to save generated source to. Will try to put the file in the project directory,
+	/// otherwise it will be placed relative to the executable
+	private static string GetDestinationDir(string relativePath, string caller)
+	{
+		var separator = Path.DirectorySeparatorChar.ToString();
+		if (separator == @"\") separator = @"\\";
+
+		var cwd = Directory.GetCurrentDirectory();
+		var match = new Regex(@$"(?<projPath>.*){separator}bin{separator}(.*)").Match(cwd);
+
+		return (!match.Success) ? cwd : Path.Combine(match.Groups["projPath"].Value, relativePath, caller);
 	}
 }
