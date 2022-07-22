@@ -10,16 +10,20 @@ namespace SerializerGeneratorUnitTests;
 public class SerializerIncrementalGeneratorOutputTests
 {
 	[Theory]
-	[InlineData("TestFiles/TestSubjects/ValidClass.cs", "TestFiles/ExpectedOutput/ValidClassSerializer.cs")]
-	[InlineData("TestFiles/TestSubjects/ValidStruct.cs", "TestFiles/ExpectedOutput/ValidStructSerializer.cs")]
-	[InlineData("TestFiles/TestSubjects/ValidClassWithArray.cs", "TestFiles/ExpectedOutput/ValidClassWithArraySerializer.cs")]
-	[InlineData("TestFiles/TestSubjects/ValidClassWithGeneric.cs", "TestFiles/ExpectedOutput/ValidClassWithGenericSerializer.cs")]
-	public void Should_produce_correct_output_when_type_is_valid(string inFile, string outFile)
+	[InlineData("ValidClass", "ValidClassSerializer")]
+	[InlineData("ValidStruct", "ValidStructSerializer")]
+	[InlineData("ValidClassWithArray", "ValidClassWithArraySerializer")]
+	[InlineData("ValidClassWithGeneric", "ValidClassWithGenericSerializer")]
+	[InlineData("ValidGenericClass", "ValidGenericClassSerializer")]
+	public void Should_produce_correct_output_when_type_is_valid(string inFileName, string outFileName)
 	{
-		var expected = File.ReadAllText(outFile);
-		var runResult = new SerializerIncrementalGenerator().GenerateFromSourceFile(inFile);
+		var inFilePath = $"TestFiles/TestSubjects/{inFileName}.cs";
+		var outFilePath = $"TestFiles/ExpectedOutput/{outFileName}.cs";
 
-		runResult.WriteGeneratedSourceToFiles("TestResults");
+		var expected = File.ReadAllText(outFilePath);
+		var runResult = new SerializerIncrementalGenerator().GenerateFromSourceFile(inFilePath);
+
+		runResult.WriteGeneratedSourceToFiles("TestResults", inFileName);
 		runResult.Exception.Should().BeNull();
 		runResult.Diagnostics.Should().BeEmpty();
 

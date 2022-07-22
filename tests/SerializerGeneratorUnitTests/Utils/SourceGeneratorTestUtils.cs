@@ -35,10 +35,24 @@ public static class SourceGeneratorTestUtils
 	/// Creates a directory for the caller under the given path and saves all generated sources from the given run result to that directory.
 	/// <param name="runResult">The run result to output generated source for.</param>
 	/// <param name="relativePath">The path relative to the project root that files should be written to.</param>
+	/// <param name="callerHint">A "hint" string that allows for grouping output more granularly than by just the calling method's name.</param>
 	/// <param name="caller">The method calling this method. The caller name is included in the output path.</param>
-	public static void WriteGeneratedSourceToFiles(this GeneratorRunResult runResult, string relativePath, [CallerMemberName] string caller = "")
+	public static void WriteGeneratedSourceToFiles(
+		this GeneratorRunResult runResult,
+		string relativePath,
+		string callerHint = "",
+		[CallerMemberName] string caller = ""
+	)
 	{
-		var destinationDir = GetDestinationDir(relativePath, caller);
+		var destinationDir = GetDestinationDir(relativePath, caller, callerHint);
+
+		if (Directory.Exists(destinationDir))
+		{
+			foreach (var file in Directory.EnumerateFiles(destinationDir))
+			{
+				File.Delete(file);
+			}
+		}
 
 		if (runResult.Exception is null && runResult.Diagnostics.IsEmpty)
 		{
@@ -46,7 +60,7 @@ public static class SourceGeneratorTestUtils
 		}
 		else
 		{
-			Directory.Delete(destinationDir, true);
+			Directory.Delete(destinationDir);
 			return;
 		}
 
@@ -59,7 +73,7 @@ public static class SourceGeneratorTestUtils
 
 	/// Returns the destination to save generated source to. Will try to put the file in the project directory,
 	/// otherwise it will be placed relative to the executable
-	private static string GetDestinationDir(string relativePath, string caller)
+	private static string GetDestinationDir(string relativePath, string caller, string callerHint)
 	{
 		var separator = Path.DirectorySeparatorChar.ToString();
 		if (separator == @"\") separator = @"\\";
@@ -67,6 +81,10 @@ public static class SourceGeneratorTestUtils
 		var cwd = Directory.GetCurrentDirectory();
 		var match = new Regex(@$"(?<projPath>.*){separator}bin{separator}(.*)").Match(cwd);
 
-		return (!match.Success) ? cwd : Path.Combine(match.Groups["projPath"].Value, relativePath, caller);
+		if (!match.Success) return cwd;
+
+		return string.IsNullOrWhiteSpace(callerHint)
+			? Path.Combine(match.Groups["projPath"].Value, relativePath, caller)
+			: Path.Combine(match.Groups["projPath"].Value, relativePath, caller, callerHint);
 	}
 }
