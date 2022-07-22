@@ -20,6 +20,9 @@ public static class GeneratedSerializerRenderer
 	public static SourceText Render(INamedTypeSymbol type, List<SerializedProp> propList)
 	{
 		var serializerName = $"{type.Name}Serializer";
+		var genericSerializerName = type.IsGenericType
+			? $"{serializerName}<{string.Join(", ", type.TypeParameters.Select(tp => tp.Name))}>"
+			: serializerName;
 		var nestedTypeString = type.ToDisplayString(CustomSymbolDisplayFormats.NestedTypeName);
 
 		var (primitives, nodes) = GetPropCollections(propList);
@@ -37,7 +40,7 @@ public static class GeneratedSerializerRenderer
 		writer.BlankLine();
 
 		writer.WriteLine("[GeneratedCode(\"{0}\", \"{1}\")]", currentAssembly.Name, currentAssembly.Version);
-		writer.WriteLine("{0} class {1} : INodeSerializer<{2}>", SyntaxFacts.GetText(type.DeclaredAccessibility), serializerName, nestedTypeString);
+		writer.WriteLine("{0} class {1} : INodeSerializer<{2}>", SyntaxFacts.GetText(type.DeclaredAccessibility), genericSerializerName, nestedTypeString);
 
 		// Class body
 		writer.BodyIndent(() =>

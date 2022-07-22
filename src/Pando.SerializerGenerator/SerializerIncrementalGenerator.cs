@@ -50,6 +50,8 @@ public class SerializerIncrementalGenerator : IIncrementalGenerator
 
 					var text = GeneratedSerializerRenderer.Render(typeSymbol, propList);
 					var fullyQualifiedTypeString = typeSymbol.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName);
+					fullyQualifiedTypeString = fullyQualifiedTypeString.Replace('<', '(');
+					fullyQualifiedTypeString = fullyQualifiedTypeString.Replace('>', ')');
 					var filename = $"{fullyQualifiedTypeString}Serializer.g.cs";
 
 					spCtx.AddSource(filename, text);
