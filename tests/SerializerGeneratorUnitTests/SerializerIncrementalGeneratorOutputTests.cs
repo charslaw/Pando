@@ -13,6 +13,7 @@ public class SerializerIncrementalGeneratorOutputTests
 	[InlineData("TestFiles/TestSubjects/ValidClass.cs", "TestFiles/ExpectedOutput/ValidClassSerializer.cs")]
 	[InlineData("TestFiles/TestSubjects/ValidStruct.cs", "TestFiles/ExpectedOutput/ValidStructSerializer.cs")]
 	[InlineData("TestFiles/TestSubjects/ValidClassWithArray.cs", "TestFiles/ExpectedOutput/ValidClassWithArraySerializer.cs")]
+	[InlineData("TestFiles/TestSubjects/ValidClassWithGeneric.cs", "TestFiles/ExpectedOutput/ValidClassWithGenericSerializer.cs")]
 	public void Should_produce_correct_output_when_type_is_valid(string inFile, string outFile)
 	{
 		var expected = File.ReadAllText(outFile);
@@ -20,6 +21,7 @@ public class SerializerIncrementalGeneratorOutputTests
 
 		runResult.WriteGeneratedSourceToFiles("TestResults");
 		runResult.Exception.Should().BeNull();
+		runResult.Diagnostics.Should().BeEmpty();
 
 		var actual = runResult.GeneratedSources.Select(gs => gs.SyntaxTree.ToString());
 		actual.Should().BeEquivalentTo(expected);
@@ -34,7 +36,7 @@ public class SerializerIncrementalGeneratorOutputTests
 		var runResult = new SerializerIncrementalGenerator().GenerateFromSourceFile(filename);
 
 		runResult.Exception.Should().BeNull();
-		runResult.Diagnostics.Should().HaveCount(1).And.AllSatisfy(d => d.Id.Should().Be(diagnosticId));
+		runResult.Diagnostics.Should().HaveCount(1).And.ContainSingle(d => d.Id == diagnosticId);
 		runResult.GeneratedSources.Should().BeEmpty();
 	}
 }
