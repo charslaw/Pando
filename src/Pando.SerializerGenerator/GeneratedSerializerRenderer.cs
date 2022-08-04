@@ -69,6 +69,7 @@ public static class GeneratedSerializerRenderer
 			typeof(object).Namespace!,
 			typeof(GeneratedCodeAttribute).Namespace!,
 			"Pando.DataSources",
+			"Pando.Serialization.NodeSerializers",
 			typeSymbol.ContainingNamespace.ToDisplayString(CustomSymbolDisplayFormats.FullyQualifiedTypeName)
 		};
 
@@ -81,7 +82,6 @@ public static class GeneratedSerializerRenderer
 			}
 			else
 			{
-				usings.Add("Pando.Serialization.NodeSerializers");
 				usings.Add(binaryBuffersNs);
 			}
 
