@@ -1,8 +1,10 @@
+using System;
 using FluentAssertions;
 using GeneratedSerializers;
 using NSubstitute;
 using Pando.Serialization.NodeSerializers;
 using Pando.Serialization.PrimitiveSerializers;
+using SerializerGeneratorIntegrationTests.Fakes;
 using SerializerGeneratorIntegrationTests.TestSubjects;
 using Xunit;
 
@@ -127,6 +129,27 @@ public class GeneratedSerializerTest
 			var subject = new MultipleNodeChildrenNode(new int[999], new { a = "Just", b = "Some", c = "Object" });
 
 			serializer.NodeSizeForObject(subject).Should().Be(2 * sizeof(ulong));
+		}
+	}
+
+	public class Serialize
+	{
+		[Fact]
+		public void Should_populate_buffer_with_child_data_when_all_children_are_primitive()
+		{
+			var expected = new byte[] {
+				0x05, 0x00, 0x00, 0x00,       // string length 5 little endian
+				0x41, 0x6c, 0x69, 0x63, 0x65, // "Alice"
+				0x20, 0x00, 0x00, 0x00        // 32 little endian
+			};
+
+			var serializer = new OnlyPrimitiveChildrenNodeSerializer(StringSerializer.UTF8, Int32LittleEndianSerializer.Default);
+
+			Span<byte> writeBuffer = stackalloc byte[expected.Length];
+			var dataSink = new SpyNodeSink();
+			serializer.Serialize(new OnlyPrimitiveChildrenNode("Alice", 32), writeBuffer, dataSink);
+
+			writeBuffer.ToArray().Should().BeEquivalentTo(expected);
 		}
 	}
 }
