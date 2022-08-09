@@ -9,7 +9,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Standart.Hash.xxHash" Version="4.0.4" />
-		<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+		<PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
