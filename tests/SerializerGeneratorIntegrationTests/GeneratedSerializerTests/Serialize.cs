@@ -64,4 +64,16 @@ public class Serialize
 
 		writeBuffer.ToArray().Should().BeEquivalentTo(expected);
 	}
+
+	[Fact]
+	public void Should_serialize_child_nodes_to_data_sink()
+	{
+		var serializer = new MultipleNodeChildrenNodeSerializer(new NoOpNodeSerializer<int[]>(), new NoOpNodeSerializer<object>());
+
+		Span<byte> writeBuffer = stackalloc byte[sizeof(ulong) * 2];
+		var dataSink = new SpyNodeSink();
+		serializer.Serialize(new MultipleNodeChildrenNode(new[] { 1, 2, 3 }, new { a = "a" }), writeBuffer, dataSink);
+
+		dataSink.AddNodeCallCount.Should().Be(2);
+	}
 }
