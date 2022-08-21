@@ -1,5 +1,6 @@
 using System;
 using Pando.DataSources;
+using Pando.Serialization.PrimitiveSerializers;
 
 namespace Pando.Serialization.NodeSerializers;
 
@@ -13,16 +14,16 @@ public interface INodeSerializer<T>
 	/// Returns the size of the buffer required to serialize the given object.
 	int NodeSizeForObject(T obj);
 
-	/// <summary>Produces a binary representation of a given node and writes it to the given <paramref name="writeBuffer"/></summary>
+	/// <summary>Produces a binary representation of a given node and writes it to the given <paramref name="writeBuffer"/>.</summary>
 	/// <remarks>
 	/// <p>If this node type contains other nodes, this method will first have to delegate to
-	/// `INodeSerializer`s that are capable of serializing the given node's children, submit
+	/// <see cref="INodeSerializer{T}"/>s that are capable of serializing the given node's children, submit
 	/// the children to the given data sink, then include the child nodes' IDs in the binary
 	/// representation of the given node so they can be retrieved later when the node is
 	/// deserialized.</p>
 	/// <p>If this node contains primitive data, this method should include the binary
 	/// representation of the primitive data in the binary representation of the given node,
-	/// possibly via the use of an <c>IPrimitiveSerializer</c>.</p>
+	/// possibly via the use of an <see cref="IPrimitiveSerializer{T}"/>.</p>
 	/// </remarks>
 	/// <example>
 	/// Example 1: Basic implementation of <c>Serialize</c> with child node.
