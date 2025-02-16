@@ -94,7 +94,7 @@ public class MemoryDataSourceTests
 
 			// Act
 			Span<byte> actualBuffer = stackalloc byte[4];
-			dataSource.CopyNodeBytesTo(hash, ref actualBuffer);
+			dataSource.CopyNodeBytesTo(hash, actualBuffer);
 			var actual = actualBuffer.ToArray();
 
 			// Assert
@@ -118,7 +118,7 @@ public class MemoryDataSourceTests
 
 			// Act
 			Span<byte> actualBuffer = stackalloc byte[4];
-			dataSource.CopyNodeBytesTo(node2Hash, ref actualBuffer);
+			dataSource.CopyNodeBytesTo(node2Hash, actualBuffer);
 			var actual = actualBuffer.ToArray();
 
 			// Assert
@@ -135,7 +135,7 @@ public class MemoryDataSourceTests
 			dataSource.Invoking(ts =>
 					{
 						Span<byte> buffer = stackalloc byte[0];
-						ts.CopyNodeBytesTo(0, ref buffer);
+						ts.CopyNodeBytesTo(0, buffer);
 					}
 				)
 				.Should()
@@ -344,9 +344,9 @@ public class MemoryDataSourceTests
 
 			// Assert
 			Span<byte> actualBuffer = stackalloc byte[4];
-			dataSource.CopyNodeBytesTo(hash1, ref actualBuffer);
+			dataSource.CopyNodeBytesTo(hash1, actualBuffer);
 			var result1 = actualBuffer.ToArray();
-			dataSource.CopyNodeBytesTo(hash2, ref actualBuffer);
+			dataSource.CopyNodeBytesTo(hash2, actualBuffer);
 			var result2 = actualBuffer.ToArray();
 			result1.Should().Equal(nodeData[..4]);
 			result2.Should().Equal(nodeData[4..8]);

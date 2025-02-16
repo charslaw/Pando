@@ -49,6 +49,6 @@ public static class FakeNodeDataSources
 
 		public bool HasNode(ulong hash) => _lut.Any(entry => entry.hash == hash);
 		public int GetSizeOfNode(ulong hash) => _lut.First(entry => entry.hash == hash).bytes.Length;
-		public void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes) => _lut.First(entry => entry.hash == hash).bytes.CopyTo(outputBytes);
+		public void CopyNodeBytesTo(ulong hash, Span<byte> outputBytes) => _lut.First(entry => entry.hash == hash).bytes.CopyTo(outputBytes);
 	}
 }

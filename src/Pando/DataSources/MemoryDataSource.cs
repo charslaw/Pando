@@ -124,11 +124,11 @@ public class MemoryDataSource : IDataSource
 		return dataLength;
 	}
 
-	public void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes)
+	public void CopyNodeBytesTo(ulong hash, Span<byte> outputBytes)
 	{
 		CheckNodeHash(hash);
 		var (start, dataLength) = _nodeIndex[hash];
-		_nodeData.CopyTo(start, dataLength, ref outputBytes);
+		_nodeData.CopyTo(start, dataLength, outputBytes);
 	}
 
 #endregion

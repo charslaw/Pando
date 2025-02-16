@@ -20,7 +20,7 @@ public static class NodeSerializerExtensions
 	{
 		var nodeSize = serializer.NodeSize ?? dataSource.GetSizeOfNode(hash);
 		Span<byte> buffer = stackalloc byte[nodeSize];
-		dataSource.CopyNodeBytesTo(hash, ref buffer);
+		dataSource.CopyNodeBytesTo(hash, buffer);
 		return serializer.Deserialize(buffer, dataSource);
 	}
 }

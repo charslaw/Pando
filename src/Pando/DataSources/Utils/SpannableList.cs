@@ -52,7 +52,7 @@ internal class SpannableList<T>
 	}
 
 	/// Copy data from the list into a destination span.
-	public void CopyTo(int sourceStart, int sourceLength, ref Span<T> destination)
+	public void CopyTo(int sourceStart, int sourceLength, Span<T> destination)
 	{
 		lock (_array)
 		{
