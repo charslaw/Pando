@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
@@ -26,21 +27,22 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TE
 	}
 
 	public int? ByteCount { get; }
-	public unsafe int ByteCountForValue(TEnum value) => ByteCount ?? _underlyingSerializer.ByteCountForValue(*(TUnderlying*)(&value));
+	public int ByteCountForValue(TEnum value) => ByteCount ?? _underlyingSerializer.ByteCountForValue(ToUnderlying(ref value));
 
-	public unsafe void Serialize(TEnum value, ref Span<byte> buffer)
+	public void Serialize(TEnum value, ref Span<byte> buffer)
 	{
-		// pointer magic: get address of value, cast to pointer to underlying type, dereference pointer to underlying type.
-		var underlying = *(TUnderlying*)(&value);
+		var underlying = ToUnderlying(ref value);
 		_underlyingSerializer.Serialize(underlying, ref buffer);
 	}
 
-	public unsafe TEnum Deserialize(ref ReadOnlySpan<byte> buffer)
+	public TEnum Deserialize(ref ReadOnlySpan<byte> buffer)
 	{
 		var underlying = _underlyingSerializer.Deserialize(ref buffer);
-		// pointer magic: get address of underlying value, cast to pointer of enum type, dereference pointer to enum type.
-		return *(TEnum*)(&underlying);
+		return ToEnum(ref underlying);
 	}
+	
+	private static TUnderlying ToUnderlying(ref TEnum value) => Unsafe.As<TEnum, TUnderlying>(ref value);
+	private static TEnum ToEnum(ref TUnderlying value) => Unsafe.As<TUnderlying, TEnum>(ref value);
 }
 
 /// <summary>Factory functions for creating <see cref="EnumSerializer{TEnum,TUnderlying}"/></summary>
