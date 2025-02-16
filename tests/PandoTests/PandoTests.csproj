@@ -1,11 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<TargetFramework>net9.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
 		<IsPackable>false</IsPackable>
 		<Nullable>enable</Nullable>
-		<LangVersion>preview</LangVersion>
-		<TargetFramework>net6.0</TargetFramework>
-		<EnablePreviewFeatures>True</EnablePreviewFeatures> <!-- For abstract static interface members -->
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 
