@@ -1,11 +1,10 @@
 using System;
-using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 using Pando.DataSources;
 using Pando.Repositories;
-using Pando.Serialization.NodeSerializers;
-using Pando.Serialization.NodeSerializers.EnumerableFactory;
-using Pando.Serialization.PrimitiveSerializers;
+using Pando.Serialization;
+using Pando.Serialization.Collections;
+using Pando.Serialization.Primitives;
 using PandoExampleProject.Serializers;
 using Xunit;
 
@@ -15,13 +14,11 @@ namespace PandoExampleProject;
 /// than to assert functionality about the system.
 public class ChessTests
 {
-	private static INodeSerializer<ChessGameState> MakeSerializer() => new ChessStateTreeSerializer(
+	private static IPandoSerializer<ChessGameState> MakeSerializer() => new ChessStateTreeSerializer(
 		new ChessPlayerStateSerializer(),
-		new PrimitiveWhiteBlackPairSerializer<TimeSpan>(new TimeSpanTicksSerializer()),
-		new NodeWhiteBlackPairSerializer<ImmutableArray<ChessPiece>>(
-			new NodeListSerializer<ImmutableArray<ChessPiece>, ChessPiece>(
-				new ChessPieceSerializer(), new ImmutableArrayFactory<ChessPiece>()
-			)
+		new WhiteBlackPairSerializer<TimeSpan>(TimeSpanTicksSerializer.Default),
+		new WhiteBlackPairSerializer<ChessPiece[]>(
+			new ArraySerializer<ChessPiece>(new ChessPieceSerializer())
 		)
 	);
 
@@ -38,7 +35,8 @@ public class ChessTests
 		var initialState = ChessSetup.InitialGameState();
 		var initialHash = pandoRepository.SaveRootSnapshot(initialState);
 
-		var initialExpected = TrimBoardLines(@"
+		var initialExpected =
+			"""
 			♜♞♝♛♚♝♞♜ 8
 			♟♟♟♟♟♟♟♟ 7
 			￣＃￣＃￣＃￣＃ 6
@@ -48,8 +46,7 @@ public class ChessTests
 			♙♙♙♙♙♙♙♙ 2
 			♖♘♗♕♔♗♘♖ 1
 			ＡＢＣＤＥＦＧＨ
-		"
-		);
+			""";
 
 		var initialActual = ChessBoardRenderer.RenderBoard(pandoRepository.GetSnapshot(initialHash));
 		Assert.Equal(initialExpected, initialActual);
@@ -58,7 +55,8 @@ public class ChessTests
 		var firstMove = ChessPieceMover.MovePiece(initialState, Player.White, 4, Rank.Four, File.E);
 		var firstMoveHash = pandoRepository.SaveSnapshot(firstMove, initialHash);
 
-		var firstMoveExpected = TrimBoardLines(@"
+		var firstMoveExpected =
+			"""
 			♜♞♝♛♚♝♞♜ 8
 			♟♟♟♟♟♟♟♟ 7
 			￣＃￣＃￣＃￣＃ 6
@@ -68,13 +66,9 @@ public class ChessTests
 			♙♙♙♙￣♙♙♙ 2
 			♖♘♗♕♔♗♘♖ 1
 			ＡＢＣＤＥＦＧＨ
-		"
-		);
+			""";
 
 		var firstMoveActual = ChessBoardRenderer.RenderBoard(pandoRepository.GetSnapshot(firstMoveHash));
 		Assert.Equal(firstMoveExpected, firstMoveActual);
 	}
-
-	// This just exists to make writing out a board state more convenient
-	private static string TrimBoardLines(string board) => Regex.Replace(board.Trim(), @"\s*\n\s*", "\n");
 }

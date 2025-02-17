@@ -11,46 +11,43 @@ internal static class ChessSetup
 		InitialBoardState()
 	);
 
-	public static WhiteBlackPair<ImmutableArray<ChessPiece>> InitialBoardState() => new(
-		ImmutableArray.Create(new ChessPiece[]
-			{
-				new(Player.White, PieceType.Pawn, Rank.Two, File.A),
-				new(Player.White, PieceType.Pawn, Rank.Two, File.B),
-				new(Player.White, PieceType.Pawn, Rank.Two, File.C),
-				new(Player.White, PieceType.Pawn, Rank.Two, File.D),
-				new(Player.White, PieceType.Pawn, Rank.Two, File.E),
-				new(Player.White, PieceType.Pawn, Rank.Two, File.F),
-				new(Player.White, PieceType.Pawn, Rank.Two, File.G),
-				new(Player.White, PieceType.Pawn, Rank.Two, File.H),
-				new(Player.White, PieceType.Rook, Rank.One, File.A),
-				new(Player.White, PieceType.Knight, Rank.One, File.B),
-				new(Player.White, PieceType.Bishop, Rank.One, File.C),
-				new(Player.White, PieceType.Queen, Rank.One, File.D),
-				new(Player.White, PieceType.King, Rank.One, File.E),
-				new(Player.White, PieceType.Bishop, Rank.One, File.F),
-				new(Player.White, PieceType.Knight, Rank.One, File.G),
-				new(Player.White, PieceType.Rook, Rank.One, File.H),
-			}
-		),
-		ImmutableArray.Create(new ChessPiece[]
-			{
-				new(Player.Black, PieceType.Pawn, Rank.Seven, File.A),
-				new(Player.Black, PieceType.Pawn, Rank.Seven, File.B),
-				new(Player.Black, PieceType.Pawn, Rank.Seven, File.C),
-				new(Player.Black, PieceType.Pawn, Rank.Seven, File.D),
-				new(Player.Black, PieceType.Pawn, Rank.Seven, File.E),
-				new(Player.Black, PieceType.Pawn, Rank.Seven, File.F),
-				new(Player.Black, PieceType.Pawn, Rank.Seven, File.G),
-				new(Player.Black, PieceType.Pawn, Rank.Seven, File.H),
-				new(Player.Black, PieceType.Rook, Rank.Eight, File.A),
-				new(Player.Black, PieceType.Knight, Rank.Eight, File.B),
-				new(Player.Black, PieceType.Bishop, Rank.Eight, File.C),
-				new(Player.Black, PieceType.Queen, Rank.Eight, File.D),
-				new(Player.Black, PieceType.King, Rank.Eight, File.E),
-				new(Player.Black, PieceType.Bishop, Rank.Eight, File.F),
-				new(Player.Black, PieceType.Knight, Rank.Eight, File.G),
-				new(Player.Black, PieceType.Rook, Rank.Eight, File.H),
-			}
-		)
+	private static WhiteBlackPair<ChessPiece[]> InitialBoardState() => new(
+		[
+			new ChessPiece(Player.White, PieceType.Pawn, Rank.Two, File.A),
+			new ChessPiece(Player.White, PieceType.Pawn, Rank.Two, File.B),
+			new ChessPiece(Player.White, PieceType.Pawn, Rank.Two, File.C),
+			new ChessPiece(Player.White, PieceType.Pawn, Rank.Two, File.D),
+			new ChessPiece(Player.White, PieceType.Pawn, Rank.Two, File.E),
+			new ChessPiece(Player.White, PieceType.Pawn, Rank.Two, File.F),
+			new ChessPiece(Player.White, PieceType.Pawn, Rank.Two, File.G),
+			new ChessPiece(Player.White, PieceType.Pawn, Rank.Two, File.H),
+			new ChessPiece(Player.White, PieceType.Rook, Rank.One, File.A),
+			new ChessPiece(Player.White, PieceType.Knight, Rank.One, File.B),
+			new ChessPiece(Player.White, PieceType.Bishop, Rank.One, File.C),
+			new ChessPiece(Player.White, PieceType.Queen, Rank.One, File.D),
+			new ChessPiece(Player.White, PieceType.King, Rank.One, File.E),
+			new ChessPiece(Player.White, PieceType.Bishop, Rank.One, File.F),
+			new ChessPiece(Player.White, PieceType.Knight, Rank.One, File.G),
+			new ChessPiece(Player.White, PieceType.Rook, Rank.One, File.H),
+		]
+		,
+		[
+			new ChessPiece(Player.Black, PieceType.Pawn, Rank.Seven, File.A),
+			new ChessPiece(Player.Black, PieceType.Pawn, Rank.Seven, File.B),
+			new ChessPiece(Player.Black, PieceType.Pawn, Rank.Seven, File.C),
+			new ChessPiece(Player.Black, PieceType.Pawn, Rank.Seven, File.D),
+			new ChessPiece(Player.Black, PieceType.Pawn, Rank.Seven, File.E),
+			new ChessPiece(Player.Black, PieceType.Pawn, Rank.Seven, File.F),
+			new ChessPiece(Player.Black, PieceType.Pawn, Rank.Seven, File.G),
+			new ChessPiece(Player.Black, PieceType.Pawn, Rank.Seven, File.H),
+			new ChessPiece(Player.Black, PieceType.Rook, Rank.Eight, File.A),
+			new ChessPiece(Player.Black, PieceType.Knight, Rank.Eight, File.B),
+			new ChessPiece(Player.Black, PieceType.Bishop, Rank.Eight, File.C),
+			new ChessPiece(Player.Black, PieceType.Queen, Rank.Eight, File.D),
+			new ChessPiece(Player.Black, PieceType.King, Rank.Eight, File.E),
+			new ChessPiece(Player.Black, PieceType.Bishop, Rank.Eight, File.F),
+			new ChessPiece(Player.Black, PieceType.Knight, Rank.Eight, File.G),
+			new ChessPiece(Player.Black, PieceType.Rook, Rank.Eight, File.H),
+		]
 	);
 }

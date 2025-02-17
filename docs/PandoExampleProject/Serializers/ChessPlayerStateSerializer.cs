@@ -1,16 +1,13 @@
 using System;
 using Pando.DataSources;
-using Pando.Serialization.NodeSerializers;
+using Pando.Serialization;
 
 namespace PandoExampleProject.Serializers;
 
 /// ChessPlayerState only contains primitive data, so this serializer is pretty simple.
-internal class ChessPlayerStateSerializer : INodeSerializer<ChessPlayerState>
+internal class ChessPlayerStateSerializer : IPandoSerializer<ChessPlayerState>
 {
-	private const int SIZE = 2 * sizeof(byte);
-	public int? NodeSize => SIZE;
-
-	public int NodeSizeForObject(ChessPlayerState obj) => SIZE;
+	public int SerializedSize => 2;
 
 	/// Sequentially writes each enum member of the chess player state into a buffer and submits the node to the data sink.
 	public void Serialize(ChessPlayerState obj, Span<byte> writeBuffer, INodeDataSink dataSink)
