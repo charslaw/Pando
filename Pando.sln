@@ -8,12 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplesCode", "docs\Exampl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PandoExampleProject", "docs\PandoExampleProject\PandoExampleProject.csproj", "{9C06CC4A-6BE4-4C58-9147-58CF0B3CC6E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pando.SerializerGenerator", "src\Pando.SerializerGenerator\Pando.SerializerGenerator.csproj", "{C3B5AABB-9B12-4F2B-A235-1E2E838E2247}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializerGeneratorIntegrationTests", "tests\SerializerGeneratorIntegrationTests\SerializerGeneratorIntegrationTests.csproj", "{7AC2CDF4-ED62-47D3-8EDD-794267FB0D93}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SerializerGeneratorUnitTests", "tests\SerializerGeneratorUnitTests\SerializerGeneratorUnitTests.csproj", "{D6175F99-C8CB-4698-BD57-2BE4240E3A4A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,17 +30,5 @@ Global
 		{9C06CC4A-6BE4-4C58-9147-58CF0B3CC6E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9C06CC4A-6BE4-4C58-9147-58CF0B3CC6E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9C06CC4A-6BE4-4C58-9147-58CF0B3CC6E8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C3B5AABB-9B12-4F2B-A235-1E2E838E2247}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3B5AABB-9B12-4F2B-A235-1E2E838E2247}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3B5AABB-9B12-4F2B-A235-1E2E838E2247}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3B5AABB-9B12-4F2B-A235-1E2E838E2247}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7AC2CDF4-ED62-47D3-8EDD-794267FB0D93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7AC2CDF4-ED62-47D3-8EDD-794267FB0D93}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7AC2CDF4-ED62-47D3-8EDD-794267FB0D93}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7AC2CDF4-ED62-47D3-8EDD-794267FB0D93}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6175F99-C8CB-4698-BD57-2BE4240E3A4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6175F99-C8CB-4698-BD57-2BE4240E3A4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6175F99-C8CB-4698-BD57-2BE4240E3A4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6175F99-C8CB-4698-BD57-2BE4240E3A4A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
