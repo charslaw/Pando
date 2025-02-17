@@ -43,6 +43,9 @@ public interface ISnapshotDataSource
 	/// Returns the hash of the parent of the snapshot identified by the given hash.
 	/// <exception cref="HashNotFoundException">thrown if there is no snapshot node identified by the given hash.</exception>
 	ulong GetSnapshotParent(ulong hash);
+	
+	/// Returns the hash of the least common ancestor snapshot of the two snapshots identified by the given hashes.
+	ulong GetSnapshotLeastCommonAncestor(ulong hash1, ulong hash2);
 
 	/// Returns the hash of the root Node of the snapshot identified by the given hash.
 	/// <exception cref="HashNotFoundException">thrown if there is no snapshot node identified by the given hash.</exception>

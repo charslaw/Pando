@@ -145,6 +145,29 @@ public class MemoryDataSource : IDataSource
 		return _snapshotIndex[hash].ParentHash;
 	}
 
+	public ulong GetSnapshotLeastCommonAncestor(ulong hash1, ulong hash2)
+	{
+		CheckSnapshotHash(hash1);
+		CheckSnapshotHash(hash2);
+		
+		HashSet<ulong> hash1Ancestors = [];
+		var current = hash1;
+		while (current != 0UL)
+		{
+			hash1Ancestors.Add(current);
+			current = _snapshotIndex[current].ParentHash;
+		}
+		
+		current = hash2;
+		while (current != 0UL)
+		{
+			if (hash1Ancestors.Contains(current)) return current;
+			current = _snapshotIndex[current].ParentHash;
+		}
+
+		throw new Exception("Given snapshots don't have a common ancestor");
+	}
+
 	public ulong GetSnapshotRootNode(ulong hash)
 	{
 		CheckSnapshotHash(hash);

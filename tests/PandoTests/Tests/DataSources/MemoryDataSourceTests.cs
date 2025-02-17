@@ -217,6 +217,25 @@ public class MemoryDataSourceTests
 		}
 	}
 
+	public class GetSnapshotLeastCommonAncestor
+	{
+		[Fact]
+		public void Should_return_correct_least_common_ancestor_snapshot_hash()
+		{
+			var dataSource = new MemoryDataSource();
+
+			var rootHash = dataSource.AddSnapshot(0, 1);
+			var childHash = dataSource.AddSnapshot(rootHash, 1);
+			var branch1Hash = dataSource.AddSnapshot(childHash, 1);
+			var branch2AHash = dataSource.AddSnapshot(childHash, 2);
+			var branch2BHash = dataSource.AddSnapshot(branch2AHash, 1);
+
+			var lca = dataSource.GetSnapshotLeastCommonAncestor(branch1Hash, branch2BHash);
+
+			lca.Should().Be(childHash);
+		}
+	}
+
 	public class GetSnapshotRootNode
 	{
 		[Fact]

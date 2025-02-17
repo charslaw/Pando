@@ -44,6 +44,8 @@ public class PersistenceBackedDataSource : IDataSource, IDisposable
 	public bool HasSnapshot(ulong hash) => _mainDataSource.HasSnapshot(hash);
 	public int SnapshotCount => _mainDataSource.SnapshotCount;
 	public ulong GetSnapshotParent(ulong hash) => _mainDataSource.GetSnapshotParent(hash);
+	public ulong GetSnapshotLeastCommonAncestor(ulong hash1, ulong hash2) => _mainDataSource.GetSnapshotLeastCommonAncestor(hash1, hash2);
+
 	public ulong GetSnapshotRootNode(ulong hash) => _mainDataSource.GetSnapshotRootNode(hash);
 	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _mainDataSource.GetLeafSnapshotHashes();
 

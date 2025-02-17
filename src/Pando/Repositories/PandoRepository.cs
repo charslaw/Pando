@@ -55,6 +55,16 @@ public class PandoRepository<T> : IRepository<T>
 		return snapshotHash;
 	}
 
+	public ulong MergeSnapshots(ulong targetHash, ulong sourceHash)
+	{
+		var baseHash = _dataSource.GetSnapshotLeastCommonAncestor(targetHash, sourceHash);
+		var mergedHash = _serializer.Merge(baseHash, targetHash, sourceHash, _dataSource);
+
+		var snapshotHash = _dataSource.AddSnapshot(mergedHash, sourceHash);
+		AddToSnapshotTree(snapshotHash, sourceHash);
+		return snapshotHash;
+	}
+
 	public T GetSnapshot(ulong hash)
 	{
 		var nodeHash = _dataSource.GetSnapshotRootNode(hash);
