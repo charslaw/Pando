@@ -1,9 +1,10 @@
 using System;
 using System.Linq;
+using Pando.DataSources.Utils;
 
 namespace PandoTests.Utils;
 
-public static class ArrayX
+internal static class ArrayX
 {
 	public static T[] CreateCopy<T>(this T[] arr) => (T[])arr.Clone();
 
@@ -21,5 +22,12 @@ public static class ArrayX
 		}
 
 		return newArray;
+	}
+
+	public static T[] ToArray<T>(this SpannableList<T> list)
+	{
+		var arr = new T[list.Count];
+		list.CopyTo(0, arr.Length, arr);
+		return arr;
 	}
 }
