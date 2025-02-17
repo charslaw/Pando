@@ -39,7 +39,7 @@ public class PersistenceBackedDataSource : IDataSource, IDisposable
 
 	public bool HasNode(ulong hash) => _mainDataSource.HasNode(hash);
 	public int GetSizeOfNode(ulong hash) => _mainDataSource.GetSizeOfNode(hash);
-	public void CopyNodeBytesTo(ulong hash, ref Span<byte> outputBytes) => _mainDataSource.CopyNodeBytesTo(hash, ref outputBytes);
+	public void CopyNodeBytesTo(ulong hash, Span<byte> outputBytes) => _mainDataSource.CopyNodeBytesTo(hash, outputBytes);
 
 	public bool HasSnapshot(ulong hash) => _mainDataSource.HasSnapshot(hash);
 	public int SnapshotCount => _mainDataSource.SnapshotCount;

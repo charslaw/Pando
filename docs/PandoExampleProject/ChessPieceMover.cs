@@ -8,19 +8,14 @@ internal static class ChessPieceMover
 	{
 		if (player != startState.PlayerState.CurrentTurn) throw new ArgumentException($"It is not {player}'s turn!", nameof(player));
 
-		var pieceArray = player switch
-		{
-			Player.White => startState.PlayerPieces.WhiteValue,
-			Player.Black => startState.PlayerPieces.BlackValue,
-			_            => throw new ArgumentOutOfRangeException(nameof(player), player, null)
-		};
-		var newPiece = pieceArray[pieceIndex] with { CurrentRank = newRank, CurrentFile = newFile };
-		var newPlayerPieces = player switch
-		{
-			Player.White => startState.PlayerPieces with { WhiteValue = pieceArray.SetItem(pieceIndex.Value, newPiece) },
-			Player.Black => startState.PlayerPieces with { BlackValue = pieceArray.SetItem(pieceIndex.Value, newPiece) },
-			_            => throw new ArgumentOutOfRangeException(nameof(player), player, null)
-		};
+		var newPlayerPieces = startState.PlayerPieces.MutateSide(player, pieces =>
+			{
+				var movedPiece = pieces[pieceIndex] with { CurrentRank = newRank, CurrentFile = newFile };
+				var updatedPieces = (ChessPiece[])pieces.Clone();
+				updatedPieces[pieceIndex] = movedPiece;
+				return updatedPieces;
+			}
+		);
 
 		return startState with
 		{
