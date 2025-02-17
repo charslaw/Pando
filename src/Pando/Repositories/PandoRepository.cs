@@ -1,21 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Pando.DataSources;
 using Pando.Exceptions;
 using Pando.Repositories.Utils;
-using Pando.Serialization.NodeSerializers;
+using Pando.Serialization;
 
 namespace Pando.Repositories;
 
 public class PandoRepository<T> : IRepository<T>
 {
 	private readonly IDataSource _dataSource;
-	private readonly INodeSerializer<T> _serializer;
+	private readonly IPandoSerializer<T> _serializer;
 
 	private ulong? _rootSnapshot;
 	private readonly Dictionary<ulong, SmallSet<ulong>> _snapshotTreeElements = new();
 
-	public PandoRepository(IDataSource dataSource, INodeSerializer<T> serializer)
+	public PandoRepository(IDataSource dataSource, IPandoSerializer<T> serializer)
 	{
 		_dataSource = dataSource;
 		_serializer = serializer;
@@ -32,7 +34,7 @@ public class PandoRepository<T> : IRepository<T>
 	{
 		if (_dataSource.SnapshotCount > 0) throw new AlreadyHasRootSnapshotException();
 
-		var nodeHash = _serializer.SerializeToHash(tree, _dataSource);
+		var nodeHash = SerializeToHash(tree);
 		var snapshotHash = _dataSource.AddSnapshot(0UL, nodeHash);
 		AddToSnapshotTree(snapshotHash);
 		return snapshotHash;
@@ -47,7 +49,7 @@ public class PandoRepository<T> : IRepository<T>
 			);
 		}
 
-		var nodeHash = _serializer.SerializeToHash(tree, _dataSource);
+		var nodeHash = SerializeToHash(tree);
 		var snapshotHash = _dataSource.AddSnapshot(parentHash, nodeHash);
 		AddToSnapshotTree(snapshotHash, parentHash);
 		return snapshotHash;
@@ -56,7 +58,7 @@ public class PandoRepository<T> : IRepository<T>
 	public T GetSnapshot(ulong hash)
 	{
 		var nodeHash = _dataSource.GetSnapshotRootNode(hash);
-		return _serializer.DeserializeFromHash(nodeHash, _dataSource);
+		return DeserializeFromHash(nodeHash);
 	}
 
 	public SnapshotTree GetSnapshotTree()
@@ -144,5 +146,20 @@ public class PandoRepository<T> : IRepository<T>
 		var children = _snapshotTreeElements[parentHash];
 		children.Add(hash);
 		_snapshotTreeElements[parentHash] = children;
+	}
+
+	private ulong SerializeToHash(T tree)
+	{
+		Span<byte> hashSpan = stackalloc byte[sizeof(ulong)];
+		_serializer.Serialize(tree, hashSpan, _dataSource);
+		var nodeHash = BinaryPrimitives.ReadUInt64LittleEndian(hashSpan);
+		return nodeHash;
+	}
+
+	private T DeserializeFromHash(ulong hash)
+	{
+		Span<byte> hashSpan = stackalloc byte[sizeof(ulong)];
+		BinaryPrimitives.WriteUInt64LittleEndian(hashSpan, hash);
+		return _serializer.Deserialize(hashSpan, _dataSource);
 	}
 }

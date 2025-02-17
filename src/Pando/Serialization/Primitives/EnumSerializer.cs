@@ -1,5 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
+using Pando.DataSources;
+using Pando.Serialization.Primitives;
 
 namespace Pando.Serialization.PrimitiveSerializers;
 
@@ -11,36 +13,35 @@ namespace Pando.Serialization.PrimitiveSerializers;
 /// <see cref="EnumSerializer"/>.<see cref="EnumSerializer.SerializerFor{TEnum}"/> or
 /// <see cref="EnumSerializer"/>.<see cref="EnumSerializer.SerializerFor{TEnum, TUnderlying}"/>
 /// </remarks>
-public sealed class EnumSerializer<TEnum, TUnderlying> : IPrimitiveSerializer<TEnum>
+public sealed class EnumSerializer<TEnum, TUnderlying> : IPandoSerializer<TEnum>
 	where TEnum : unmanaged, Enum
 	where TUnderlying : unmanaged
 {
-	private readonly IPrimitiveSerializer<TUnderlying> _underlyingSerializer;
+	public int SerializedSize { get; }
 
-	internal EnumSerializer(IPrimitiveSerializer<TUnderlying> underlyingSerializer)
+	private readonly IPandoSerializer<TUnderlying> _underlyingSerializer;
+
+	internal EnumSerializer(IPandoSerializer<TUnderlying> underlyingSerializer)
 	{
 		// We somewhat dangerously assume that it is safe to convert TEnum to whatever TUnderlying is.
 		// This is relatively safe because the only way to construct an EnumSerializer is via the provided factory methods,
 		// which create serializers based on the underlying type of the given enum.
 		_underlyingSerializer = underlyingSerializer;
-		ByteCount = _underlyingSerializer.ByteCount;
+		SerializedSize = underlyingSerializer.SerializedSize;
 	}
 
-	public int? ByteCount { get; }
-	public int ByteCountForValue(TEnum value) => ByteCount ?? _underlyingSerializer.ByteCountForValue(ToUnderlying(ref value));
-
-	public void Serialize(TEnum value, ref Span<byte> buffer)
+	public void Serialize(TEnum value, Span<byte> buffer, INodeDataSink dataSink)
 	{
 		var underlying = ToUnderlying(ref value);
-		_underlyingSerializer.Serialize(underlying, ref buffer);
+		_underlyingSerializer.Serialize(underlying, buffer, dataSink);
 	}
 
-	public TEnum Deserialize(ref ReadOnlySpan<byte> buffer)
+	public TEnum Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
 	{
-		var underlying = _underlyingSerializer.Deserialize(ref buffer);
+		var underlying = _underlyingSerializer.Deserialize(buffer, dataSource);
 		return ToEnum(ref underlying);
 	}
-	
+
 	private static TUnderlying ToUnderlying(ref TEnum value) => Unsafe.As<TEnum, TUnderlying>(ref value);
 	private static TEnum ToEnum(ref TUnderlying value) => Unsafe.As<TUnderlying, TEnum>(ref value);
 }
@@ -52,7 +53,7 @@ public static class EnumSerializer
 	/// using a default serializer to serialize the underlying value.</summary>
 	/// <exception cref="NotSupportedException">thrown if the specified enum type has an unsupported underlying type.
 	/// Currently, <c>nint</c> and <c>nuint</c> are not supported.</exception>
-	public static IPrimitiveSerializer<TEnum> SerializerFor<TEnum>()
+	public static IPandoSerializer<TEnum> SerializerFor<TEnum>()
 		where TEnum : unmanaged, Enum
 	{
 		var enumType = typeof(TEnum);
@@ -76,7 +77,7 @@ public static class EnumSerializer
 	/// using the provided <paramref name="underlyingSerializer"/> to serialize the underlying value.</summary>
 	/// <exception cref="ArgumentException">thrown if the provided <paramref name="underlyingSerializer"/>
 	/// is incapable of serializing the underlying type of <typeparamref name="TEnum"/>.</exception>
-	public static IPrimitiveSerializer<TEnum> SerializerFor<TEnum, TUnderlying>(IPrimitiveSerializer<TUnderlying> underlyingSerializer)
+	public static IPandoSerializer<TEnum> SerializerFor<TEnum, TUnderlying>(IPandoSerializer<TUnderlying> underlyingSerializer)
 		where TEnum : unmanaged, Enum
 		where TUnderlying : unmanaged
 	{
