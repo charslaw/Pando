@@ -55,13 +55,30 @@ public class PandoRepository<T> : IRepository<T>
 		return snapshotHash;
 	}
 
-	public ulong MergeSnapshots(ulong targetHash, ulong sourceHash)
+	/// Merges the two snapshots identified by the given hashes, returning the hash of the merged result snapshot.
+	/// Conflict resolution is determined by the passed in <see cref="IPandoSerializer{T}"/>.
+	public ulong MergeSnapshots(ulong targetSnapshotHash, ulong sourceSnapshotHash)
 	{
-		var baseHash = _dataSource.GetSnapshotLeastCommonAncestor(targetHash, sourceHash);
-		var mergedHash = _serializer.Merge(baseHash, targetHash, sourceHash, _dataSource);
+		var baseSnapshotHash = _dataSource.GetSnapshotLeastCommonAncestor(targetSnapshotHash, sourceSnapshotHash);
+		Span<byte> hashBytes = stackalloc byte[sizeof(ulong) * 3];
+		var baseNodeHashSlice = hashBytes.Slice(0, sizeof(ulong));
+		var targetNodeHashSlice = hashBytes.Slice(sizeof(ulong), sizeof(ulong));
+		var sourceNodeHashSlice = hashBytes.Slice(sizeof(ulong) * 2, sizeof(ulong));
+		BinaryPrimitives.WriteUInt64LittleEndian(baseNodeHashSlice, _dataSource.GetSnapshotRootNode(baseSnapshotHash));
+		BinaryPrimitives.WriteUInt64LittleEndian(targetNodeHashSlice, _dataSource.GetSnapshotRootNode(targetSnapshotHash));
+		BinaryPrimitives.WriteUInt64LittleEndian(sourceNodeHashSlice, _dataSource.GetSnapshotRootNode(sourceSnapshotHash));
 
-		var snapshotHash = _dataSource.AddSnapshot(mergedHash, sourceHash);
-		AddToSnapshotTree(snapshotHash, sourceHash);
+		_serializer.Merge(
+			baseNodeHashSlice,
+			targetNodeHashSlice,
+			sourceNodeHashSlice,
+			_dataSource
+		);
+
+		var mergedHash = BinaryPrimitives.ReadUInt64LittleEndian(baseNodeHashSlice);
+
+		var snapshotHash = _dataSource.AddSnapshot(sourceSnapshotHash, mergedHash);
+		AddToSnapshotTree(snapshotHash, sourceSnapshotHash);
 		return snapshotHash;
 	}
 
