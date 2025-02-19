@@ -10,20 +10,20 @@ internal static class StreamUtils
 	{
 		private const int NODE_HASH_END = sizeof(ulong);
 		private const int NODE_DATA_START_END = NODE_HASH_END + sizeof(int);
-		private const int NODE_DATA_LEN_END = NODE_DATA_START_END + sizeof(int);
-		private const int SIZE_OF_NODE_INDEX_ENTRY = NODE_DATA_LEN_END;
+		private const int NODE_DATA_END_END = NODE_DATA_START_END + sizeof(int);
+		private const int SIZE_OF_NODE_INDEX_ENTRY = NODE_DATA_END_END;
 
 		/// Translates the given node index details into the appropriate byte representation and writes it to this stream at the current position.
-		public static void WriteIndexEntry(Stream stream, ulong hash, int dataStart, int dataLength)
+		public static void WriteIndexEntry(Stream stream, ulong hash, int dataStart, int dataEnd)
 		{
 			Span<byte> buffer = stackalloc byte[SIZE_OF_NODE_INDEX_ENTRY];
 			ByteEncoder.CopyBytes(hash, buffer[..NODE_HASH_END]);
 			ByteEncoder.CopyBytes(dataStart, buffer[NODE_HASH_END..NODE_DATA_START_END]);
-			ByteEncoder.CopyBytes(dataLength, buffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
+			ByteEncoder.CopyBytes(dataEnd, buffer[NODE_DATA_START_END..NODE_DATA_END_END]);
 			stream.Write(buffer);
 		}
 
-		public static Dictionary<ulong, DataSlice> PopulateNodeIndex(Stream nodeIndexStream, Dictionary<ulong, DataSlice>? index)
+		public static Dictionary<ulong, Range> PopulateNodeIndex(Stream nodeIndexStream, Dictionary<ulong, Range>? index)
 		{
 			nodeIndexStream.Seek(0, SeekOrigin.Begin);
 			if (nodeIndexStream.Length % SIZE_OF_NODE_INDEX_ENTRY != 0)
@@ -35,17 +35,17 @@ internal static class StreamUtils
 			}
 
 			var totalEntriesCount = (int)nodeIndexStream.Length / SIZE_OF_NODE_INDEX_ENTRY;
-			index ??= new Dictionary<ulong, DataSlice>(totalEntriesCount);
+			index ??= new Dictionary<ulong, Range>(totalEntriesCount);
 			if (totalEntriesCount == 0) return index;
 
 			Span<byte> hashBuffer = stackalloc byte[SIZE_OF_NODE_INDEX_ENTRY];
 			for (int i = 0; i < totalEntriesCount; i++)
 			{
-				nodeIndexStream.Read(hashBuffer);
+				nodeIndexStream.ReadExactly(hashBuffer);
 				var hash = ByteEncoder.GetUInt64(hashBuffer[..NODE_HASH_END]);
-				var parentHash = ByteEncoder.GetInt32(hashBuffer[NODE_HASH_END..NODE_DATA_START_END]);
-				var rootNodeHash = ByteEncoder.GetInt32(hashBuffer[NODE_DATA_START_END..NODE_DATA_LEN_END]);
-				var snapshotData = new DataSlice(parentHash, rootNodeHash);
+				var dataStart = ByteEncoder.GetInt32(hashBuffer[NODE_HASH_END..NODE_DATA_START_END]);
+				var dataEnd = ByteEncoder.GetInt32(hashBuffer[NODE_DATA_START_END..NODE_DATA_END_END]);
+				var snapshotData = (dataStart..dataEnd);
 
 				index.Add(hash, snapshotData);
 			}

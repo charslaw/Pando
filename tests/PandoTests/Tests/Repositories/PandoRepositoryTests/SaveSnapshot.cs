@@ -49,7 +49,7 @@ public class SaveSnapshot
 		);
 		var tree2 = tree with { };
 
-		var nodeIndex = new Dictionary<ulong, DataSlice>();
+		var nodeIndex = new Dictionary<ulong, Range>();
 		var nodeData = new SpannableList<byte>();
 		var repository = new PandoRepository<TestTree>(
 			new MemoryDataSource(nodeIndex: nodeIndex, nodeData: nodeData),

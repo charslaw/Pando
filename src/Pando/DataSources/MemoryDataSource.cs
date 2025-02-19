@@ -11,14 +11,14 @@ public class MemoryDataSource : IDataSource
 {
 	private readonly Dictionary<ulong, SnapshotData> _snapshotIndex;
 	private readonly HashSet<ulong> _leafSnapshots;
-	private readonly Dictionary<ulong, DataSlice> _nodeIndex;
+	private readonly Dictionary<ulong, Range> _nodeIndex;
 	private readonly SpannableList<byte> _nodeData;
 
 	public MemoryDataSource()
 	{
 		_snapshotIndex = new Dictionary<ulong, SnapshotData>();
 		_leafSnapshots = new HashSet<ulong>();
-		_nodeIndex = new Dictionary<ulong, DataSlice>();
+		_nodeIndex = new Dictionary<ulong, Range>();
 		_nodeData = new SpannableList<byte>();
 	}
 
@@ -33,13 +33,13 @@ public class MemoryDataSource : IDataSource
 
 	internal MemoryDataSource(
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
-		Dictionary<ulong, DataSlice>? nodeIndex = null,
+		Dictionary<ulong, Range>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
 	)
 	{
 		_snapshotIndex = snapshotIndex ?? new Dictionary<ulong, SnapshotData>();
 		_leafSnapshots = new HashSet<ulong>();
-		_nodeIndex = nodeIndex ?? new Dictionary<ulong, DataSlice>();
+		_nodeIndex = nodeIndex ?? new Dictionary<ulong, Range>();
 		_nodeData = nodeData ?? new SpannableList<byte>();
 	}
 
@@ -47,7 +47,7 @@ public class MemoryDataSource : IDataSource
 	internal MemoryDataSource(
 		Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource,
 		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
-		Dictionary<ulong, DataSlice>? nodeIndex = null,
+		Dictionary<ulong, Range>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
 	)
 	{
@@ -120,15 +120,14 @@ public class MemoryDataSource : IDataSource
 	public int GetSizeOfNode(ulong hash)
 	{
 		CheckNodeHash(hash);
-		var (_, dataLength) = _nodeIndex[hash];
+		var (_, dataLength) = _nodeIndex[hash].GetOffsetAndLength(_nodeData.Count);
 		return dataLength;
 	}
 
 	public void CopyNodeBytesTo(ulong hash, Span<byte> outputBytes)
 	{
 		CheckNodeHash(hash);
-		var (start, dataLength) = _nodeIndex[hash];
-		_nodeData.CopyTo(start, dataLength, outputBytes);
+		_nodeData.CopyTo(_nodeIndex[hash], outputBytes);
 	}
 
 #endregion
@@ -149,7 +148,7 @@ public class MemoryDataSource : IDataSource
 	{
 		CheckSnapshotHash(hash1);
 		CheckSnapshotHash(hash2);
-		
+
 		HashSet<ulong> hash1Ancestors = [];
 		var current = hash1;
 		while (current != 0UL)
@@ -157,7 +156,7 @@ public class MemoryDataSource : IDataSource
 			hash1Ancestors.Add(current);
 			current = _snapshotIndex[current].ParentHash;
 		}
-		
+
 		current = hash2;
 		while (current != 0UL)
 		{

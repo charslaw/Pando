@@ -22,7 +22,7 @@ public class MemoryDataSourceTests
 			var nodeData = new byte[] { 0, 1, 2, 3 };
 
 			// Arrange
-			var nodeIndex = new Dictionary<ulong, DataSlice>();
+			var nodeIndex = new Dictionary<ulong, Range>();
 			var nodeDataList = new SpannableList<byte>();
 			var dataSource = new MemoryDataSource(
 				nodeIndex: nodeIndex,
@@ -341,19 +341,18 @@ public class MemoryDataSourceTests
 			// Test Data
 			var hash1 = 0123UL;
 			var hash2 = 4567UL;
-			var nodeData = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 };
 			var nodeIndexEntry = ArrayX.Concat(
 				ByteEncoder.GetBytes(hash1),
 				ByteEncoder.GetBytes(0),
 				ByteEncoder.GetBytes(4),
 				ByteEncoder.GetBytes(hash2),
 				ByteEncoder.GetBytes(4),
-				ByteEncoder.GetBytes(4)
+				ByteEncoder.GetBytes(8)
 			);
 
 			// Arrange/Act
-			var nodeIndexStream = new MemoryStream(nodeIndexEntry.CreateCopy());
-			var nodeDataStream = new MemoryStream(nodeData.CreateCopy());
+			var nodeIndexStream = new MemoryStream(nodeIndexEntry);
+			var nodeDataStream = new MemoryStream([0, 1, 2, 3, 4, 5, 6, 7]);
 			var dataSource = new MemoryDataSource(
 				snapshotIndexSource: Stream.Null,
 				leafSnapshotsSource: Stream.Null,
@@ -362,13 +361,11 @@ public class MemoryDataSourceTests
 			);
 
 			// Assert
-			Span<byte> actualBuffer = stackalloc byte[4];
-			dataSource.CopyNodeBytesTo(hash1, actualBuffer);
-			var result1 = actualBuffer.ToArray();
-			dataSource.CopyNodeBytesTo(hash2, actualBuffer);
-			var result2 = actualBuffer.ToArray();
-			result1.Should().Equal(nodeData[..4]);
-			result2.Should().Equal(nodeData[4..8]);
+			byte[] actualBuffer = new byte[8];
+			dataSource.CopyNodeBytesTo(hash1, actualBuffer.AsSpan()[..4]);
+			dataSource.CopyNodeBytesTo(hash2, actualBuffer.AsSpan()[4..]);
+			byte[] expected = [0, 1, 2, 3, 4, 5, 6, 7];
+			actualBuffer.Should().Equal(expected);
 		}
 
 		[Fact]

@@ -27,7 +27,7 @@ internal static class ArrayX
 	public static T[] ToArray<T>(this SpannableList<T> list)
 	{
 		var arr = new T[list.Count];
-		list.CopyTo(0, arr.Length, arr);
+		list.CopyTo(..list.Count, arr);
 		return arr;
 	}
 }

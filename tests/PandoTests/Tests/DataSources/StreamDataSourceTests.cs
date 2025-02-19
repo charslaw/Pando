@@ -17,15 +17,6 @@ public class StreamDataSourceTests
 		[Fact]
 		public void Should_output_node_index_sequentially()
 		{
-			// Test Data
-			var nodeData = new[]
-			{
-				new byte[] { 1, 2, 3, 4 },
-				new byte[] { 5, 6, 7 },
-				new byte[] { 8, 9, 10, 11, 12 }
-			};
-
-			// Arrange
 			var nodeIndexStream = new MemoryStream();
 			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
@@ -34,35 +25,30 @@ public class StreamDataSourceTests
 				nodeDataStream: Stream.Null
 			);
 
-			// Act
-			dataSource.AddNode(nodeData[0]);
-			dataSource.AddNode(nodeData[1]);
-			dataSource.AddNode(nodeData[2]);
+			dataSource.AddNode([1, 2, 3, 4]);
+			dataSource.AddNode([5, 6, 7]);
+			dataSource.AddNode([8, 9, 10, 11, 12]);
 
-			// Assert
-			Span<byte> expected = stackalloc byte[48];
-			ByteEncoder.CopyBytes(xxHash64.ComputeHash(nodeData[0], nodeData[0].Length), expected.Slice(0, 8));
-			ByteEncoder.CopyBytes(0, expected.Slice(8, 4));
-			ByteEncoder.CopyBytes(nodeData[0].Length, expected.Slice(12, 4));
-			ByteEncoder.CopyBytes(xxHash64.ComputeHash(nodeData[1], nodeData[1].Length), expected.Slice(16, 8));
-			ByteEncoder.CopyBytes(nodeData[0].Length, expected.Slice(24, 4));
-			ByteEncoder.CopyBytes(nodeData[1].Length, expected.Slice(28, 4));
-			ByteEncoder.CopyBytes(xxHash64.ComputeHash(nodeData[2], nodeData[2].Length), expected.Slice(32, 8));
-			ByteEncoder.CopyBytes(nodeData[0].Length + nodeData[1].Length, expected.Slice(40, 4));
-			ByteEncoder.CopyBytes(nodeData[2].Length, expected.Slice(44, 4));
+			var expected = ArrayX.Concat(
+				ByteEncoder.GetBytes(HashUtils.ComputeNodeHash([1, 2, 3, 4])),
+				ByteEncoder.GetBytes(0),
+				ByteEncoder.GetBytes(4),
 
-			nodeIndexStream.ToArray().Should().Equal(expected.ToArray());
+				ByteEncoder.GetBytes(HashUtils.ComputeNodeHash([5, 6, 7])),
+				ByteEncoder.GetBytes(4),
+				ByteEncoder.GetBytes(7),
+
+				ByteEncoder.GetBytes(HashUtils.ComputeNodeHash([8, 9, 10, 11, 12])),
+				ByteEncoder.GetBytes(7),
+				ByteEncoder.GetBytes(12)
+			);
+
+			nodeIndexStream.ToArray().Should().Equal(expected);
 		}
 
 		[Fact]
 		public void Should_append_node_data_sequentially()
 		{
-			// Test Data
-			var nodeData1 = new byte[] { 1, 2, 3, 4 };
-			var nodeData2 = new byte[] { 5, 6, 7 };
-			var nodeData3 = new byte[] { 8, 9, 10, 11, 12 };
-
-			// Arrange
 			var nodeDataStream = new MemoryStream();
 			using var dataSource = new StreamDataSource(
 				snapshotIndexStream: Stream.Null,
@@ -71,13 +57,11 @@ public class StreamDataSourceTests
 				nodeDataStream: nodeDataStream
 			);
 
-			// Act
-			dataSource.AddNode(nodeData1);
-			dataSource.AddNode(nodeData2);
-			dataSource.AddNode(nodeData3);
+			dataSource.AddNode([1, 2, 3, 4]);
+			dataSource.AddNode([5, 6, 7]);
+			dataSource.AddNode([8, 9, 10, 11, 12]);
 
-			// Assert
-			var expected = ArrayX.Concat(nodeData1, nodeData2, nodeData3);
+			byte[] expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 			nodeDataStream.ToArray().Should().Equal(expected);
 		}
 	}

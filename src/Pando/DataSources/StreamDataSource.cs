@@ -50,7 +50,7 @@ public class StreamDataSource : INodeDataSink, ISnapshotDataSink, IDisposable
 		_nodeDataStream.Write(bytes);
 		_nodeDataBytesCount += bytes.Length;
 
-		StreamUtils.NodeIndex.WriteIndexEntry(_nodeIndexStream, hash, (int)start, bytes.Length);
+		StreamUtils.NodeIndex.WriteIndexEntry(_nodeIndexStream, hash, (int)start, (int)_nodeDataBytesCount);
 	}
 
 	/// <remarks>The StreamDataSource <i>does not</i> defend against duplicate snapshots.
