@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using Pando.DataSources;
+using Pando.DataSources.Utils;
 using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.Collections;
@@ -15,7 +16,7 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 {
 	protected readonly IPandoSerializer<TElement> ElementSerializer = elementSerializer;
 
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	public void Serialize(TCollection collection, Span<byte> buffer, INodeDataSink dataSink)
 	{
@@ -34,8 +35,7 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 				currentByte += elementSize;
 			}
 
-			var nodeHash = dataSink.AddNode(elementBytes);
-			BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+			dataSink.AddNode(elementBytes, buffer);
 		}
 		finally
 		{

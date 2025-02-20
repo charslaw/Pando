@@ -12,7 +12,7 @@ public class StreamDataSource : INodeDataSink, ISnapshotDataSink, IDisposable
 	private readonly Stream _nodeIndexStream;
 	private readonly Stream _nodeDataStream;
 
-	private readonly HashSet<ulong> _leafSnapshotHashSet;
+	private readonly HashSet<SnapshotId> _leafSnapshotHashSet;
 
 	/// Counts total number of bytes in the node data stream.
 	private long _nodeDataBytesCount;
@@ -30,11 +30,11 @@ public class StreamDataSource : INodeDataSink, ISnapshotDataSink, IDisposable
 	/// <remarks>The StreamDataSource <i>does not</i> defend against duplicate nodes.
 	/// Before adding a node, you should ensure it is not a duplicate</remarks>
 	/// <inheritdoc/>
-	public ulong AddNode(ReadOnlySpan<byte> bytes)
+	public NodeId AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var hash = HashUtils.ComputeNodeHash(bytes);
-		AddNodeWithHashUnsafe(hash, bytes);
-		return hash;
+		var nodeId = HashUtils.ComputeNodeHash(bytes);
+		AddNodeWithHashUnsafe(nodeId, bytes);
+		return nodeId;
 	}
 
 	/// Adds a new node indexed with the given hash, containing the given bytes
@@ -44,23 +44,23 @@ public class StreamDataSource : INodeDataSink, ISnapshotDataSink, IDisposable
 	///     <para>The StreamDataSource <i>does not</i> defend against duplicate nodes.
 	///     Before adding a node, you should ensure it is not a duplicate.</para>
 	/// </remarks>
-	internal void AddNodeWithHashUnsafe(ulong hash, ReadOnlySpan<byte> bytes)
+	internal void AddNodeWithHashUnsafe(NodeId nodeId, ReadOnlySpan<byte> bytes)
 	{
 		var start = _nodeDataBytesCount;
 		_nodeDataStream.Write(bytes);
 		_nodeDataBytesCount += bytes.Length;
 
-		StreamUtils.NodeIndex.WriteIndexEntry(_nodeIndexStream, hash, (int)start, (int)_nodeDataBytesCount);
+		StreamUtils.NodeIndex.WriteIndexEntry(_nodeIndexStream, nodeId, (int)start, (int)_nodeDataBytesCount);
 	}
 
 	/// <remarks>The StreamDataSource <i>does not</i> defend against duplicate snapshots.
 	/// Before adding a snapshot, you should ensure it is not a duplicate.</remarks>
 	/// <inheritdoc/>
-	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
+	public SnapshotId AddSnapshot(SnapshotId parentSnapshotId, NodeId rootNodeId)
 	{
-		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
-		AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
-		return hash;
+		var snapshotId = HashUtils.ComputeSnapshotHash(parentSnapshotId, rootNodeId);
+		AddSnapshotWithHashUnsafe(snapshotId, parentSnapshotId, rootNodeId);
+		return snapshotId;
 	}
 
 	/// Adds a new snapshot indexed with the given hash, containing the parent hash and node hash
@@ -70,14 +70,14 @@ public class StreamDataSource : INodeDataSink, ISnapshotDataSink, IDisposable
 	///     <para>The StreamDataSource <i>does not</i> defend against duplicate snapshots.
 	///     Before adding a snapshot, you should ensure it is not a duplicate.</para>
 	/// </remarks>
-	internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
+	internal void AddSnapshotWithHashUnsafe(SnapshotId snapshotId, SnapshotId parentSnapshotId, NodeId rootNodeId)
 	{
-		StreamUtils.SnapshotIndex.WriteIndexEntry(_snapshotIndexStream, hash, parentHash, rootNodeHash);
+		StreamUtils.SnapshotIndex.WriteIndexEntry(_snapshotIndexStream, snapshotId, parentSnapshotId, rootNodeId);
 
 		// Parent is by definition no longer a leaf node
-		_leafSnapshotHashSet.Remove(parentHash);
+		_leafSnapshotHashSet.Remove(parentSnapshotId);
 		// Newly add snapshot is by definition a leaf node
-		_leafSnapshotHashSet.Add(hash);
+		_leafSnapshotHashSet.Add(snapshotId);
 
 		UpdateLeafSnapshotStream();
 	}
@@ -87,12 +87,12 @@ public class StreamDataSource : INodeDataSink, ISnapshotDataSink, IDisposable
 	{
 		_leafSnapshotsStream.Seek(0, SeekOrigin.Begin);
 		_leafSnapshotsStream.SetLength(0);
-		Span<byte> buffer = stackalloc byte[_leafSnapshotHashSet.Count * sizeof(ulong)];
+		Span<byte> buffer = stackalloc byte[_leafSnapshotHashSet.Count * SnapshotId.SIZE];
 		var offset = 0;
-		foreach (var leafHash in _leafSnapshotHashSet)
+		foreach (var leafId in _leafSnapshotHashSet)
 		{
-			ByteEncoder.CopyBytes(leafHash, buffer.Slice(offset, sizeof(ulong)));
-			offset += sizeof(ulong);
+			leafId.CopyTo(buffer.Slice(offset, SnapshotId.SIZE));
+			offset += SnapshotId.SIZE;
 		}
 
 		_leafSnapshotsStream.Write(buffer);

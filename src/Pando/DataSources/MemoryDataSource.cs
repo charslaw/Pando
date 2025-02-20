@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.IO;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
@@ -9,16 +9,16 @@ namespace Pando.DataSources;
 
 public class MemoryDataSource : IDataSource
 {
-	private readonly Dictionary<ulong, SnapshotData> _snapshotIndex;
-	private readonly HashSet<ulong> _leafSnapshots;
-	private readonly Dictionary<ulong, Range> _nodeIndex;
+	private readonly Dictionary<SnapshotId, SnapshotData> _snapshotIndex;
+	private readonly HashSet<SnapshotId> _leafSnapshots;
+	private readonly Dictionary<NodeId, Range> _nodeIndex;
 	private readonly SpannableList<byte> _nodeData;
 
 	public MemoryDataSource()
 	{
-		_snapshotIndex = new Dictionary<ulong, SnapshotData>();
-		_leafSnapshots = new HashSet<ulong>();
-		_nodeIndex = new Dictionary<ulong, Range>();
+		_snapshotIndex = new Dictionary<SnapshotId, SnapshotData>();
+		_leafSnapshots = new HashSet<SnapshotId>();
+		_nodeIndex = new Dictionary<NodeId, Range>();
 		_nodeData = new SpannableList<byte>();
 	}
 
@@ -32,22 +32,22 @@ public class MemoryDataSource : IDataSource
 		) { }
 
 	internal MemoryDataSource(
-		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
-		Dictionary<ulong, Range>? nodeIndex = null,
+		Dictionary<SnapshotId, SnapshotData>? snapshotIndex = null,
+		Dictionary<NodeId, Range>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
 	)
 	{
-		_snapshotIndex = snapshotIndex ?? new Dictionary<ulong, SnapshotData>();
-		_leafSnapshots = new HashSet<ulong>();
-		_nodeIndex = nodeIndex ?? new Dictionary<ulong, Range>();
+		_snapshotIndex = snapshotIndex ?? new Dictionary<SnapshotId, SnapshotData>();
+		_leafSnapshots = new HashSet<SnapshotId>();
+		_nodeIndex = nodeIndex ?? new Dictionary<NodeId, Range>();
 		_nodeData = nodeData ?? new SpannableList<byte>();
 	}
 
 
 	internal MemoryDataSource(
 		Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource,
-		Dictionary<ulong, SnapshotData>? snapshotIndex = null,
-		Dictionary<ulong, Range>? nodeIndex = null,
+		Dictionary<SnapshotId, SnapshotData>? snapshotIndex = null,
+		Dictionary<NodeId, Range>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
 	)
 	{
@@ -62,72 +62,72 @@ public class MemoryDataSource : IDataSource
 
 	/// <remarks>This implementation is guaranteed not to insert duplicate nodes.</remarks>
 	/// <inheritdoc/>
-	public ulong AddNode(ReadOnlySpan<byte> bytes)
+	public NodeId AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var hash = HashUtils.ComputeNodeHash(bytes);
-		if (HasNode(hash)) return hash;
+		var nodeId = HashUtils.ComputeNodeHash(bytes);
+		if (HasNode(nodeId)) return nodeId;
 
-		AddNodeWithHashUnsafe(hash, bytes);
-		return hash;
+		AddNodeWithIdUnsafe(nodeId, bytes);
+		return nodeId;
 	}
 
-	/// Adds a new node indexed with the given hash, containing the given bytes.
+	/// Adds a new node indexed with the given id, containing the given bytes.
 	/// <remarks>
-	///     <para>This method is unsafe because the given hash and data might mismatch,
+	///     <para>This method is unsafe because the given id and data might mismatch,
 	///     and because it will blindly add the data to the node data collection
 	///     even if it already exists in the collection.</para>
-	///     <para>When calling this method, ensure the correct hash is given and
+	///     <para>When calling this method, ensure the correct id is given and
 	///     call <see cref="HasNode"/> first to ensure that this is not a duplicate node.</para>
 	/// </remarks>
-	internal void AddNodeWithHashUnsafe(ulong hash, ReadOnlySpan<byte> bytes)
+	internal void AddNodeWithIdUnsafe(NodeId nodeId, ReadOnlySpan<byte> bytes)
 	{
 		var dataSlice = _nodeData.AddSpan(bytes);
-		_nodeIndex.Add(hash, dataSlice);
+		_nodeIndex.Add(nodeId, dataSlice);
 	}
 
 #endregion
 
 #region ISnapshotDataSink Implementation
 
-	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
+	public SnapshotId AddSnapshot(SnapshotId parentSnapshotId, NodeId rootNodeId)
 	{
-		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
-		if (HasSnapshot(hash)) return hash;
+		var snapshotId = HashUtils.ComputeSnapshotHash(parentSnapshotId, rootNodeId);
+		if (HasSnapshot(snapshotId)) return snapshotId;
 
-		AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
-		return hash;
+		AddSnapshotWithIdUnsafe(snapshotId, parentSnapshotId, rootNodeId);
+		return snapshotId;
 	}
 
-	/// <remarks>This method is unsafe because the given hash and data might mismatch.
-	/// When calling this method, ensure the correct hash is given.</remarks>
-	internal void AddSnapshotWithHashUnsafe(ulong hash, ulong parentHash, ulong rootNodeHash)
+	/// <remarks>This method is unsafe because the given id and data might mismatch.
+	/// When calling this method, ensure the correct id is given.</remarks>
+	internal void AddSnapshotWithIdUnsafe(SnapshotId snapshotId, SnapshotId parentSnapshotId, NodeId rootNodeId)
 	{
-		SnapshotData snapshotData = new SnapshotData(parentHash, rootNodeHash);
-		_snapshotIndex.Add(hash, snapshotData);
+		SnapshotData snapshotData = new SnapshotData(parentSnapshotId, rootNodeId);
+		_snapshotIndex.Add(snapshotId, snapshotData);
 
 		// Parent is by definition no longer a leaf node
-		_leafSnapshots.Remove(snapshotData.ParentHash);
+		_leafSnapshots.Remove(snapshotData.ParentSnapshotId);
 		// Newly add snapshot is by definition a leaf node
-		_leafSnapshots.Add(hash);
+		_leafSnapshots.Add(snapshotId);
 	}
 
 #endregion
 
 #region INodeDataSource Implementation
 
-	public bool HasNode(ulong hash) => _nodeIndex.ContainsKey(hash);
+	public bool HasNode(NodeId nodeId) => _nodeIndex.ContainsKey(nodeId);
 
-	public int GetSizeOfNode(ulong hash)
+	public int GetSizeOfNode(NodeId nodeId)
 	{
-		CheckNodeHash(hash);
-		var (_, dataLength) = _nodeIndex[hash].GetOffsetAndLength(_nodeData.Count);
+		EnsureNodePresence(nodeId);
+		var (_, dataLength) = _nodeIndex[nodeId].GetOffsetAndLength(_nodeData.Count);
 		return dataLength;
 	}
 
-	public void CopyNodeBytesTo(ulong hash, Span<byte> outputBytes)
+	public void CopyNodeBytesTo(NodeId nodeId, Span<byte> outputBytes)
 	{
-		CheckNodeHash(hash);
-		_nodeData.CopyTo(_nodeIndex[hash], outputBytes);
+		EnsureNodePresence(nodeId);
+		_nodeData.CopyTo(_nodeIndex[nodeId], outputBytes);
 	}
 
 #endregion
@@ -136,60 +136,60 @@ public class MemoryDataSource : IDataSource
 
 	public int SnapshotCount => _snapshotIndex.Count;
 
-	public bool HasSnapshot(ulong hash) => _snapshotIndex.ContainsKey(hash);
+	public bool HasSnapshot(SnapshotId snapshotId) => _snapshotIndex.ContainsKey(snapshotId);
 
-	public ulong GetSnapshotParent(ulong hash)
+	public SnapshotId GetSnapshotParent(SnapshotId snapshotId)
 	{
-		CheckSnapshotHash(hash);
-		return _snapshotIndex[hash].ParentHash;
+		EnsureSnapshotPresence(snapshotId);
+		return _snapshotIndex[snapshotId].ParentSnapshotId;
 	}
 
-	public ulong GetSnapshotLeastCommonAncestor(ulong hash1, ulong hash2)
+	public SnapshotId GetSnapshotLeastCommonAncestor(SnapshotId id1, SnapshotId id2)
 	{
-		CheckSnapshotHash(hash1);
-		CheckSnapshotHash(hash2);
+		EnsureSnapshotPresence(id1);
+		EnsureSnapshotPresence(id2);
 
-		HashSet<ulong> hash1Ancestors = [];
-		var current = hash1;
-		while (current != 0UL)
+		HashSet<SnapshotId> snapshot1Ancestors = [];
+		var current = id1;
+		while (current != SnapshotId.None)
 		{
-			hash1Ancestors.Add(current);
-			current = _snapshotIndex[current].ParentHash;
+			snapshot1Ancestors.Add(current);
+			current = _snapshotIndex[current].ParentSnapshotId;
 		}
 
-		current = hash2;
-		while (current != 0UL)
+		current = id2;
+		while (current != SnapshotId.None)
 		{
-			if (hash1Ancestors.Contains(current)) return current;
-			current = _snapshotIndex[current].ParentHash;
+			if (snapshot1Ancestors.Contains(current)) return current;
+			current = _snapshotIndex[current].ParentSnapshotId;
 		}
 
 		throw new Exception("Given snapshots don't have a common ancestor");
 	}
 
-	public ulong GetSnapshotRootNode(ulong hash)
+	public NodeId GetSnapshotRootNode(SnapshotId snapshotId)
 	{
-		CheckSnapshotHash(hash);
-		return _snapshotIndex[hash].RootNodeHash;
+		EnsureSnapshotPresence(snapshotId);
+		return _snapshotIndex[snapshotId].RootNodeId;
 	}
 
-	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _leafSnapshots.ToImmutableHashSet();
+	public IReadOnlySet<SnapshotId> GetLeafSnapshotIds() => new ReadOnlySet<SnapshotId>(_leafSnapshots);
 
 #endregion
 
-	private void CheckNodeHash(ulong hash)
+	private void EnsureNodePresence(NodeId nodeId)
 	{
-		if (!HasNode(hash))
+		if (!HasNode(nodeId))
 		{
-			throw new HashNotFoundException($"The data source does not contain a node with the requested hash {hash}");
+			throw new HashNotFoundException($"The data source does not contain a node with the requested hash {nodeId}");
 		}
 	}
 
-	private void CheckSnapshotHash(ulong hash)
+	private void EnsureSnapshotPresence(SnapshotId snapshotId)
 	{
-		if (!HasSnapshot(hash))
+		if (!HasSnapshot(snapshotId))
 		{
-			throw new HashNotFoundException($"The data source does not contain a snapshot with the requested hash {hash}");
+			throw new HashNotFoundException($"The data source does not contain a snapshot with the requested hash {snapshotId}");
 		}
 	}
 }

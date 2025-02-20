@@ -18,17 +18,15 @@ internal class WhiteBlackPairSerializer<T>(IPandoSerializer<T> tSerializer) : IP
 		tSerializer.Serialize(value.WhiteValue, childrenBuffer[..tSize], dataSink);
 		tSerializer.Serialize(value.BlackValue, childrenBuffer[tSize..totalSize], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public WhiteBlackPair<T> Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
 	{
-		var nodeHash = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
 		var tSize = tSerializer.SerializedSize;
 		var totalSize = tSize * 2;
 		Span<byte> childrenBuffer = stackalloc byte[totalSize];
-		dataSource.CopyNodeBytesTo(nodeHash, childrenBuffer);
+		dataSource.CopyNodeBytesTo(buffer, childrenBuffer);
 
 		var whiteValue = tSerializer.Deserialize(childrenBuffer[..tSize], dataSource);
 		var blackValue = tSerializer.Deserialize(childrenBuffer[tSize..totalSize], dataSource);

@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using Pando.DataSources;
+using Pando.DataSources.Utils;
 using Pando.Serialization.Utils;
 
 namespace Pando.Serialization.Generic;
@@ -11,7 +12,7 @@ namespace Pando.Serialization.Generic;
 public class GenericNodeSerializer<TNode, T1> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 
@@ -34,8 +35,7 @@ public class GenericNodeSerializer<TNode, T1> : IPandoSerializer<TNode>
 		value.Deconstruct(out var t1);
 		_t1Serializer.Serialize(t1, childrenBuffer[_t0EndOffset.._t1EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -77,7 +77,7 @@ public class GenericNodeSerializer<TNode, T1> : IPandoSerializer<TNode>
 public class GenericNodeSerializer<TNode, T1, T2> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -106,8 +106,7 @@ public class GenericNodeSerializer<TNode, T1, T2> : IPandoSerializer<TNode>
 		_t1Serializer.Serialize(t1, childrenBuffer[_t0EndOffset.._t1EndOffset], dataSink);
 		_t2Serializer.Serialize(t2, childrenBuffer[_t1EndOffset.._t2EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -151,7 +150,7 @@ public class GenericNodeSerializer<TNode, T1, T2> : IPandoSerializer<TNode>
 public class GenericNodeSerializer<TNode, T1, T2, T3> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -186,8 +185,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3> : IPandoSerializer<TNode>
 		_t2Serializer.Serialize(t2, childrenBuffer[_t1EndOffset.._t2EndOffset], dataSink);
 		_t3Serializer.Serialize(t3, childrenBuffer[_t2EndOffset.._t3EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -233,7 +231,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3> : IPandoSerializer<TNode>
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -274,8 +272,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4> : IPandoSerializer<TNo
 		_t3Serializer.Serialize(t3, childrenBuffer[_t2EndOffset.._t3EndOffset], dataSink);
 		_t4Serializer.Serialize(t4, childrenBuffer[_t3EndOffset.._t4EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -323,7 +320,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4> : IPandoSerializer<TNo
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -370,8 +367,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5> : IPandoSerializer
 		_t4Serializer.Serialize(t4, childrenBuffer[_t3EndOffset.._t4EndOffset], dataSink);
 		_t5Serializer.Serialize(t5, childrenBuffer[_t4EndOffset.._t5EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -421,7 +417,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5> : IPandoSerializer
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -474,8 +470,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6> : IPandoSerial
 		_t5Serializer.Serialize(t5, childrenBuffer[_t4EndOffset.._t5EndOffset], dataSink);
 		_t6Serializer.Serialize(t6, childrenBuffer[_t5EndOffset.._t6EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -527,7 +522,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6> : IPandoSerial
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -586,8 +581,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7> : IPandoSe
 		_t6Serializer.Serialize(t6, childrenBuffer[_t5EndOffset.._t6EndOffset], dataSink);
 		_t7Serializer.Serialize(t7, childrenBuffer[_t6EndOffset.._t7EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -641,7 +635,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7> : IPandoSe
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -706,8 +700,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8> : IPan
 		_t7Serializer.Serialize(t7, childrenBuffer[_t6EndOffset.._t7EndOffset], dataSink);
 		_t8Serializer.Serialize(t8, childrenBuffer[_t7EndOffset.._t8EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -763,7 +756,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8> : IPan
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -834,8 +827,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9> : 
 		_t8Serializer.Serialize(t8, childrenBuffer[_t7EndOffset.._t8EndOffset], dataSink);
 		_t9Serializer.Serialize(t9, childrenBuffer[_t8EndOffset.._t9EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -893,7 +885,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9> : 
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -970,8 +962,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 		_t9Serializer.Serialize(t9, childrenBuffer[_t8EndOffset.._t9EndOffset], dataSink);
 		_t10Serializer.Serialize(t10, childrenBuffer[_t9EndOffset.._t10EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -1031,7 +1022,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -1114,8 +1105,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 		_t10Serializer.Serialize(t10, childrenBuffer[_t9EndOffset.._t10EndOffset], dataSink);
 		_t11Serializer.Serialize(t11, childrenBuffer[_t10EndOffset.._t11EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -1177,7 +1167,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -1266,8 +1256,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 		_t11Serializer.Serialize(t11, childrenBuffer[_t10EndOffset.._t11EndOffset], dataSink);
 		_t12Serializer.Serialize(t12, childrenBuffer[_t11EndOffset.._t12EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -1331,7 +1320,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -1426,8 +1415,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 		_t12Serializer.Serialize(t12, childrenBuffer[_t11EndOffset.._t12EndOffset], dataSink);
 		_t13Serializer.Serialize(t13, childrenBuffer[_t12EndOffset.._t13EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -1493,7 +1481,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -1594,8 +1582,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 		_t13Serializer.Serialize(t13, childrenBuffer[_t12EndOffset.._t13EndOffset], dataSink);
 		_t14Serializer.Serialize(t14, childrenBuffer[_t13EndOffset.._t14EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -1663,7 +1650,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -1770,8 +1757,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 		_t14Serializer.Serialize(t14, childrenBuffer[_t13EndOffset.._t14EndOffset], dataSink);
 		_t15Serializer.Serialize(t15, childrenBuffer[_t14EndOffset.._t15EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
@@ -1841,7 +1827,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16> : IPandoSerializer<TNode>
 	where TNode : IGenericSerializable<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>
 {
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	private readonly IPandoSerializer<T1> _t1Serializer;
 	private readonly IPandoSerializer<T2> _t2Serializer;
@@ -1954,8 +1940,7 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 		_t15Serializer.Serialize(t15, childrenBuffer[_t14EndOffset.._t15EndOffset], dataSink);
 		_t16Serializer.Serialize(t16, childrenBuffer[_t15EndOffset.._t16EndOffset], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)

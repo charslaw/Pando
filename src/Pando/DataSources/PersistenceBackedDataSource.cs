@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using Pando.DataSources.Utils;
 
@@ -15,39 +16,39 @@ public class PersistenceBackedDataSource : IDataSource, IDisposable
 		_persistentDataSource = persistentDataSource;
 	}
 
-	public ulong AddNode(ReadOnlySpan<byte> bytes)
+	public NodeId AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var hash = HashUtils.ComputeNodeHash(bytes);
+		var nodeId = HashUtils.ComputeNodeHash(bytes);
 
-		if (_mainDataSource.HasNode(hash)) return hash;
+		if (_mainDataSource.HasNode(nodeId)) return nodeId;
 
-		_mainDataSource.AddNodeWithHashUnsafe(hash, bytes);
-		_persistentDataSource.AddNodeWithHashUnsafe(hash, bytes);
-		return hash;
+		_mainDataSource.AddNodeWithIdUnsafe(nodeId, bytes);
+		_persistentDataSource.AddNodeWithHashUnsafe(nodeId, bytes);
+		return nodeId;
 	}
 
-	public ulong AddSnapshot(ulong parentHash, ulong rootNodeHash)
+	public SnapshotId AddSnapshot(SnapshotId parentSnapshotId, NodeId rootNodeId)
 	{
-		var hash = HashUtils.ComputeSnapshotHash(parentHash, rootNodeHash);
+		var snapshotId = HashUtils.ComputeSnapshotHash(parentSnapshotId, rootNodeId);
 
-		if (_mainDataSource.HasSnapshot(hash)) return hash;
+		if (_mainDataSource.HasSnapshot(snapshotId)) return snapshotId;
 
-		_mainDataSource.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
-		_persistentDataSource.AddSnapshotWithHashUnsafe(hash, parentHash, rootNodeHash);
-		return hash;
+		_mainDataSource.AddSnapshotWithIdUnsafe(snapshotId, parentSnapshotId, rootNodeId);
+		_persistentDataSource.AddSnapshotWithHashUnsafe(snapshotId, parentSnapshotId, rootNodeId);
+		return snapshotId;
 	}
 
-	public bool HasNode(ulong hash) => _mainDataSource.HasNode(hash);
-	public int GetSizeOfNode(ulong hash) => _mainDataSource.GetSizeOfNode(hash);
-	public void CopyNodeBytesTo(ulong hash, Span<byte> outputBytes) => _mainDataSource.CopyNodeBytesTo(hash, outputBytes);
+	public bool HasNode(NodeId nodeId) => _mainDataSource.HasNode(nodeId);
+	public int GetSizeOfNode(NodeId nodeId) => _mainDataSource.GetSizeOfNode(nodeId);
+	public void CopyNodeBytesTo(NodeId nodeId, Span<byte> outputBytes) => _mainDataSource.CopyNodeBytesTo(nodeId, outputBytes);
 
-	public bool HasSnapshot(ulong hash) => _mainDataSource.HasSnapshot(hash);
+	public bool HasSnapshot(SnapshotId snapshotId) => _mainDataSource.HasSnapshot(snapshotId);
 	public int SnapshotCount => _mainDataSource.SnapshotCount;
-	public ulong GetSnapshotParent(ulong hash) => _mainDataSource.GetSnapshotParent(hash);
-	public ulong GetSnapshotLeastCommonAncestor(ulong hash1, ulong hash2) => _mainDataSource.GetSnapshotLeastCommonAncestor(hash1, hash2);
+	public SnapshotId GetSnapshotParent(SnapshotId snapshotId) => _mainDataSource.GetSnapshotParent(snapshotId);
+	public SnapshotId GetSnapshotLeastCommonAncestor(SnapshotId id1, SnapshotId id2) => _mainDataSource.GetSnapshotLeastCommonAncestor(id1, id2);
 
-	public ulong GetSnapshotRootNode(ulong hash) => _mainDataSource.GetSnapshotRootNode(hash);
-	public IImmutableSet<ulong> GetLeafSnapshotHashes() => _mainDataSource.GetLeafSnapshotHashes();
+	public NodeId GetSnapshotRootNode(SnapshotId snapshotId) => _mainDataSource.GetSnapshotRootNode(snapshotId);
+	public IReadOnlySet<SnapshotId> GetLeafSnapshotIds() => _mainDataSource.GetLeafSnapshotIds();
 
 	public void Dispose() => _persistentDataSource.Dispose();
 }

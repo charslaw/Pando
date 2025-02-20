@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using System.Text;
 using Pando.DataSources;
+using Pando.DataSources.Utils;
 
 namespace Pando.Serialization.Collections;
 
@@ -14,7 +15,7 @@ public class StringSerializer(Encoding encoding) : IPandoSerializer<string>
 	/// A default serializer for strings that uses the ASCII encoding.
 	public static StringSerializer ASCII { get; } = new(Encoding.ASCII);
 
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	public void Serialize(string value, Span<byte> buffer, INodeDataSink dataSink)
 	{
@@ -22,16 +23,14 @@ public class StringSerializer(Encoding encoding) : IPandoSerializer<string>
 		Span<byte> elementBytes = stackalloc byte[bytesSize];
 		encoding.GetBytes(value, elementBytes);
 
-		var nodeHash = dataSink.AddNode(elementBytes);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(elementBytes, buffer);
 	}
 
 	public string Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
 	{
-		var nodeHash = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
-		var nodeDataSize = dataSource.GetSizeOfNode(nodeHash);
+		var nodeDataSize = dataSource.GetSizeOfNode(buffer);
 		Span<byte> elementBytes = stackalloc byte[nodeDataSize];
-		dataSource.CopyNodeBytesTo(nodeHash, elementBytes);
+		dataSource.CopyNodeBytesTo(buffer, elementBytes);
 		return encoding.GetString(elementBytes);
 	}
 }

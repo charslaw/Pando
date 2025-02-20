@@ -49,7 +49,7 @@ public class SaveSnapshot
 		);
 		var tree2 = tree with { };
 
-		var nodeIndex = new Dictionary<ulong, Range>();
+		var nodeIndex = new Dictionary<NodeId, Range>();
 		var nodeData = new SpannableList<byte>();
 		var repository = new PandoRepository<TestTree>(
 			new MemoryDataSource(nodeIndex: nodeIndex, nodeData: nodeData),
@@ -80,7 +80,7 @@ public class SaveSnapshot
 			TestTree.GenericSerializer()
 		);
 
-		repository.Invoking(repo => repo.SaveSnapshot(tree1, 0UL))
+		repository.Invoking(repo => repo.SaveSnapshot(tree1, SnapshotId.None))
 			.Should()
 			.Throw<HashNotFoundException>();
 

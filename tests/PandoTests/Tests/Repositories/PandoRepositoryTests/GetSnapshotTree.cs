@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using System.IO;
 using FluentAssertions;
 using Pando.DataSources;
+using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
 using PandoTests.Tests.Repositories.TestStateTrees;
@@ -140,7 +141,7 @@ public class GetSnapshotTree
 
 	/// Simulate adding snapshots to the data source in a previous session, then reconstitute a new data source from the persisted data
 	/// This is used to test that a Pando repository will work properly when used with a data source that already has data.
-	private static (IDataSource source, ulong rootHash, ulong child1Hash, ulong child2Hash, ulong grandChildHash) PrepopulatedDataSource()
+	private static (IDataSource source, SnapshotId rootHash, SnapshotId child1Hash, SnapshotId child2Hash, SnapshotId grandChildHash) PrepopulatedDataSource()
 	{
 		// Assemble "previous session" data
 		var snapshotIndex = new MemoryStream();

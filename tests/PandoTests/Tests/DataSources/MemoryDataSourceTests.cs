@@ -22,7 +22,7 @@ public class MemoryDataSourceTests
 			var nodeData = new byte[] { 0, 1, 2, 3 };
 
 			// Arrange
-			var nodeIndex = new Dictionary<ulong, Range>();
+			var nodeIndex = new Dictionary<NodeId, Range>();
 			var nodeDataList = new SpannableList<byte>();
 			var dataSource = new MemoryDataSource(
 				nodeIndex: nodeIndex,
@@ -86,16 +86,15 @@ public class MemoryDataSourceTests
 		{
 			// Test Data
 			var nodeData = new byte[] { 0, 1, 2, 3 };
-			var hash = xxHash64.ComputeHash(nodeData);
+			var nodeId = HashUtils.ComputeNodeHash(nodeData);
 
 			// Arrange
 			var dataSource = new MemoryDataSource();
 			dataSource.AddNode(nodeData.CreateCopy());
 
 			// Act
-			Span<byte> actualBuffer = stackalloc byte[4];
-			dataSource.CopyNodeBytesTo(hash, actualBuffer);
-			var actual = actualBuffer.ToArray();
+			var actual = new byte[4];
+			dataSource.CopyNodeBytesTo(nodeId, actual);
 
 			// Assert
 			actual.Should().Equal(nodeData);
@@ -108,7 +107,7 @@ public class MemoryDataSourceTests
 			var nodeData1 = new byte[] { 0, 1, 2, 3 };
 			var nodeData2 = new byte[] { 4, 5, 6, 7 };
 			var nodeData3 = new byte[] { 8, 9, 10, 11 };
-			var node2Hash = xxHash64.ComputeHash(nodeData2);
+			var node2Id = HashUtils.ComputeNodeHash(nodeData2);
 
 			// Arrange
 			var dataSource = new MemoryDataSource();
@@ -117,9 +116,8 @@ public class MemoryDataSourceTests
 			dataSource.AddNode(nodeData3.CreateCopy());
 
 			// Act
-			Span<byte> actualBuffer = stackalloc byte[4];
-			dataSource.CopyNodeBytesTo(node2Hash, actualBuffer);
-			var actual = actualBuffer.ToArray();
+			var actual = new byte[4];
+			dataSource.CopyNodeBytesTo(node2Id, actual);
 
 			// Assert
 			actual.Should().Equal(nodeData2);
@@ -132,10 +130,10 @@ public class MemoryDataSourceTests
 			var dataSource = new MemoryDataSource();
 
 			// Assert
-			dataSource.Invoking(ts =>
+			dataSource.Invoking(source =>
 					{
 						Span<byte> buffer = stackalloc byte[0];
-						ts.CopyNodeBytesTo(0, buffer);
+						source.CopyNodeBytesTo(NodeId.None, buffer);
 					}
 				)
 				.Should()
@@ -149,15 +147,15 @@ public class MemoryDataSourceTests
 		public void Should_add_to_snapshot_index()
 		{
 			// Test Data
-			ulong parentHash = 1;
-			ulong rootNodeHash = 2;
+			var parentSnapshotId = new SnapshotId(1);
+			var rootNodeId = new NodeId(2);
 
 			// Arrange
-			var snapshotIndex = new Dictionary<ulong, SnapshotData>();
+			var snapshotIndex = new Dictionary<SnapshotId, SnapshotData>();
 			var dataSource = new MemoryDataSource(snapshotIndex: snapshotIndex);
 
 			// Act
-			dataSource.AddSnapshot(parentHash, rootNodeHash);
+			dataSource.AddSnapshot(parentSnapshotId, rootNodeId);
 
 			// Assert
 			snapshotIndex.Count.Should().Be(1);
@@ -167,8 +165,8 @@ public class MemoryDataSourceTests
 		public void Should_not_throw_on_duplicate_snapshot()
 		{
 			// Test Data
-			ulong parentHash = 1;
-			ulong rootNodeHash = 2;
+			var parentSnapshotId = new SnapshotId(1);
+			var rootNodeId = new NodeId(2);
 
 			// Arrange
 			var dataSource = new MemoryDataSource();
@@ -176,8 +174,8 @@ public class MemoryDataSourceTests
 			// Assert
 			dataSource.Invoking(source =>
 					{
-						source.AddSnapshot(parentHash, rootNodeHash);
-						source.AddSnapshot(parentHash, rootNodeHash);
+						source.AddSnapshot(parentSnapshotId, rootNodeId);
+						source.AddSnapshot(parentSnapshotId, rootNodeId);
 					}
 				)
 				.Should()
@@ -191,17 +189,17 @@ public class MemoryDataSourceTests
 		public void Should_return_correct_parent_snapshot_hash()
 		{
 			// Test Data
-			ulong parentHash = 1;
-			ulong rootNodeHash = 2;
+			var parentSnapshotId = new SnapshotId(1);
+			var rootNodeId = new NodeId(2);
 
 			// Arrange
 			var dataSource = new MemoryDataSource();
 
 			// Act
-			var hash = dataSource.AddSnapshot(parentHash, rootNodeHash);
+			var snapshotId = dataSource.AddSnapshot(parentSnapshotId, rootNodeId);
 
 			// Assert
-			dataSource.GetSnapshotParent(hash).Should().Be(1UL);
+			dataSource.GetSnapshotParent(snapshotId).Should().Be(new SnapshotId(1));
 		}
 
 		[Fact]
@@ -211,7 +209,7 @@ public class MemoryDataSourceTests
 			var dataSource = new MemoryDataSource();
 
 			// Assert
-			dataSource.Invoking(ts => ts.GetSnapshotParent(0))
+			dataSource.Invoking(ts => ts.GetSnapshotParent(SnapshotId.None))
 				.Should()
 				.Throw<HashNotFoundException>();
 		}
@@ -224,15 +222,15 @@ public class MemoryDataSourceTests
 		{
 			var dataSource = new MemoryDataSource();
 
-			var rootHash = dataSource.AddSnapshot(0, 1);
-			var childHash = dataSource.AddSnapshot(rootHash, 1);
-			var branch1Hash = dataSource.AddSnapshot(childHash, 1);
-			var branch2AHash = dataSource.AddSnapshot(childHash, 2);
-			var branch2BHash = dataSource.AddSnapshot(branch2AHash, 1);
+			var rootId = dataSource.AddSnapshot(new SnapshotId(0), new NodeId(1));
+			var childId = dataSource.AddSnapshot(rootId, new NodeId(1));
+			var branch1Id = dataSource.AddSnapshot(childId, new NodeId(1));
+			var branch2AId = dataSource.AddSnapshot(childId, new NodeId(2));
+			var branch2BId = dataSource.AddSnapshot(branch2AId, new NodeId(1));
 
-			var lca = dataSource.GetSnapshotLeastCommonAncestor(branch1Hash, branch2BHash);
+			var lca = dataSource.GetSnapshotLeastCommonAncestor(branch1Id, branch2BId);
 
-			lca.Should().Be(childHash);
+			lca.Should().Be(childId);
 		}
 	}
 
@@ -242,17 +240,17 @@ public class MemoryDataSourceTests
 		public void Should_return_correct_root_node_hash()
 		{
 			// Test Data
-			ulong parentHash = 1;
-			ulong rootNodeHash = 2;
+			var parentSnapshotId = new SnapshotId(1);
+			var rootNodeId = new NodeId(2);
 
 			// Arrange
 			var dataSource = new MemoryDataSource();
 
 			// Act
-			var hash = dataSource.AddSnapshot(parentHash, rootNodeHash);
+			var snapshotId = dataSource.AddSnapshot(parentSnapshotId, rootNodeId);
 
 			// Assert
-			dataSource.GetSnapshotRootNode(hash).Should().Be(2UL);
+			dataSource.GetSnapshotRootNode(snapshotId).Should().Be(new NodeId(2));
 		}
 
 		[Fact]
@@ -262,7 +260,7 @@ public class MemoryDataSourceTests
 			var dataSource = new MemoryDataSource();
 
 			// Assert
-			dataSource.Invoking(ts => ts.GetSnapshotRootNode(0))
+			dataSource.Invoking(ts => ts.GetSnapshotRootNode(SnapshotId.None))
 				.Should()
 				.Throw<HashNotFoundException>();
 		}
@@ -277,10 +275,10 @@ public class MemoryDataSourceTests
 			var dataSource = new MemoryDataSource();
 
 			// Act
-			var snapshotHash = dataSource.AddSnapshot(0, 2);
+			var snapshotHash = dataSource.AddSnapshot(SnapshotId.None, new NodeId(2));
 
 			// Assert
-			dataSource.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { snapshotHash });
+			dataSource.GetLeafSnapshotIds().Should().BeEquivalentTo(new[] { snapshotHash });
 		}
 
 		[Fact]
@@ -290,11 +288,11 @@ public class MemoryDataSourceTests
 			var dataSource = new MemoryDataSource();
 
 			// Act
-			var rootHash = dataSource.AddSnapshot(0, 2);
-			var childHash = dataSource.AddSnapshot(rootHash, 3);
+			var rootId = dataSource.AddSnapshot(SnapshotId.None, new NodeId(2));
+			var childId = dataSource.AddSnapshot(rootId, new NodeId(3));
 
 			// Assert
-			dataSource.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { childHash });
+			dataSource.GetLeafSnapshotIds().Should().BeEquivalentTo(new[] { childId });
 		}
 
 		[Fact]
@@ -304,12 +302,12 @@ public class MemoryDataSourceTests
 			var dataSource = new MemoryDataSource();
 
 			// Act
-			var rootHash = dataSource.AddSnapshot(0, 2);
-			var childHash1 = dataSource.AddSnapshot(rootHash, 3);
-			var childHash2 = dataSource.AddSnapshot(rootHash, 4);
+			var rootId = dataSource.AddSnapshot(SnapshotId.None, new NodeId(2));
+			var child1Id = dataSource.AddSnapshot(rootId, new NodeId(3));
+			var child2Id = dataSource.AddSnapshot(rootId, new NodeId(4));
 
 			// Assert
-			dataSource.GetLeafSnapshotHashes().Should().BeEquivalentTo(new[] { childHash1, childHash2 });
+			dataSource.GetLeafSnapshotIds().Should().BeEquivalentTo(new[] { child1Id, child2Id });
 		}
 	}
 
@@ -319,8 +317,9 @@ public class MemoryDataSourceTests
 		public void Should_initialize_data_source_with_node()
 		{
 			// Test Data
-			var nodeHash = 123UL;
-			var nodeIndex = ArrayX.Concat(ByteEncoder.GetBytes(nodeHash), new byte[8]);
+			var nodeId = new NodeId(123);
+			var nodeIndex = new byte[16];
+			nodeId.CopyTo(nodeIndex.AsSpan()[..8]);
 
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndex.CreateCopy());
@@ -332,23 +331,23 @@ public class MemoryDataSourceTests
 			);
 
 			// Assert
-			dataSource.HasNode(nodeHash).Should().BeTrue();
+			dataSource.HasNode(nodeId).Should().BeTrue();
 		}
 
 		[Fact]
 		public void Should_initialize_data_source_with_correct_node_data()
 		{
 			// Test Data
-			var hash1 = 0123UL;
-			var hash2 = 4567UL;
-			var nodeIndexEntry = ArrayX.Concat(
-				ByteEncoder.GetBytes(hash1),
-				ByteEncoder.GetBytes(0),
-				ByteEncoder.GetBytes(4),
-				ByteEncoder.GetBytes(hash2),
-				ByteEncoder.GetBytes(4),
-				ByteEncoder.GetBytes(8)
-			);
+			var id1 = new NodeId(0123);
+			var id2 = new NodeId(4567);
+			byte[] nodeIndexEntry = [
+				..id1.ToByteArray(),
+				..ByteEncoder.GetBytes(0),
+				..ByteEncoder.GetBytes(4),
+				..id2.ToByteArray(),
+				..ByteEncoder.GetBytes(4),
+				..ByteEncoder.GetBytes(8)
+			];
 
 			// Arrange/Act
 			var nodeIndexStream = new MemoryStream(nodeIndexEntry);
@@ -362,8 +361,8 @@ public class MemoryDataSourceTests
 
 			// Assert
 			byte[] actualBuffer = new byte[8];
-			dataSource.CopyNodeBytesTo(hash1, actualBuffer.AsSpan()[..4]);
-			dataSource.CopyNodeBytesTo(hash2, actualBuffer.AsSpan()[4..]);
+			dataSource.CopyNodeBytesTo(id1, actualBuffer.AsSpan()[..4]);
+			dataSource.CopyNodeBytesTo(id2, actualBuffer.AsSpan()[4..]);
 			byte[] expected = [0, 1, 2, 3, 4, 5, 6, 7];
 			actualBuffer.Should().Equal(expected);
 		}
@@ -372,8 +371,9 @@ public class MemoryDataSourceTests
 		public void Should_initialize_data_source_with_snapshot()
 		{
 			// Test Data
-			var hash = 123UL;
-			var snapshotIndex = ArrayX.Concat(ByteEncoder.GetBytes(hash), new byte[16]);
+			var snapshotId = new SnapshotId(123);
+			var snapshotIndex = new byte[24];
+			snapshotId.CopyTo(snapshotIndex.AsSpan()[..8]);
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndex);
@@ -385,21 +385,17 @@ public class MemoryDataSourceTests
 			);
 
 			// Assert
-			dataSource.HasSnapshot(hash).Should().BeTrue();
+			dataSource.HasSnapshot(snapshotId).Should().BeTrue();
 		}
 
 		[Fact]
 		public void Should_initialize_data_source_with_correct_snapshot_data()
 		{
 			// Test Data
-			var hash = 123UL;
-			var parentHash = 5UL;
-			var rootNodeHash = 42UL;
-			var snapshotIndexEntry = ArrayX.Concat(
-				ByteEncoder.GetBytes(hash),
-				ByteEncoder.GetBytes(parentHash),
-				ByteEncoder.GetBytes(rootNodeHash)
-			);
+			var snapshotId = new SnapshotId(123);
+			var parentSnapshotId = new SnapshotId(5);
+			var rootNodeId = new NodeId(42);
+			byte[] snapshotIndexEntry = [..snapshotId.ToByteArray(), ..parentSnapshotId.ToByteArray(), ..rootNodeId.ToByteArray()];
 
 			// Arrange/Act
 			var snapshotIndexStream = new MemoryStream(snapshotIndexEntry.CreateCopy());
@@ -411,10 +407,10 @@ public class MemoryDataSourceTests
 			);
 
 			// Assert
-			var actualParentHash = dataSource.GetSnapshotParent(hash);
-			var actualRootNodeHash = dataSource.GetSnapshotRootNode(hash);
-			actualParentHash.Should().Be(parentHash);
-			actualRootNodeHash.Should().Be(rootNodeHash);
+			var actualParentHash = dataSource.GetSnapshotParent(snapshotId);
+			var actualRootNodeHash = dataSource.GetSnapshotRootNode(snapshotId);
+			actualParentHash.Should().Be(parentSnapshotId);
+			actualRootNodeHash.Should().Be(rootNodeId);
 		}
 
 		[Fact]
@@ -423,7 +419,7 @@ public class MemoryDataSourceTests
 			var nodeDataStream = new MemoryStream(8);
 			nodeDataStream.Write(new byte[] { 1, 2, 3 });
 			var nodeDataList = new SpannableList<byte>();
-			var _ = new MemoryDataSource(
+			_ = new MemoryDataSource(
 				snapshotIndexSource: Stream.Null,
 				leafSnapshotsSource: Stream.Null,
 				nodeIndexSource: Stream.Null,

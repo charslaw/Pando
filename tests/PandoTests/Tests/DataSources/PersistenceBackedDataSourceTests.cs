@@ -1,6 +1,7 @@
 using System.IO;
 using FluentAssertions;
 using Pando.DataSources;
+using Pando.DataSources.Utils;
 using PandoTests.Utils;
 using Xunit;
 
@@ -49,9 +50,9 @@ public class PersistenceBackedDataSourceTests
 		public void Should_not_output_duplicate_snapshot_to_stream_data_source()
 		{
 			// Test Data
-			var parentHash = 5UL;
-			var rootNodeHash = 27UL;
-			var expectedIndexLength = sizeof(ulong) * 3;
+			var parentSnapshotId = new SnapshotId(5);
+			var rootNodeId = new NodeId(27);
+			var expectedIndexLength = SnapshotId.SIZE + SnapshotId.SIZE + NodeId.SIZE;
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
@@ -65,8 +66,8 @@ public class PersistenceBackedDataSourceTests
 			var dataSource = new PersistenceBackedDataSource(memoryDataSource, streamSource);
 
 			// Act
-			dataSource.AddSnapshot(parentHash, rootNodeHash);
-			dataSource.AddSnapshot(parentHash, rootNodeHash);
+			dataSource.AddSnapshot(parentSnapshotId, rootNodeId);
+			dataSource.AddSnapshot(parentSnapshotId, rootNodeId);
 
 			// Assert
 			var actualIndex = snapshotIndexStream.ToArray();

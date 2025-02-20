@@ -37,8 +37,7 @@ internal class ChessStateTreeSerializer(
 		remainingTimeSerializer.Serialize(whiteBlackPair, childrenBuffer[remainingTimeStart..playerPiecesStart], dataSink);
 		playerPiecesSerializer.Serialize(playerPieces, childrenBuffer[playerPiecesStart..childrenSize], dataSink);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataSink.AddNode(childrenBuffer, buffer);
 	}
 
 	/// <param name="buffer">The raw byte data of this branch node</param>
@@ -46,10 +45,9 @@ internal class ChessStateTreeSerializer(
 	public ChessGameState Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
 	{
 		// load node data into buffer
-		var nodeHash = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
-		var nodeDataSize = dataSource.GetSizeOfNode(nodeHash);
+		var nodeDataSize = dataSource.GetSizeOfNode(buffer);
 		Span<byte> childrenBuffer = stackalloc byte[nodeDataSize];
-		dataSource.CopyNodeBytesTo(nodeHash, childrenBuffer);
+		dataSource.CopyNodeBytesTo(buffer, childrenBuffer);
 
 		var remainingTimeStart = playerStateSerializer.SerializedSize;
 		var playerPiecesStart = remainingTimeStart + remainingTimeSerializer.SerializedSize;

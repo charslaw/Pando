@@ -23,6 +23,7 @@ command.SetHandler((filename, maxChildren) =>
 	writer.WriteLine("using System;");
 	writer.WriteLine("using System.Buffers.Binary;");
 	writer.WriteLine("using Pando.DataSources;");
+	writer.WriteLine("using Pando.DataSources.Utils;");
 	writer.WriteLine("using Pando.Serialization.Utils;");
 	writer.WriteLineNoTabs(null);
 	writer.WriteLine("namespace Pando.Serialization.Generic;");
@@ -54,7 +55,7 @@ command.SetHandler((filename, maxChildren) =>
 			() =>
 			{
 				// SerializedSize impl
-				writer.WriteLine("public int SerializedSize => sizeof(ulong);");
+				writer.WriteLine("public int SerializedSize => NodeId.SIZE;");
 				writer.WriteLineNoTabs(null);
 
 				// child serializers
@@ -85,7 +86,6 @@ command.SetHandler((filename, maxChildren) =>
 						writer.WriteLineNoTabs(null);
 
 						// assign offsets
-						// writer.WriteLine($"{offsetVar(1)} = {serializerField(1)}.SerializedSize;");
 						for (int i = 1; i <= children; i++) writer.WriteLine($"{offsetVar(i)} = {offsetVar(i - 1)} + {serializerField(i)}.SerializedSize;");
 					}
 				);
@@ -98,12 +98,10 @@ command.SetHandler((filename, maxChildren) =>
 						writer.WriteLineNoTabs(null);
 						writer.WriteLine($"value.Deconstruct({string.Join(", ", range.Select(i => "out var t" + i))});");
 
-						// writer.WriteLine($"{serializerField(1)}.Serialize(t1, childrenBuffer[..{offsetVar(1)}], dataSink);");
 						for (int i = 1; i <= children; i++) writer.WriteLine($"{serializerField(i)}.Serialize(t{i}, childrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], dataSink);");
 						writer.WriteLineNoTabs(null);
 
-						writer.WriteLine("var nodeHash = dataSink.AddNode(childrenBuffer);");
-						writer.WriteLine("BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);");
+						writer.WriteLine("dataSink.AddNode(childrenBuffer, buffer);");
 					}
 				);
 
@@ -116,7 +114,6 @@ command.SetHandler((filename, maxChildren) =>
 						writer.WriteLine("dataSource.CopyNodeBytesTo(buffer, childrenBuffer);");
 						writer.WriteLineNoTabs(null);
 
-						// writer.WriteLine($"var t1 = {serializerField(1)}.Deserialize(childrenBuffer[..{offsetVar(1)}], dataSource);");
 						for (int i = 1; i <= children; i++) writer.WriteLine($"var t{i} = {serializerField(i)}.Deserialize(childrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], dataSource);");
 						writer.WriteLineNoTabs(null);
 

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
@@ -29,19 +30,20 @@ public class StreamDataSourceTests
 			dataSource.AddNode([5, 6, 7]);
 			dataSource.AddNode([8, 9, 10, 11, 12]);
 
-			var expected = ArrayX.Concat(
-				ByteEncoder.GetBytes(HashUtils.ComputeNodeHash([1, 2, 3, 4])),
-				ByteEncoder.GetBytes(0),
-				ByteEncoder.GetBytes(4),
+			byte[] expected =
+			[
+				..HashUtils.ComputeNodeHash([1, 2, 3, 4]).ToByteArray(),
+				..ByteEncoder.GetBytes(0),
+				..ByteEncoder.GetBytes(4),
 
-				ByteEncoder.GetBytes(HashUtils.ComputeNodeHash([5, 6, 7])),
-				ByteEncoder.GetBytes(4),
-				ByteEncoder.GetBytes(7),
+				..HashUtils.ComputeNodeHash([5, 6, 7]).ToByteArray(),
+				..ByteEncoder.GetBytes(4),
+				..ByteEncoder.GetBytes(7),
 
-				ByteEncoder.GetBytes(HashUtils.ComputeNodeHash([8, 9, 10, 11, 12])),
-				ByteEncoder.GetBytes(7),
-				ByteEncoder.GetBytes(12)
-			);
+				..HashUtils.ComputeNodeHash([8, 9, 10, 11, 12]).ToByteArray(),
+				..ByteEncoder.GetBytes(7),
+				..ByteEncoder.GetBytes(12)
+			];
 
 			nodeIndexStream.ToArray().Should().Equal(expected);
 		}
@@ -73,12 +75,6 @@ public class StreamDataSourceTests
 		{
 			// Test Data
 			ulong rootNodeHash = 0xFF_AA_00_BB_FF_CC_00_DD;
-			var expectedIndex = new byte[]
-			{
-				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // parent hash
-				0xDD, 0x00, 0xCC, 0xFF, 0xBB, 0x00, 0xAA, 0xFF  // root node hash
-			};
-			var expectedHash = xxHash64.ComputeHash(expectedIndex);
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
@@ -90,14 +86,22 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			dataSource.AddSnapshot(0, rootNodeHash);
+			dataSource.AddSnapshot(SnapshotId.None, new NodeId(rootNodeHash));
 
 			// Assert
 			var snapshotIndex = snapshotIndexStream.ToArray();
-			var actualHash = ByteEncoder.GetUInt64(snapshotIndex);
+			var actualSnapshotId = BinaryPrimitives.ReadUInt64LittleEndian(snapshotIndex);
 			var actualIndex = snapshotIndex[8..];
-			actualIndex.Should().Equal(expectedIndex);
-			actualHash.Should().Be(expectedHash);
+
+			var expectedSnapshotIndex = new byte[]
+			{
+				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // parent hash
+				0xDD, 0x00, 0xCC, 0xFF, 0xBB, 0x00, 0xAA, 0xFF  // root node hash
+			};
+			ulong expectedSnapshotId = xxHash64.ComputeHash(expectedSnapshotIndex);
+
+			actualIndex.Should().Equal(expectedSnapshotIndex);
+			actualSnapshotId.Should().Be(expectedSnapshotId);
 		}
 
 		[Fact]
@@ -106,12 +110,6 @@ public class StreamDataSourceTests
 			// Test Data
 			ulong parentHash = 0x12_34_56_78_90_AB_CD_EF;
 			ulong rootNodeHash = 0xFF_AA_00_BB_FF_CC_00_DD;
-			var expectedIndex = new byte[]
-			{
-				0xEF, 0xCD, 0xAB, 0x90, 0x78, 0x56, 0x34, 0x12, // parent hash
-				0xDD, 0x00, 0xCC, 0xFF, 0xBB, 0x00, 0xAA, 0xFF  // root node hash
-			};
-			var expectedHash = xxHash64.ComputeHash(expectedIndex);
 
 			// Arrange
 			var snapshotIndexStream = new MemoryStream();
@@ -123,14 +121,22 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			dataSource.AddSnapshot(parentHash, rootNodeHash);
+			dataSource.AddSnapshot(new SnapshotId(parentHash), new NodeId(rootNodeHash));
 
 			// Assert
 			var snapshotIndex = snapshotIndexStream.ToArray();
-			var actualHash = ByteEncoder.GetUInt64(snapshotIndex);
-			var actualIndex = snapshotIndex[8..];
-			actualIndex.Should().Equal(expectedIndex);
-			actualHash.Should().Be(expectedHash);
+			var actualSnapshotHash = BinaryPrimitives.ReadUInt64LittleEndian(snapshotIndex);
+			var actualSnapshotIndex = snapshotIndex[8..];
+
+			var expectedSnapshotIndex = new byte[]
+			{
+				0xEF, 0xCD, 0xAB, 0x90, 0x78, 0x56, 0x34, 0x12, // parent hash
+				0xDD, 0x00, 0xCC, 0xFF, 0xBB, 0x00, 0xAA, 0xFF  // root node hash
+			};
+			var expectedSnapshotHash = xxHash64.ComputeHash(expectedSnapshotIndex);
+
+			actualSnapshotIndex.Should().Equal(expectedSnapshotIndex);
+			actualSnapshotHash.Should().Be(expectedSnapshotHash);
 		}
 
 		[Fact]
@@ -146,12 +152,12 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			var snapshotHash = dataSource.AddSnapshot(0, 1);
+			var snapshotHash = dataSource.AddSnapshot(SnapshotId.None, new NodeId(1));
 
 			// Assert
 			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
 			leafSnapshotsRaw.Length.Should().Be(8);
-			var actualHash = ByteEncoder.GetUInt64(leafSnapshotsRaw);
+			var actualHash = SnapshotId.FromBuffer(leafSnapshotsRaw);
 			actualHash.Should().Be(snapshotHash);
 		}
 
@@ -168,14 +174,14 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			var rootHash = dataSource.AddSnapshot(0, 1);
-			var childHash = dataSource.AddSnapshot(rootHash, 2);
+			var rootSnapshotId = dataSource.AddSnapshot(SnapshotId.None, new NodeId(1));
+			var childId = dataSource.AddSnapshot(rootSnapshotId, new NodeId(2));
 
 			// Assert
 			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
 			leafSnapshotsRaw.Length.Should().Be(8);
-			var actualHash = ByteEncoder.GetUInt64(leafSnapshotsRaw);
-			actualHash.Should().Be(childHash);
+			var actualHash = SnapshotId.FromBuffer(leafSnapshotsRaw);
+			actualHash.Should().Be(childId);
 		}
 
 		[Fact]
@@ -191,15 +197,15 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			var rootHash = dataSource.AddSnapshot(0, 1);
-			var childHash1 = dataSource.AddSnapshot(rootHash, 2);
-			var childHash2 = dataSource.AddSnapshot(rootHash, 3);
+			var rootSnapshotId = dataSource.AddSnapshot(SnapshotId.None, new NodeId(1));
+			var child1Hash = dataSource.AddSnapshot(rootSnapshotId, new NodeId(2));
+			var child2Hash = dataSource.AddSnapshot(rootSnapshotId, new NodeId(3));
 
 			// Assert
 			var leafSnapshotsRaw = leafSnapshotsStream.ToArray();
 			leafSnapshotsRaw.Length.Should().Be(16);
 			var actualHashes = GetHashesFromByteArray(leafSnapshotsRaw);
-			actualHashes.Should().BeEquivalentTo(new[] { childHash1, childHash2 });
+			actualHashes.Should().BeEquivalentTo(new[] { child1Hash, child2Hash });
 		}
 	}
 
@@ -209,11 +215,11 @@ public class StreamDataSourceTests
 		public void Should_account_for_existing_leaf_snapshots()
 		{
 			// Test Data
-			var snapshot1Hash = 1UL;
-			var snapshot2Hash = 2UL;
-			var initialLeafSnapshots = new byte[sizeof(ulong) * 2];
-			ByteEncoder.CopyBytes(snapshot1Hash, initialLeafSnapshots.AsSpan(0, sizeof(ulong)));
-			ByteEncoder.CopyBytes(snapshot2Hash, initialLeafSnapshots.AsSpan(sizeof(ulong), sizeof(ulong)));
+			var snapshot1Id = new SnapshotId(1UL);
+			var snapshot2Id = new SnapshotId(2UL);
+			var initialLeafSnapshots = new byte[SnapshotId.SIZE * 2];
+			snapshot1Id.CopyTo(initialLeafSnapshots.AsSpan(0, sizeof(ulong)));
+			snapshot2Id.CopyTo(initialLeafSnapshots.AsSpan(sizeof(ulong), sizeof(ulong)));
 
 			// Arrange
 			var leafSnapshotsStream = new MemoryStream(initialLeafSnapshots);
@@ -225,20 +231,20 @@ public class StreamDataSourceTests
 			);
 
 			// Act
-			var newSnapshot = dataSource.AddSnapshot(snapshot1Hash, 0);
+			var newSnapshot = dataSource.AddSnapshot(snapshot1Id, NodeId.None);
 
 			// Assert
 			var actualHashes = GetHashesFromByteArray(leafSnapshotsStream.ToArray());
-			actualHashes.Should().BeEquivalentTo(new[] { newSnapshot, snapshot2Hash });
+			actualHashes.Should().BeEquivalentTo(new[] { newSnapshot, snapshot2Id });
 		}
 	}
 
 
-	private static IEnumerable<ulong> GetHashesFromByteArray(byte[] input)
+	private static IEnumerable<SnapshotId> GetHashesFromByteArray(byte[] input)
 	{
 		for (int i = 0; i < input.Length; i += 8)
 		{
-			yield return ByteEncoder.GetUInt64(input.AsSpan(i, sizeof(ulong)));
+			yield return SnapshotId.FromBuffer(input.AsSpan(i, SnapshotId.SIZE));
 		}
 	}
 }

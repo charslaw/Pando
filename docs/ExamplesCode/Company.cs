@@ -1,6 +1,7 @@
 using System;
 using System.Buffers.Binary;
 using Pando.DataSources;
+using Pando.DataSources.Utils;
 using Pando.Serialization;
 using Pando.Serialization.Collections;
 
@@ -22,7 +23,7 @@ internal class CompanySerializer : IPandoSerializer<Company>
 	);
 
 	// The serialized size is the size that this node will occupy in the parent buffer. For a node like Company, this will just be a hash.
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
 	/// Writes the serialized value of the company name and employee array into a node and returns the hash of that node to the parent buffer.
 	public void Serialize(Company obj, Span<byte> buffer, INodeDataSink dataSink)
@@ -39,9 +40,8 @@ internal class CompanySerializer : IPandoSerializer<Company>
 		// person node hashes into its own node, then add that node's hash to childBuffer.
 		_employeesSerializer.Serialize(obj.Employees, childBuffer[employeesStart..totalSize], dataSink);
 
-		// Add
-		var nodeHash = dataSink.AddNode(childBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		// Add the serialized children to the data sink, copying the resulting node id into the input buffer.
+		dataSink.AddNode(childBuffer, buffer);
 	}
 
 	/// Converts a company's binary representation to a Company instance.
@@ -54,9 +54,8 @@ internal class CompanySerializer : IPandoSerializer<Company>
 		var totalSize = employeesStart + _employeesSerializer.SerializedSize;
 
 		// Retrieve the node data for this node
-		var nodeHash = BinaryPrimitives.ReadUInt64LittleEndian(readBuffer);
 		Span<byte> nodeData = stackalloc byte[totalSize];
-		dataSource.CopyNodeBytesTo(nodeHash, nodeData);
+		dataSource.CopyNodeBytesTo(readBuffer, nodeData);
 
 		// Deserialize company name
 		var companyName = _companyNameSerializer.Deserialize(nodeData[..employeesStart], dataSource);
