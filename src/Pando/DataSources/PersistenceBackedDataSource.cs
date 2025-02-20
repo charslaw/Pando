@@ -8,12 +8,12 @@ namespace Pando.DataSources;
 public class PersistenceBackedDataSource : IDataSource, IDisposable
 {
 	private readonly MemoryDataSource _mainDataSource;
-	private readonly StreamDataSource _persistentDataSource;
+	private readonly StreamAppendingDataSink _persistentDataSink;
 
-	public PersistenceBackedDataSource(MemoryDataSource mainDataSource, StreamDataSource persistentDataSource)
+	public PersistenceBackedDataSource(MemoryDataSource mainDataSource, StreamAppendingDataSink persistentDataSink)
 	{
 		_mainDataSource = mainDataSource;
-		_persistentDataSource = persistentDataSource;
+		_persistentDataSink = persistentDataSink;
 	}
 
 	public NodeId AddNode(ReadOnlySpan<byte> bytes)
@@ -23,7 +23,7 @@ public class PersistenceBackedDataSource : IDataSource, IDisposable
 		if (_mainDataSource.HasNode(nodeId)) return nodeId;
 
 		_mainDataSource.AddNodeWithIdUnsafe(nodeId, bytes);
-		_persistentDataSource.AddNodeWithHashUnsafe(nodeId, bytes);
+		_persistentDataSink.AddNodeWithHashUnsafe(nodeId, bytes);
 		return nodeId;
 	}
 
@@ -34,7 +34,7 @@ public class PersistenceBackedDataSource : IDataSource, IDisposable
 		if (_mainDataSource.HasSnapshot(snapshotId)) return snapshotId;
 
 		_mainDataSource.AddSnapshotWithIdUnsafe(snapshotId, parentSnapshotId, rootNodeId);
-		_persistentDataSource.AddSnapshotWithHashUnsafe(snapshotId, parentSnapshotId, rootNodeId);
+		_persistentDataSink.AddSnapshotWithHashUnsafe(snapshotId, parentSnapshotId, rootNodeId);
 		return snapshotId;
 	}
 
@@ -48,7 +48,6 @@ public class PersistenceBackedDataSource : IDataSource, IDisposable
 	public SnapshotId GetSnapshotLeastCommonAncestor(SnapshotId id1, SnapshotId id2) => _mainDataSource.GetSnapshotLeastCommonAncestor(id1, id2);
 
 	public NodeId GetSnapshotRootNode(SnapshotId snapshotId) => _mainDataSource.GetSnapshotRootNode(snapshotId);
-	public IReadOnlySet<SnapshotId> GetLeafSnapshotIds() => _mainDataSource.GetLeafSnapshotIds();
 
-	public void Dispose() => _persistentDataSource.Dispose();
+	public void Dispose() => _persistentDataSink.Dispose();
 }

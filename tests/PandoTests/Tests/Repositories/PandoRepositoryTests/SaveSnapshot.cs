@@ -82,7 +82,7 @@ public class SaveSnapshot
 
 		repository.Invoking(repo => repo.SaveSnapshot(tree1, SnapshotId.None))
 			.Should()
-			.Throw<HashNotFoundException>();
+			.Throw<SnapshotIdNotFoundException>();
 
 		source.SnapshotCount.Should().Be(0, "because it should check the validity prior to making any changes to the data source");
 	}

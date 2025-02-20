@@ -10,22 +10,19 @@ namespace Pando.DataSources;
 public class MemoryDataSource : IDataSource
 {
 	private readonly Dictionary<SnapshotId, SnapshotData> _snapshotIndex;
-	private readonly HashSet<SnapshotId> _leafSnapshots;
 	private readonly Dictionary<NodeId, Range> _nodeIndex;
 	private readonly SpannableList<byte> _nodeData;
 
 	public MemoryDataSource()
 	{
 		_snapshotIndex = new Dictionary<SnapshotId, SnapshotData>();
-		_leafSnapshots = new HashSet<SnapshotId>();
 		_nodeIndex = new Dictionary<NodeId, Range>();
 		_nodeData = new SpannableList<byte>();
 	}
 
-	public MemoryDataSource(Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource)
+	public MemoryDataSource(Stream snapshotIndexSource, Stream nodeIndexSource, Stream nodeDataSource)
 		: this(
 			snapshotIndexSource: snapshotIndexSource,
-			leafSnapshotsSource: leafSnapshotsSource,
 			nodeIndexSource: nodeIndexSource,
 			nodeDataSource: nodeDataSource,
 			null, null, null
@@ -38,21 +35,19 @@ public class MemoryDataSource : IDataSource
 	)
 	{
 		_snapshotIndex = snapshotIndex ?? new Dictionary<SnapshotId, SnapshotData>();
-		_leafSnapshots = new HashSet<SnapshotId>();
 		_nodeIndex = nodeIndex ?? new Dictionary<NodeId, Range>();
 		_nodeData = nodeData ?? new SpannableList<byte>();
 	}
 
 
 	internal MemoryDataSource(
-		Stream snapshotIndexSource, Stream leafSnapshotsSource, Stream nodeIndexSource, Stream nodeDataSource,
+		Stream snapshotIndexSource, Stream nodeIndexSource, Stream nodeDataSource,
 		Dictionary<SnapshotId, SnapshotData>? snapshotIndex = null,
 		Dictionary<NodeId, Range>? nodeIndex = null,
 		SpannableList<byte>? nodeData = null
 	)
 	{
 		_snapshotIndex = StreamUtils.SnapshotIndex.PopulateSnapshotIndex(snapshotIndexSource, snapshotIndex);
-		_leafSnapshots = StreamUtils.LeafSnapshotSet.PopulateLeafSnapshotsSet(leafSnapshotsSource);
 		_nodeIndex = StreamUtils.NodeIndex.PopulateNodeIndex(nodeIndexSource, nodeIndex);
 		_nodeData = StreamUtils.NodeData.PopulateNodeData(nodeDataSource, nodeData);
 	}
@@ -104,11 +99,6 @@ public class MemoryDataSource : IDataSource
 	{
 		SnapshotData snapshotData = new SnapshotData(parentSnapshotId, rootNodeId);
 		_snapshotIndex.Add(snapshotId, snapshotData);
-
-		// Parent is by definition no longer a leaf node
-		_leafSnapshots.Remove(snapshotData.ParentSnapshotId);
-		// Newly add snapshot is by definition a leaf node
-		_leafSnapshots.Add(snapshotId);
 	}
 
 #endregion
@@ -119,14 +109,14 @@ public class MemoryDataSource : IDataSource
 
 	public int GetSizeOfNode(NodeId nodeId)
 	{
-		EnsureNodePresence(nodeId);
+		EnsureNodePresence(nodeId, nameof(nodeId));
 		var (_, dataLength) = _nodeIndex[nodeId].GetOffsetAndLength(_nodeData.Count);
 		return dataLength;
 	}
 
 	public void CopyNodeBytesTo(NodeId nodeId, Span<byte> outputBytes)
 	{
-		EnsureNodePresence(nodeId);
+		EnsureNodePresence(nodeId, nameof(nodeId));
 		_nodeData.CopyTo(_nodeIndex[nodeId], outputBytes);
 	}
 
@@ -140,14 +130,14 @@ public class MemoryDataSource : IDataSource
 
 	public SnapshotId GetSnapshotParent(SnapshotId snapshotId)
 	{
-		EnsureSnapshotPresence(snapshotId);
+		EnsureSnapshotPresence(snapshotId, nameof(snapshotId));
 		return _snapshotIndex[snapshotId].ParentSnapshotId;
 	}
 
 	public SnapshotId GetSnapshotLeastCommonAncestor(SnapshotId id1, SnapshotId id2)
 	{
-		EnsureSnapshotPresence(id1);
-		EnsureSnapshotPresence(id2);
+		EnsureSnapshotPresence(id1, nameof(id1));
+		EnsureSnapshotPresence(id2, nameof(id2));
 
 		HashSet<SnapshotId> snapshot1Ancestors = [];
 		var current = id1;
@@ -169,27 +159,19 @@ public class MemoryDataSource : IDataSource
 
 	public NodeId GetSnapshotRootNode(SnapshotId snapshotId)
 	{
-		EnsureSnapshotPresence(snapshotId);
+		EnsureSnapshotPresence(snapshotId, nameof(snapshotId));
 		return _snapshotIndex[snapshotId].RootNodeId;
 	}
 
-	public IReadOnlySet<SnapshotId> GetLeafSnapshotIds() => new ReadOnlySet<SnapshotId>(_leafSnapshots);
-
 #endregion
 
-	private void EnsureNodePresence(NodeId nodeId)
+	private void EnsureNodePresence(NodeId nodeId, string paramName)
 	{
-		if (!HasNode(nodeId))
-		{
-			throw new HashNotFoundException($"The data source does not contain a node with the requested hash {nodeId}");
-		}
+		if (!HasNode(nodeId)) throw new NodeIdNotFoundException(nodeId, paramName);
 	}
 
-	private void EnsureSnapshotPresence(SnapshotId snapshotId)
+	private void EnsureSnapshotPresence(SnapshotId snapshotId, string paramName)
 	{
-		if (!HasSnapshot(snapshotId))
-		{
-			throw new HashNotFoundException($"The data source does not contain a snapshot with the requested hash {snapshotId}");
-		}
+		if (!HasSnapshot(snapshotId)) throw new SnapshotIdNotFoundException(snapshotId, paramName);
 	}
 }

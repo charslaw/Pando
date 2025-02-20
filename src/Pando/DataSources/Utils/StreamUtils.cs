@@ -102,34 +102,6 @@ internal static class StreamUtils
 		}
 	}
 
-	internal static class LeafSnapshotSet
-	{
-		public static HashSet<SnapshotId> PopulateLeafSnapshotsSet(Stream leafSnapshotsStream)
-		{
-			leafSnapshotsStream.Seek(0, SeekOrigin.Begin);
-			if (leafSnapshotsStream.Length % SnapshotId.SIZE != 0)
-			{
-				throw new IncompleteReadException(
-					$"{nameof(leafSnapshotsStream)} has a wrong number of bytes: {leafSnapshotsStream.Length}." +
-					$"Length must be a multiple of {SnapshotId.SIZE}."
-				);
-			}
-
-			var totalHashesCount = (int)leafSnapshotsStream.Length / SnapshotId.SIZE;
-			if (totalHashesCount == 0) return new HashSet<SnapshotId>();
-
-			var set = new HashSet<SnapshotId>(totalHashesCount);
-			Span<byte> idBuffer = stackalloc byte[SnapshotId.SIZE];
-			for (int i = 0; i < totalHashesCount; i++)
-			{
-				leafSnapshotsStream.ReadExactly(idBuffer);
-				set.Add(SnapshotId.FromBuffer(idBuffer));
-			}
-
-			return set;
-		}
-	}
-
 	internal static class NodeData
 	{
 		public static SpannableList<byte> PopulateNodeData(Stream nodeDataStream, SpannableList<byte>? data)

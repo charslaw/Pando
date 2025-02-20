@@ -25,10 +25,11 @@ public interface INodeDataSource
 	bool HasNode(NodeId nodeId);
 
 	/// Gets the size in bytes of the node identified by the given <see cref="NodeId"/>.
+	/// <exception cref="NodeIdNotFoundException">If the given <paramref name="nodeId"/> is not found in the data source.</exception>
 	int GetSizeOfNode(NodeId nodeId);
 
 	/// Copies the binary representation of the node with the given <see cref="NodeId"/> into the given Span.
-	/// <exception cref="HashNotFoundException">If the given <see cref="NodeId"/> is not found in the data source.</exception>
+	/// <exception cref="NodeIdNotFoundException">If the given <paramref name="nodeId"/> is not found in the data source.</exception>
 	/// <exception cref="ArgumentOutOfRangeException">If the given span is not large enough to contain the node data.</exception>
 	void CopyNodeBytesTo(NodeId nodeId, Span<byte> outputBytes);
 }
@@ -42,7 +43,7 @@ public interface ISnapshotDataSource
 	bool HasSnapshot(SnapshotId snapshotId);
 
 	/// Returns the <see cref="SnapshotId"/> of the parent of the snapshot identified by the given <see cref="SnapshotId"/>.
-	/// <exception cref="HashNotFoundException">thrown if there is no snapshot node identified by the given <see cref="SnapshotId"/>.</exception>
+	/// <exception cref="SnapshotIdNotFound">thrown if there is no snapshot node identified by the given <see cref="SnapshotId"/>.</exception>
 	SnapshotId GetSnapshotParent(SnapshotId snapshotId);
 
 	/// Returns the <see cref="SnapshotId"/> of the least common ancestor snapshot of the two snapshots identified by the given <see cref="SnapshotId"/>s.
@@ -51,11 +52,7 @@ public interface ISnapshotDataSource
 	/// Returns the <see cref="SnapshotId"/> of the root Node of the snapshot identified by the given <see cref="SnapshotId"/>.
 	/// <exception cref="HashNotFoundException">thrown if there is no snapshot node identified by the given <see cref="SnapshotId"/>.</exception>
 	NodeId GetSnapshotRootNode(SnapshotId snapshotId);
-
-	/// Returns a set of <see cref="SnapshotId"/>s that correspond with the "heads" of each branch in the snapshot tree in this data source.
-	IReadOnlySet<SnapshotId> GetLeafSnapshotIds();
 }
 
 /// Stores data Snapshots and Nodes
-public interface IDataSource
-	: INodeDataSink, ISnapshotDataSink, INodeDataSource, ISnapshotDataSource { }
+public interface IDataSource : INodeDataSink, ISnapshotDataSink, INodeDataSource, ISnapshotDataSource;

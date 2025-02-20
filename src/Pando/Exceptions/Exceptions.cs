@@ -1,8 +1,14 @@
 using System;
+using Pando.DataSources.Utils;
 
 namespace Pando.Exceptions;
 
-public class HashNotFoundException(string message) : Exception(message);
+public class SnapshotIdNotFoundException(SnapshotId snapshotId, string paramName)
+	: ArgumentException($"Could not find snapshot with id {snapshotId}", paramName);
+
+public class NodeIdNotFoundException(NodeId nodeId, string paramName)
+	: ArgumentException($"Could not find node with id {nodeId}", paramName);
+
 
 public class NoRootSnapshotException : Exception;
 
