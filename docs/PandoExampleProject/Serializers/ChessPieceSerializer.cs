@@ -10,7 +10,7 @@ internal class ChessPieceSerializer : IPandoSerializer<ChessPiece>
 	public int SerializedSize => 5;
 
 	/// Sequentially writes each enum member of the chess piece into a buffer and submits the node to the data sink.
-	public void Serialize(ChessPiece obj, Span<byte> buffer, INodeDataSink dataSink)
+	public void Serialize(ChessPiece obj, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		// We *could* use an EnumSerializer for each of these enums, though I think in this case that would be less readable
 		// when writing the serializer manually since the enums can just be directly cast to the underlying type
@@ -22,7 +22,7 @@ internal class ChessPieceSerializer : IPandoSerializer<ChessPiece>
 	}
 
 	/// Gets the sequential byte values and converts them to their enum values, then creates a chess piece.
-	public ChessPiece Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
+	public ChessPiece Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
 		return new ChessPiece(
 			(Player)buffer[0],

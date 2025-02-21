@@ -26,7 +26,6 @@ public class SaveSnapshot
 		var tree1Copy = tree1 with { };
 
 		var repository = new PandoRepository<TestTree>(
-			new MemoryDataSource(),
 			TestTree.GenericSerializer()
 		);
 
@@ -52,7 +51,8 @@ public class SaveSnapshot
 		var nodeIndex = new Dictionary<NodeId, Range>();
 		var nodeData = new SpannableList<byte>();
 		var repository = new PandoRepository<TestTree>(
-			new MemoryDataSource(nodeIndex: nodeIndex, nodeData: nodeData),
+			new MemoryNodeStore(nodeIndex: nodeIndex, nodeData: nodeData),
+			new MemorySnapshotStore(),
 			TestTree.GenericSerializer()
 		);
 
@@ -74,8 +74,9 @@ public class SaveSnapshot
 			)
 		);
 
-		var source = new MemoryDataSource();
+		var source = new MemorySnapshotStore();
 		var repository = new PandoRepository<TestTree>(
+			new MemoryNodeStore(),
 			source,
 			TestTree.GenericSerializer()
 		);

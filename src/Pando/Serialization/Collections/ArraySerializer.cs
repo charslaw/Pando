@@ -9,7 +9,7 @@ namespace Pando.Serialization.Collections;
 public class ArraySerializer<TElement>(IPandoSerializer<TElement> elementSerializer)
 	: CollectionSerializer<TElement[], TElement>(elementSerializer)
 {
-	protected override TElement[] CreateCollection(ReadOnlySpan<byte> elementBytes, int elementSize, INodeDataSource dataSource)
+	protected override TElement[] CreateCollection(ReadOnlySpan<byte> elementBytes, int elementSize, IReadOnlyNodeDataStore dataSource)
 	{
 		var arr = new TElement[elementBytes.Length / elementSize];
 		var currentByte = 0;

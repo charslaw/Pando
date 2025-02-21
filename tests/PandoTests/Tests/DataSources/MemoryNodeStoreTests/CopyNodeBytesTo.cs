@@ -3,10 +3,11 @@ using FluentAssertions;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
+using Pando.Repositories;
 using PandoTests.Utils;
 using Xunit;
 
-namespace PandoTests.Tests.DataSources.MemoryDataSourceTests;
+namespace PandoTests.Tests.DataSources.MemoryNodeStoreTests;
 
 public class CopyNodeBytesTo
 {
@@ -18,7 +19,7 @@ public class CopyNodeBytesTo
 		var nodeId = HashUtils.ComputeNodeHash(nodeData);
 
 		// Arrange
-		var dataSource = new MemoryDataSource();
+		var dataSource = new MemoryNodeStore();
 		dataSource.AddNode(nodeData.CreateCopy());
 
 		// Act
@@ -39,7 +40,7 @@ public class CopyNodeBytesTo
 		var node2Id = HashUtils.ComputeNodeHash(nodeData2);
 
 		// Arrange
-		var dataSource = new MemoryDataSource();
+		var dataSource = new MemoryNodeStore();
 		dataSource.AddNode(nodeData1.CreateCopy());
 		dataSource.AddNode(nodeData2.CreateCopy());
 		dataSource.AddNode(nodeData3.CreateCopy());
@@ -56,7 +57,7 @@ public class CopyNodeBytesTo
 	public void Should_throw_if_called_with_nonexistent_hash()
 	{
 		// Arrange
-		var dataSource = new MemoryDataSource();
+		var dataSource = new MemoryNodeStore();
 
 		// Assert
 		dataSource.Invoking(source =>

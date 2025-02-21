@@ -18,7 +18,7 @@ public interface IPandoSerializer<T>
 	/// <remarks>
 	///     <p>The implementation of Serialize is inherently recursive, because each node must delegate to serialize its child nodes.</p>
 	///     <p>For a node with children, the implementation should serialize its children into an inner buffer that is saved as a node in the
-	///     <paramref name="dataSink"/>, then copy the returned node hash to the given <paramref name="buffer"/>.</p>
+	///     <paramref name="dataStore"/>, then copy the returned node hash to the given <paramref name="buffer"/>.</p>
 	///     <p>For a primitive (leaf node), it should copy a binary representation of the primitive data into the given <paramref name="buffer"/>.</p>
 	/// </remarks>
 	/// <example>
@@ -51,7 +51,7 @@ public interface IPandoSerializer<T>
 	///     }
 	///     </code>
 	/// </example>
-	void Serialize(T value, Span<byte> buffer, INodeDataSink dataSink);
+	void Serialize(T value, Span<byte> buffer, INodeDataStore dataStore);
 
 	/// <summary>Converts a binary representation of a node into an instance of that node.</summary>
 	/// <returns>An instance of type T that is represented by the given binary representation.</returns>
@@ -89,7 +89,7 @@ public interface IPandoSerializer<T>
 	///     }
 	///     </code>
 	/// </example>
-	T Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource);
+	T Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore);
 
 	/// <summary>Perform a 3-way merge from source buffer onto target buffer, with the result being output in base buffer.</summary>
 	/// <remarks>
@@ -98,11 +98,9 @@ public interface IPandoSerializer<T>
 	/// <param name="baseBuffer">The common ancestor data of the 3-way merge and the destination of the output.</param>
 	/// <param name="targetBuffer">The target of the 3-way merge.</param>
 	/// <param name="sourceBuffer">The source of the 3-way merge.</param>
-	/// <param name="dataSource">The data source.</param>
-	void Merge(
-		Span<byte> baseBuffer,
+	/// <param name="dataStore"></param>
+	void Merge(Span<byte> baseBuffer,
 		ReadOnlySpan<byte> targetBuffer,
 		ReadOnlySpan<byte> sourceBuffer,
-		IDataSource dataSource
-	) => MergeUtils.MergeInline(baseBuffer, targetBuffer, sourceBuffer);
+		INodeDataStore dataStore) => MergeUtils.MergeInline(baseBuffer, targetBuffer, sourceBuffer);
 }

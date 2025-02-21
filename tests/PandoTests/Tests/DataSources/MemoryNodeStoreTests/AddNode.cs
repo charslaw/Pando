@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
+using Pando.Repositories;
 using PandoTests.Utils;
 using Xunit;
 
-namespace PandoTests.Tests.DataSources.MemoryDataSourceTests;
+namespace PandoTests.Tests.DataSources.MemoryNodeStoreTests;
 
 public class AddNode
 {
@@ -19,7 +20,7 @@ public class AddNode
 		// Arrange
 		var nodeIndex = new Dictionary<NodeId, Range>();
 		var nodeDataList = new SpannableList<byte>();
-		var dataSource = new MemoryDataSource(
+		var dataSource = new MemoryNodeStore(
 			nodeIndex: nodeIndex,
 			nodeData: nodeDataList
 		);
@@ -39,7 +40,7 @@ public class AddNode
 		var nodeData = new byte[] { 0, 1, 2, 3 };
 
 		// Arrange
-		var dataSource = new MemoryDataSource();
+		var dataSource = new MemoryNodeStore();
 
 		// Assert
 		dataSource.Invoking(source =>
@@ -60,7 +61,7 @@ public class AddNode
 
 		// Arrange
 		var nodeDataList = new SpannableList<byte>();
-		var dataSource = new MemoryDataSource(nodeData: nodeDataList);
+		var dataSource = new MemoryNodeStore(nodeData: nodeDataList);
 
 		// Act
 		dataSource.AddNode(nodeData.CreateCopy());

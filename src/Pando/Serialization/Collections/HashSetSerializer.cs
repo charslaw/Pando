@@ -10,7 +10,7 @@ namespace Pando.Serialization.Collections;
 public class HashSetSerializer<TElement>(IPandoSerializer<TElement> elementSerializer)
 	: CollectionSerializer<HashSet<TElement>, TElement>(elementSerializer)
 {
-	protected override HashSet<TElement> CreateCollection(ReadOnlySpan<byte> elementBytes, int elementSize, INodeDataSource dataSource)
+	protected override HashSet<TElement> CreateCollection(ReadOnlySpan<byte> elementBytes, int elementSize, IReadOnlyNodeDataStore dataSource)
 	{
 		var set = new HashSet<TElement>(elementBytes.Length / elementSize);
 		for (int i = 0; i < elementBytes.Length; i += elementSize)

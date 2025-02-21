@@ -12,7 +12,7 @@ public class HalfLittleEndianSerializer : IPandoSerializer<Half>
 
 	public unsafe int SerializedSize => sizeof(Half);
 
-	public void Serialize(Half value, Span<byte> buffer, INodeDataSink _) => BinaryPrimitives.WriteHalfLittleEndian(buffer, value);
+	public void Serialize(Half value, Span<byte> buffer, INodeDataStore _) => BinaryPrimitives.WriteHalfLittleEndian(buffer, value);
 
-	public Half Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource _) => BinaryPrimitives.ReadHalfLittleEndian(buffer);
+	public Half Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore _) => BinaryPrimitives.ReadHalfLittleEndian(buffer);
 }

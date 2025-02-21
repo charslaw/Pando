@@ -14,7 +14,7 @@ public class TimeSpanTicksSerializer(IPandoSerializer<long> innerSerializer) : I
 
 	public int SerializedSize { get; } = innerSerializer.SerializedSize;
 
-	public void Serialize(TimeSpan value, Span<byte> buffer, INodeDataSink dataSink) => innerSerializer.Serialize(value.Ticks, buffer, dataSink);
+	public void Serialize(TimeSpan value, Span<byte> buffer, INodeDataStore dataStore) => innerSerializer.Serialize(value.Ticks, buffer, dataStore);
 
-	public TimeSpan Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource) => TimeSpan.FromTicks(innerSerializer.Deserialize(buffer, dataSource));
+	public TimeSpan Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) => TimeSpan.FromTicks(innerSerializer.Deserialize(buffer, dataStore));
 }

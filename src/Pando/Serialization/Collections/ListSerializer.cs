@@ -10,7 +10,7 @@ namespace Pando.Serialization.Collections;
 public class ListSerializer<TElement>(IPandoSerializer<TElement> elementSerializer)
 	: CollectionSerializer<List<TElement>, TElement>(elementSerializer)
 {
-	protected override List<TElement> CreateCollection(ReadOnlySpan<byte> elementBytes, int elementSize, INodeDataSource dataSource)
+	protected override List<TElement> CreateCollection(ReadOnlySpan<byte> elementBytes, int elementSize, IReadOnlyNodeDataStore dataSource)
 	{
 		var list = new List<TElement>(elementBytes.Length / elementSize);
 		for (int i = 0; i < elementBytes.Length; i += elementSize)

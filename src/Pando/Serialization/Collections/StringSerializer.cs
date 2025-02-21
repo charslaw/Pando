@@ -3,6 +3,7 @@ using System.Buffers.Binary;
 using System.Text;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
+using Pando.Repositories;
 
 namespace Pando.Serialization.Collections;
 
@@ -17,20 +18,20 @@ public class StringSerializer(Encoding encoding) : IPandoSerializer<string>
 
 	public int SerializedSize => NodeId.SIZE;
 
-	public void Serialize(string value, Span<byte> buffer, INodeDataSink dataSink)
+	public void Serialize(string value, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		var bytesSize = encoding.GetByteCount(value);
 		Span<byte> elementBytes = stackalloc byte[bytesSize];
 		encoding.GetBytes(value, elementBytes);
 
-		dataSink.AddNode(elementBytes, buffer);
+		dataStore.AddNode(elementBytes, buffer);
 	}
 
-	public string Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
+	public string Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
-		var nodeDataSize = dataSource.GetSizeOfNode(buffer);
+		var nodeDataSize = dataStore.GetSizeOfNode(buffer);
 		Span<byte> elementBytes = stackalloc byte[nodeDataSize];
-		dataSource.CopyNodeBytesTo(buffer, elementBytes);
+		dataStore.CopyNodeBytesTo(buffer, elementBytes);
 		return encoding.GetString(elementBytes);
 	}
 }

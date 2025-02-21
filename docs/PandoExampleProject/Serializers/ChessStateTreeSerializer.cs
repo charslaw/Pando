@@ -22,8 +22,8 @@ internal class ChessStateTreeSerializer(
 	/// <param name="buffer">
 	///     The buffer into which to write the binary representation of the given <paramref name="state" />
 	/// </param>
-	/// <param name="dataSink">Data sink we want to serialize to</param>
-	public void Serialize(ChessGameState state, Span<byte> buffer, INodeDataSink dataSink)
+	/// <param name="dataStore"></param>
+	public void Serialize(ChessGameState state, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		var childrenSize = playerStateSerializer.SerializedSize + remainingTimeSerializer.SerializedSize + playerPiecesSerializer.SerializedSize;
 		Span<byte> childrenBuffer = stackalloc byte[childrenSize];
@@ -33,30 +33,30 @@ internal class ChessStateTreeSerializer(
 		var remainingTimeStart = playerStateSerializer.SerializedSize;
 		var playerPiecesStart = remainingTimeStart + remainingTimeSerializer.SerializedSize;
 
-		playerStateSerializer.Serialize(chessPlayerState, childrenBuffer[..remainingTimeStart], dataSink);
-		remainingTimeSerializer.Serialize(whiteBlackPair, childrenBuffer[remainingTimeStart..playerPiecesStart], dataSink);
-		playerPiecesSerializer.Serialize(playerPieces, childrenBuffer[playerPiecesStart..childrenSize], dataSink);
+		playerStateSerializer.Serialize(chessPlayerState, childrenBuffer[..remainingTimeStart], dataStore);
+		remainingTimeSerializer.Serialize(whiteBlackPair, childrenBuffer[remainingTimeStart..playerPiecesStart], dataStore);
+		playerPiecesSerializer.Serialize(playerPieces, childrenBuffer[playerPiecesStart..childrenSize], dataStore);
 
-		dataSink.AddNode(childrenBuffer, buffer);
+		dataStore.AddNode(childrenBuffer, buffer);
 	}
 
 	/// <param name="buffer">The raw byte data of this branch node</param>
-	/// <param name="dataSource">The data source to pull child nodes from</param>
-	public ChessGameState Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
+	/// <param name="dataStore"></param>
+	public ChessGameState Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
 		// load node data into buffer
-		var nodeDataSize = dataSource.GetSizeOfNode(buffer);
+		var nodeDataSize = dataStore.GetSizeOfNode(buffer);
 		Span<byte> childrenBuffer = stackalloc byte[nodeDataSize];
-		dataSource.CopyNodeBytesTo(buffer, childrenBuffer);
+		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
 		var remainingTimeStart = playerStateSerializer.SerializedSize;
 		var playerPiecesStart = remainingTimeStart + remainingTimeSerializer.SerializedSize;
 		var bufferEnd = playerPiecesStart + playerPiecesSerializer.SerializedSize;
 
 		// Deserialize children from buffer
-		var playerState = playerStateSerializer.Deserialize(childrenBuffer[..remainingTimeStart], dataSource);
-		var remainingTime = remainingTimeSerializer.Deserialize(childrenBuffer[remainingTimeStart..playerPiecesStart], dataSource);
-		var playerPieces = playerPiecesSerializer.Deserialize(childrenBuffer[playerPiecesStart..bufferEnd], dataSource);
+		var playerState = playerStateSerializer.Deserialize(childrenBuffer[..remainingTimeStart], dataStore);
+		var remainingTime = remainingTimeSerializer.Deserialize(childrenBuffer[remainingTimeStart..playerPiecesStart], dataStore);
+		var playerPieces = playerPiecesSerializer.Deserialize(childrenBuffer[playerPiecesStart..bufferEnd], dataStore);
 
 		return new ChessGameState(playerState, remainingTime, playerPieces);
 	}

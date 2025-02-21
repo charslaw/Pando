@@ -19,7 +19,7 @@ public class SerDes
 
 		var setSerializer = new HashSetSerializer<int>(Int32LittleEndianSerializer.Default);
 		var nodeData = new SpannableList<byte>();
-		var dataSource = new MemoryDataSource(null, null, nodeData);
+		var dataSource = new MemoryNodeStore(null, nodeData);
 
 		setSerializer.Serialize(array, stackalloc byte[8], dataSource);
 
@@ -34,7 +34,7 @@ public class SerDes
 		HashSet<int> array = [1337, 42];
 
 		var setSerializer = new HashSetSerializer<int>(Int32LittleEndianSerializer.Default);
-		var dataSource = new MemoryDataSource();
+		var dataSource = new MemoryNodeStore();
 
 		Span<byte> hashSpan = stackalloc byte[8];
 		setSerializer.Serialize(array, hashSpan, dataSource);

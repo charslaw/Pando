@@ -2,6 +2,7 @@ using System;
 using System.Buffers.Binary;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
+using Pando.Repositories;
 using Pando.Serialization;
 using Pando.Serialization.Collections;
 using Pando.Serialization.Primitives;
@@ -41,7 +42,7 @@ internal class PersonSerializer : IPandoSerializer<Person>
 	public int SerializedSize => NodeId.SIZE;
 
 	/// Writes the properties of a person into a new node, then writes that node's hash into the given parent buffer.
-	public void Serialize(Person obj, Span<byte> buffer, INodeDataSink dataSink)
+	public void Serialize(Person obj, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		var dobStart = _nameSerializer.SerializedSize;
 		var genderStart = dobStart + _dateOfBirthSerializer.SerializedSize;
@@ -52,17 +53,17 @@ internal class PersonSerializer : IPandoSerializer<Person>
 
 		var (name, dob, gender, eyeColor) = obj;
 
-		_nameSerializer.Serialize(name, childBuffer[..dobStart], dataSink);
-		_dateOfBirthSerializer.Serialize(dob, childBuffer[dobStart..genderStart], dataSink);
-		_genderSerializer.Serialize(gender, childBuffer[genderStart..eyeColorStart], dataSink);
-		_eyeColorSerializer.Serialize(eyeColor, childBuffer[eyeColorStart..totalSize], dataSink);
+		_nameSerializer.Serialize(name, childBuffer[..dobStart], dataStore);
+		_dateOfBirthSerializer.Serialize(dob, childBuffer[dobStart..genderStart], dataStore);
+		_genderSerializer.Serialize(gender, childBuffer[genderStart..eyeColorStart], dataStore);
+		_eyeColorSerializer.Serialize(eyeColor, childBuffer[eyeColorStart..totalSize], dataStore);
 
-		dataSink.AddNode(childBuffer, buffer);
+		dataStore.AddNode(childBuffer, buffer);
 	}
 
 	/// Gets each of the values out of the given bytes array.
 	/// Note that since this node does not contain other nodes, the dataSource parameter is not used.
-	public Person Deserialize(ReadOnlySpan<byte> bytes, INodeDataSource dataSource)
+	public Person Deserialize(ReadOnlySpan<byte> bytes, IReadOnlyNodeDataStore dataStore)
 	{
 		var dobStart = _nameSerializer.SerializedSize;
 		var genderStart = dobStart + _dateOfBirthSerializer.SerializedSize;
@@ -70,12 +71,12 @@ internal class PersonSerializer : IPandoSerializer<Person>
 		var totalSize = eyeColorStart + _eyeColorSerializer.SerializedSize;
 
 		Span<byte> childBuffer = stackalloc byte[totalSize];
-		dataSource.CopyNodeBytesTo(bytes, childBuffer);
+		dataStore.CopyNodeBytesTo(bytes, childBuffer);
 
-		var name = _nameSerializer.Deserialize(childBuffer[..dobStart], dataSource);
-		var dob = _dateOfBirthSerializer.Deserialize(childBuffer[dobStart..genderStart], dataSource);
-		var gender = _genderSerializer.Deserialize(childBuffer[genderStart..eyeColorStart], dataSource);
-		var eyeColor = _eyeColorSerializer.Deserialize(childBuffer[eyeColorStart..totalSize], dataSource);
+		var name = _nameSerializer.Deserialize(childBuffer[..dobStart], dataStore);
+		var dob = _dateOfBirthSerializer.Deserialize(childBuffer[dobStart..genderStart], dataStore);
+		var gender = _genderSerializer.Deserialize(childBuffer[genderStart..eyeColorStart], dataStore);
+		var eyeColor = _eyeColorSerializer.Deserialize(childBuffer[eyeColorStart..totalSize], dataStore);
 
 		return new Person(name, dob, gender, eyeColor);
 	}
