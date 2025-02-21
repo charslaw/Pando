@@ -26,7 +26,6 @@ public class SaveSnapshot
 		var tree1Copy = tree1 with { };
 
 		var repository = new PandoRepository<TestTree>(
-			new MemoryDataSource(),
 			TestTree.GenericSerializer()
 		);
 
@@ -49,10 +48,11 @@ public class SaveSnapshot
 		);
 		var tree2 = tree with { };
 
-		var nodeIndex = new Dictionary<ulong, DataSlice>();
+		var nodeIndex = new Dictionary<NodeId, Range>();
 		var nodeData = new SpannableList<byte>();
 		var repository = new PandoRepository<TestTree>(
-			new MemoryDataSource(nodeIndex: nodeIndex, nodeData: nodeData),
+			new MemoryNodeStore(nodeIndex: nodeIndex, nodeData: nodeData),
+			new MemorySnapshotStore(),
 			TestTree.GenericSerializer()
 		);
 
@@ -74,15 +74,16 @@ public class SaveSnapshot
 			)
 		);
 
-		var source = new MemoryDataSource();
+		var source = new MemorySnapshotStore();
 		var repository = new PandoRepository<TestTree>(
+			new MemoryNodeStore(),
 			source,
 			TestTree.GenericSerializer()
 		);
 
-		repository.Invoking(repo => repo.SaveSnapshot(tree1, 0UL))
+		repository.Invoking(repo => repo.SaveSnapshot(tree1, SnapshotId.None))
 			.Should()
-			.Throw<HashNotFoundException>();
+			.Throw<SnapshotIdNotFoundException>();
 
 		source.SnapshotCount.Should().Be(0, "because it should check the validity prior to making any changes to the data source");
 	}

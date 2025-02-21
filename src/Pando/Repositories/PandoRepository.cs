@@ -1,165 +1,89 @@
 ﻿using System;
-using System.Buffers.Binary;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using Pando.DataSources;
 using Pando.Exceptions;
-using Pando.Repositories.Utils;
 using Pando.Serialization;
 
 namespace Pando.Repositories;
 
-public class PandoRepository<T> : IRepository<T>
+public class PandoRepository<T>(INodeDataStore nodeDataStore, ISnapshotDataStore snapshotDataStore, IPandoSerializer<T> serializer)
+	: IPandoRepository<T>
 {
-	private readonly IDataSource _dataSource;
-	private readonly IPandoSerializer<T> _serializer;
+	public PandoRepository(IPandoSerializer<T> serializer) : this(new MemoryNodeStore(), new MemorySnapshotStore(), serializer) { }
 
-	private ulong? _rootSnapshot;
-	private readonly Dictionary<ulong, SmallSet<ulong>> _snapshotTreeElements = new();
-
-	public PandoRepository(IDataSource dataSource, IPandoSerializer<T> serializer)
+	public SnapshotId SaveRootSnapshot(T tree)
 	{
-		_dataSource = dataSource;
-		_serializer = serializer;
+		if (snapshotDataStore.RootSnapshot is not null) throw new AlreadyHasRootSnapshotException();
 
-		var snapshotCount = _dataSource.SnapshotCount;
-		if (snapshotCount > 0)
-		{
-			_snapshotTreeElements = new Dictionary<ulong, SmallSet<ulong>>(snapshotCount);
-			InitializeSnapshotTree(_dataSource.GetLeafSnapshotHashes());
-		}
+		var rootNodeId = SerializeToNodeId(tree);
+		return snapshotDataStore.AddRootSnapshot(rootNodeId);
 	}
 
-	public ulong SaveRootSnapshot(T tree)
+	public SnapshotId SaveSnapshot(T tree, SnapshotId parentSnapshotId)
 	{
-		if (_dataSource.SnapshotCount > 0) throw new AlreadyHasRootSnapshotException();
-
-		var nodeHash = SerializeToHash(tree);
-		var snapshotHash = _dataSource.AddSnapshot(0UL, nodeHash);
-		AddToSnapshotTree(snapshotHash);
-		return snapshotHash;
-	}
-
-	public ulong SaveSnapshot(T tree, ulong parentHash)
-	{
-		if (!_dataSource.HasSnapshot(parentHash))
+		if (!snapshotDataStore.HasSnapshot(parentSnapshotId))
 		{
-			throw new HashNotFoundException(
-				$"Could not save a snapshot with parent hash {parentHash} because no snapshot with that hash exists in the data source."
-			);
+			throw new SnapshotIdNotFoundException(parentSnapshotId, nameof(parentSnapshotId));
 		}
 
-		var nodeHash = SerializeToHash(tree);
-		var snapshotHash = _dataSource.AddSnapshot(parentHash, nodeHash);
-		AddToSnapshotTree(snapshotHash, parentHash);
-		return snapshotHash;
+		var rootNodeId = SerializeToNodeId(tree);
+		return snapshotDataStore.AddSnapshot(rootNodeId, parentSnapshotId);
 	}
 
-	public T GetSnapshot(ulong hash)
+	/// Merges the two snapshots identified by the given hashes, returning the hash of the merged result snapshot.
+	/// Conflict resolution is determined by the passed in <see cref="IPandoSerializer{T}"/>.
+	public SnapshotId MergeSnapshots(SnapshotId sourceSnapshotId, SnapshotId targetSnapshotId)
 	{
-		var nodeHash = _dataSource.GetSnapshotRootNode(hash);
-		return DeserializeFromHash(nodeHash);
+		if (sourceSnapshotId == targetSnapshotId) throw new InvalidMergeException($"cannot merge a snapshot with itself ({sourceSnapshotId})");
+
+		var baseSnapshotHash = snapshotDataStore.GetSnapshotLeastCommonAncestor(sourceSnapshotId, targetSnapshotId);
+
+		if (baseSnapshotHash == targetSnapshotId) throw new InvalidMergeException("cannot merge a snapshot into one of its ancestors");
+		if (baseSnapshotHash == sourceSnapshotId) throw new InvalidMergeException("cannot merge a snapshot into one of its descendants");
+
+		Span<byte> idBuffer = stackalloc byte[NodeId.SIZE * 3];
+		var baseNodeIdBuffer = idBuffer.Slice(0, NodeId.SIZE);
+		var targetNodeIdBuffer = idBuffer.Slice(NodeId.SIZE, NodeId.SIZE);
+		var sourceNodeIdBuffer = idBuffer.Slice(NodeId.SIZE * 2, NodeId.SIZE);
+		snapshotDataStore.GetSnapshotData(baseSnapshotHash).RootNodeId.CopyTo(baseNodeIdBuffer);
+		snapshotDataStore.GetSnapshotData(targetSnapshotId).RootNodeId.CopyTo(targetNodeIdBuffer);
+		snapshotDataStore.GetSnapshotData(sourceSnapshotId).RootNodeId.CopyTo(sourceNodeIdBuffer);
+
+		serializer.Merge(
+			baseNodeIdBuffer,
+			targetNodeIdBuffer,
+			sourceNodeIdBuffer,
+			nodeDataStore
+		);
+
+		var mergedNodeId = NodeId.FromBuffer(baseNodeIdBuffer);
+
+		var mergeSnapshotId = snapshotDataStore.AddSnapshot(mergedNodeId, sourceSnapshotId, targetSnapshotId);
+		return mergeSnapshotId;
 	}
 
-	public SnapshotTree GetSnapshotTree()
-	{
-		if (_rootSnapshot is null) throw new NoRootSnapshotException();
+	public void WalkSnapshots(SnapshotVisitor<T> visitor) =>
+		snapshotDataStore.WalkTree((snapshotId, sourceSnapshotId, targetSnapshotId, nodeId) =>
+			visitor(snapshotId, DeserializeFromNodeId(nodeId), sourceSnapshotId, targetSnapshotId)
+		);
 
-		return GetSnapshotTreeInternal(_rootSnapshot.Value);
+
+	public T GetSnapshot(SnapshotId snapshotId)
+	{
+		var nodeId = snapshotDataStore.GetSnapshotData(snapshotId).RootNodeId;
+		return DeserializeFromNodeId(nodeId);
 	}
 
-	private SnapshotTree GetSnapshotTreeInternal(ulong hash)
+	private NodeId SerializeToNodeId(T tree)
 	{
-		if (!_snapshotTreeElements.ContainsKey(hash))
-		{
-			// This should not happen except in the case of developer error.
-			// All calls to this method (except for the root snapshot) use a hash that should definitely be in the _snapshotTreeElements
-			throw new HashNotFoundException(
-				$"Could not get snapshot tree with root hash {hash} because the given hash does not exist in the snapshot tree."
-			);
-		}
-
-		var children = _snapshotTreeElements[hash];
-		var childrenCount = children.Count;
-		switch (childrenCount)
-		{
-			case 0: return new SnapshotTree(hash);
-			case 1:
-				var list = ImmutableArray.Create(GetSnapshotTreeInternal(children.Single));
-				return new SnapshotTree(hash, list);
-			default:
-				var treeChildren = ImmutableArray.CreateBuilder<SnapshotTree>(childrenCount);
-				foreach (var childHash in children.All)
-				{
-					treeChildren.Add(GetSnapshotTreeInternal(childHash));
-				}
-
-				return new SnapshotTree(hash, treeChildren.MoveToImmutable());
-		}
+		Span<byte> idBuffer = stackalloc byte[NodeId.SIZE];
+		serializer.Serialize(tree, idBuffer, nodeDataStore);
+		return NodeId.FromBuffer(idBuffer);
 	}
 
-	private void InitializeSnapshotTree(IImmutableSet<ulong> leaves)
+	private T DeserializeFromNodeId(NodeId nodeId)
 	{
-		foreach (var leaf in leaves)
-		{
-			_snapshotTreeElements[leaf] = new SmallSet<ulong>();
-
-			var currentHash = leaf;
-			var parentHash = _dataSource.GetSnapshotParent(currentHash);
-			while (parentHash != 0UL)
-			{
-				if (_snapshotTreeElements.TryGetValue(parentHash, out var set))
-				{
-					set.Add(currentHash);
-					_snapshotTreeElements[parentHash] = set;
-					break; // We've run into an existing hash; that means we've already explored everything above this.
-				}
-
-				_snapshotTreeElements.Add(parentHash, new SmallSet<ulong>(currentHash));
-
-				currentHash = parentHash;
-				parentHash = _dataSource.GetSnapshotParent(currentHash);
-			}
-
-			if (parentHash == 0UL) _rootSnapshot = currentHash;
-		}
-	}
-
-	private void AddToSnapshotTree(ulong hash)
-	{
-		_rootSnapshot = hash;
-		_snapshotTreeElements[hash] = default;
-	}
-
-	private void AddToSnapshotTree(ulong hash, ulong parentHash)
-	{
-		if (!_snapshotTreeElements.ContainsKey(parentHash))
-		{
-			// This should not happen except in the case of developer error
-			// This method is only called after confirming that the parent hash already exists in the data source in `SaveSnapshot`
-			throw new HashNotFoundException(
-				$"Could not add the snapshot to the snapshot tree because the given parent hash {parentHash} could not be found in the snapshot tree."
-			);
-		}
-
-		_snapshotTreeElements[hash] = default;
-		var children = _snapshotTreeElements[parentHash];
-		children.Add(hash);
-		_snapshotTreeElements[parentHash] = children;
-	}
-
-	private ulong SerializeToHash(T tree)
-	{
-		Span<byte> hashSpan = stackalloc byte[sizeof(ulong)];
-		_serializer.Serialize(tree, hashSpan, _dataSource);
-		var nodeHash = BinaryPrimitives.ReadUInt64LittleEndian(hashSpan);
-		return nodeHash;
-	}
-
-	private T DeserializeFromHash(ulong hash)
-	{
-		Span<byte> hashSpan = stackalloc byte[sizeof(ulong)];
-		BinaryPrimitives.WriteUInt64LittleEndian(hashSpan, hash);
-		return _serializer.Deserialize(hashSpan, _dataSource);
+		Span<byte> idBuffer = stackalloc byte[sizeof(ulong)];
+		nodeId.CopyTo(idBuffer);
+		return serializer.Deserialize(idBuffer, nodeDataStore);
 	}
 }

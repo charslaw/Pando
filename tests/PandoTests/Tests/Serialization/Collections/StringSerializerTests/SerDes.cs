@@ -40,7 +40,7 @@ public class SerDes
 	{
 		var arraySerializer = new StringSerializer(encoding);
 		var nodeData = new SpannableList<byte>();
-		var dataSource = new MemoryDataSource(null, null, nodeData);
+		var dataSource = new MemoryNodeStore(null, nodeData);
 
 		arraySerializer.Serialize(value, stackalloc byte[8], dataSource);
 
@@ -55,7 +55,7 @@ public class SerDes
 	public void Should_be_able_to_deserialize_serialized_node_data(string value)
 	{
 		var stringSerializer = new StringSerializer(Encoding.UTF8);
-		var dataSource = new MemoryDataSource();
+		var dataSource = new MemoryNodeStore();
 
 		Span<byte> hashSpan = stackalloc byte[8];
 		stringSerializer.Serialize(value, hashSpan, dataSource);

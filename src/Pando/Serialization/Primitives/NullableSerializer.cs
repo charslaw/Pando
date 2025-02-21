@@ -8,14 +8,14 @@ public class NullableSerializer<T>(IPandoSerializer<T> innerSerializer) : IPando
 {
 	public int SerializedSize { get; } = 1 + innerSerializer.SerializedSize;
 
-	public void Serialize(T? value, Span<byte> buffer, INodeDataSink dataSink)
+	public void Serialize(T? value, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, SerializedSize, nameof(buffer));
 
 		if (value is not null)
 		{
 			buffer[0] = 1;
-			innerSerializer.Serialize(value.Value, buffer[1..], dataSink);
+			innerSerializer.Serialize(value.Value, buffer[1..], dataStore);
 		}
 		else
 		{
@@ -23,9 +23,9 @@ public class NullableSerializer<T>(IPandoSerializer<T> innerSerializer) : IPando
 		}
 	}
 
-	public T? Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
+	public T? Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
 		ArgumentOutOfRangeException.ThrowIfLessThan(buffer.Length, SerializedSize, nameof(buffer));
-		return buffer[0] == 0 ? null : innerSerializer.Deserialize(buffer[1..], dataSource);
+		return buffer[0] == 0 ? null : innerSerializer.Deserialize(buffer[1..], dataStore);
 	}
 }

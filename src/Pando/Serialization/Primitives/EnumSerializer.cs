@@ -30,15 +30,15 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPandoSerializer<TEnum>
 		SerializedSize = underlyingSerializer.SerializedSize;
 	}
 
-	public void Serialize(TEnum value, Span<byte> buffer, INodeDataSink dataSink)
+	public void Serialize(TEnum value, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		var underlying = ToUnderlying(ref value);
-		_underlyingSerializer.Serialize(underlying, buffer, dataSink);
+		_underlyingSerializer.Serialize(underlying, buffer, dataStore);
 	}
 
-	public TEnum Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
+	public TEnum Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
-		var underlying = _underlyingSerializer.Deserialize(buffer, dataSource);
+		var underlying = _underlyingSerializer.Deserialize(buffer, dataStore);
 		return ToEnum(ref underlying);
 	}
 

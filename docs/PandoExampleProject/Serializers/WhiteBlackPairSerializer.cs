@@ -9,29 +9,27 @@ internal class WhiteBlackPairSerializer<T>(IPandoSerializer<T> tSerializer) : IP
 {
 	public int SerializedSize => sizeof(ulong);
 
-	public void Serialize(WhiteBlackPair<T> value, Span<byte> buffer, INodeDataSink dataSink)
+	public void Serialize(WhiteBlackPair<T> value, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		var tSize = tSerializer.SerializedSize;
 		var totalSize = 2 * tSize;
 		Span<byte> childrenBuffer = stackalloc byte[totalSize];
 
-		tSerializer.Serialize(value.WhiteValue, childrenBuffer[..tSize], dataSink);
-		tSerializer.Serialize(value.BlackValue, childrenBuffer[tSize..totalSize], dataSink);
+		tSerializer.Serialize(value.WhiteValue, childrenBuffer[..tSize], dataStore);
+		tSerializer.Serialize(value.BlackValue, childrenBuffer[tSize..totalSize], dataStore);
 
-		var nodeHash = dataSink.AddNode(childrenBuffer);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataStore.AddNode(childrenBuffer, buffer);
 	}
 
-	public WhiteBlackPair<T> Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
+	public WhiteBlackPair<T> Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
-		var nodeHash = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
 		var tSize = tSerializer.SerializedSize;
 		var totalSize = tSize * 2;
 		Span<byte> childrenBuffer = stackalloc byte[totalSize];
-		dataSource.CopyNodeBytesTo(nodeHash, childrenBuffer);
+		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
-		var whiteValue = tSerializer.Deserialize(childrenBuffer[..tSize], dataSource);
-		var blackValue = tSerializer.Deserialize(childrenBuffer[tSize..totalSize], dataSource);
+		var whiteValue = tSerializer.Deserialize(childrenBuffer[..tSize], dataStore);
+		var blackValue = tSerializer.Deserialize(childrenBuffer[tSize..totalSize], dataStore);
 
 		return new WhiteBlackPair<T>(whiteValue, blackValue);
 	}

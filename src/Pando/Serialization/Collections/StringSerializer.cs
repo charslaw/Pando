@@ -1,10 +1,9 @@
 using System;
 using System.Buffers.Binary;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Pando.DataSources;
-using Pando.Serialization.Primitives;
-using Pando.Serialization.PrimitiveSerializers;
+using Pando.DataSources.Utils;
+using Pando.Repositories;
 
 namespace Pando.Serialization.Collections;
 
@@ -17,24 +16,22 @@ public class StringSerializer(Encoding encoding) : IPandoSerializer<string>
 	/// A default serializer for strings that uses the ASCII encoding.
 	public static StringSerializer ASCII { get; } = new(Encoding.ASCII);
 
-	public int SerializedSize => sizeof(ulong);
+	public int SerializedSize => NodeId.SIZE;
 
-	public void Serialize(string value, Span<byte> buffer, INodeDataSink dataSink)
+	public void Serialize(string value, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		var bytesSize = encoding.GetByteCount(value);
 		Span<byte> elementBytes = stackalloc byte[bytesSize];
 		encoding.GetBytes(value, elementBytes);
 
-		var nodeHash = dataSink.AddNode(elementBytes);
-		BinaryPrimitives.WriteUInt64LittleEndian(buffer, nodeHash);
+		dataStore.AddNode(elementBytes, buffer);
 	}
 
-	public string Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)
+	public string Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
-		var nodeHash = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
-		var nodeDataSize = dataSource.GetSizeOfNode(nodeHash);
+		var nodeDataSize = dataStore.GetSizeOfNode(buffer);
 		Span<byte> elementBytes = stackalloc byte[nodeDataSize];
-		dataSource.CopyNodeBytesTo(nodeHash, elementBytes);
+		dataStore.CopyNodeBytesTo(buffer, elementBytes);
 		return encoding.GetString(elementBytes);
 	}
 }

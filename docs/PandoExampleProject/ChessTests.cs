@@ -27,7 +27,8 @@ public class ChessTests
 	{
 		// Initialize a pando repository that stores data in memory and uses our serializer
 		var pandoRepository = new PandoRepository<ChessGameState>(
-			new MemoryDataSource(),
+			new MemoryNodeStore(),
+			new MemorySnapshotStore(),
 			MakeSerializer()
 		);
 

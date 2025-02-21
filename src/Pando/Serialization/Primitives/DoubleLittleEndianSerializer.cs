@@ -12,7 +12,7 @@ public class DoubleLittleEndianSerializer : IPandoSerializer<double>
 
 	public int SerializedSize => sizeof(double);
 
-	public void Serialize(double value, Span<byte> slice, INodeDataSink _) => BinaryPrimitives.WriteDoubleLittleEndian(slice, value);
+	public void Serialize(double value, Span<byte> slice, INodeDataStore _) => BinaryPrimitives.WriteDoubleLittleEndian(slice, value);
 
-	public double Deserialize(ReadOnlySpan<byte> slice, INodeDataSource _) => BinaryPrimitives.ReadDoubleLittleEndian(slice);
+	public double Deserialize(ReadOnlySpan<byte> slice, IReadOnlyNodeDataStore _) => BinaryPrimitives.ReadDoubleLittleEndian(slice);
 }

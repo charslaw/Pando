@@ -22,7 +22,7 @@ internal class SpannableList<T>
 	}
 
 	/// Adds a given span to the list.
-	public DataSlice AddSpan(ReadOnlySpan<T> sourceSpan)
+	public Range AddSpan(ReadOnlySpan<T> sourceSpan)
 	{
 		lock (_array)
 		{
@@ -34,7 +34,7 @@ internal class SpannableList<T>
 			var destSpan = _array.AsSpan(start, sourceLength);
 			sourceSpan.CopyTo(destSpan);
 			_head += sourceLength;
-			return new DataSlice(start, sourceLength);
+			return (start.._head);
 		}
 	}
 
@@ -52,11 +52,11 @@ internal class SpannableList<T>
 	}
 
 	/// Copy data from the list into a destination span.
-	public void CopyTo(int sourceStart, int sourceLength, Span<T> destination)
+	public void CopyTo(Range range, Span<T> destination)
 	{
 		lock (_array)
 		{
-			_array.AsSpan(sourceStart, sourceLength).CopyTo(destination);
+			_array.AsSpan(range).CopyTo(destination);
 		}
 	}
 }

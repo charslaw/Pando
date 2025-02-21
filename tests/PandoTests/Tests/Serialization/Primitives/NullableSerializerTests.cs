@@ -12,8 +12,8 @@ public class NullableSerializerTests
 	private class InnerSerializer : IPandoSerializer<byte>
 	{
 		public int SerializedSize => 1;
-		public void Serialize(byte value, Span<byte> buffer, INodeDataSink _) => buffer.Fill(byte.MaxValue);
-		public byte Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource) => byte.MaxValue;
+		public void Serialize(byte value, Span<byte> buffer, INodeDataStore _) => buffer.Fill(byte.MaxValue);
+		public byte Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) => byte.MaxValue;
 	}
 
 	private static NullableSerializer<byte> Serializer() => new(new InnerSerializer());

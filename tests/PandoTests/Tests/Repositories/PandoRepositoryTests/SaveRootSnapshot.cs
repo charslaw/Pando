@@ -25,7 +25,6 @@ public class SaveRootSnapshot
 
 		// Arrange
 		var repository = new PandoRepository<TestTree>(
-			new MemoryDataSource(),
 			TestTree.GenericSerializer()
 		);
 
@@ -57,7 +56,6 @@ public class SaveRootSnapshot
 
 		// Arrange
 		var repository = new PandoRepository<TestTree>(
-			new MemoryDataSource(),
 			TestTree.GenericSerializer()
 		);
 		repository.SaveRootSnapshot(tree);
