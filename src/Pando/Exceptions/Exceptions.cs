@@ -11,6 +11,8 @@ public class NodeIdNotFoundException(NodeId nodeId, string paramName)
 	: ArgumentException($"Could not find node with id {nodeId}", paramName);
 
 
-public class NoRootSnapshotException : Exception;
+public class NoRootSnapshotException() : Exception("No root snapshot exists.");
 
-public class AlreadyHasRootSnapshotException : Exception;
+public class AlreadyHasRootSnapshotException() : Exception("A root snapshot already exists.");
+
+public class InvalidMergeException(string message) : InvalidOperationException(message);

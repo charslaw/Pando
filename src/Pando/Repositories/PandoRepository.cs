@@ -33,7 +33,13 @@ public class PandoRepository<T>(INodeDataStore nodeDataStore, ISnapshotDataStore
 	/// Conflict resolution is determined by the passed in <see cref="IPandoSerializer{T}"/>.
 	public SnapshotId MergeSnapshots(SnapshotId sourceSnapshotId, SnapshotId targetSnapshotId)
 	{
+		if (sourceSnapshotId == targetSnapshotId) throw new InvalidMergeException($"cannot merge a snapshot with itself ({sourceSnapshotId})");
+
 		var baseSnapshotHash = snapshotDataStore.GetSnapshotLeastCommonAncestor(sourceSnapshotId, targetSnapshotId);
+
+		if (baseSnapshotHash == targetSnapshotId) throw new InvalidMergeException("cannot merge a snapshot into one of its ancestors");
+		if (baseSnapshotHash == sourceSnapshotId) throw new InvalidMergeException("cannot merge a snapshot into one of its descendants");
+
 		Span<byte> idBuffer = stackalloc byte[NodeId.SIZE * 3];
 		var baseNodeIdBuffer = idBuffer.Slice(0, NodeId.SIZE);
 		var targetNodeIdBuffer = idBuffer.Slice(NodeId.SIZE, NodeId.SIZE);
