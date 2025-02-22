@@ -80,6 +80,9 @@ public class MemorySnapshotStore(Dictionary<SnapshotId, MemorySnapshotStore.Tree
 
 		var rootId = RootSnapshot.Value;
 		var rootEntry = snapshotIndex[rootId];
+
+		visitor(rootId, SnapshotId.None, SnapshotId.None, rootEntry.RootNodeId);
+
 		var rootChildren = rootEntry.Children;
 		if (rootChildren is null || rootChildren.Count == 0) return;
 
@@ -88,7 +91,6 @@ public class MemorySnapshotStore(Dictionary<SnapshotId, MemorySnapshotStore.Tree
 
 		try
 		{
-			visitor(rootId, SnapshotId.None, SnapshotId.None, rootEntry.RootNodeId);
 			foreach (var rootChild in rootChildren.Reverse()) stack[top++] = rootChild;
 
 			while (top > 0)
