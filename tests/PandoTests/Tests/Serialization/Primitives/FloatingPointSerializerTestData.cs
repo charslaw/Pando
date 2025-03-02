@@ -1,30 +1,42 @@
 using System;
+using System.Collections.Generic;
+using Pando.Serialization;
 using Pando.Serialization.Primitives;
-using Xunit;
 
 namespace PandoTests.Tests.Serialization.Primitives;
 
-public class SingleLittleEndianSerializerTestData
+[InheritsTests]
+public class SingleLittleEndianSerializerTests : PrimitiveSerializerTest<float>
 {
-	public static TheoryData<float, byte[], SingleLittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<float> CreateSerializer() =>
+		new SingleLittleEndianSerializer();
+
+	public override IEnumerable<Func<(float, byte[])>> SerializationTestData()
 	{
-		{ (float)Math.PI, [0xDB, 0x0F, 0x49, 0x40], new SingleLittleEndianSerializer() },
-	};
+		yield return () => (MathF.PI, [0xDB, 0x0F, 0x49, 0x40]);
+	}
 }
 
-public class DoubleLittleEndianSerializerTestData
+[InheritsTests]
+public class DoubleLittleEndianSerializerTests : PrimitiveSerializerTest<double>
 {
-	public static TheoryData<double, byte[], DoubleLittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<double> CreateSerializer() =>
+		new DoubleLittleEndianSerializer();
+
+	public override IEnumerable<Func<(double, byte[])>> SerializationTestData()
 	{
-		{ Math.PI, [0x18, 0x2D, 0x44, 0x54, 0xFB, 0x21, 0x09, 0x40], new DoubleLittleEndianSerializer() },
-	};
+		yield return () => (Math.PI, [0x18, 0x2D, 0x44, 0x54, 0xFB, 0x21, 0x09, 0x40]);
+	}
 }
 
-// Currently unused because adding it as a MethodData results in "Ambiguous match found for 'System.Half Byte op_Explicit(System.Half)'"
-public class HalfLittleEndianSerializerTestData
+[InheritsTests]
+public class HalfLittleEndianSerializerTests : PrimitiveSerializerTest<Half>
 {
-	public static TheoryData<Half, byte[], HalfLittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<Half> CreateSerializer() =>
+		new HalfLittleEndianSerializer();
+
+	public override IEnumerable<Func<(Half, byte[])>> SerializationTestData()
 	{
-		{ (Half)Math.PI, [0x48, 0x42], new HalfLittleEndianSerializer() }
-	};
+		yield return () => ((Half)Math.PI, [0x48, 0x42]);
+	}
 }

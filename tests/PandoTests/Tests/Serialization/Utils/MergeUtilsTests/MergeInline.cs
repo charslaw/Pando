@@ -1,18 +1,16 @@
 using System;
 using System.Buffers.Binary;
-using FluentAssertions;
 using Pando.Serialization.Utils;
-using Xunit;
 
 namespace PandoTests.Tests.Serialization.Utils.MergeUtilsTests;
 
 public class MergeInline
 {
-	[Theory]
-	[InlineData(100, 200, 100, 200)] // only target value changed; use target value
-	[InlineData(100, 100, 300, 300)] // only source value changed; use source value
-	[InlineData(100, 200, 300, 300)] // both changed, use source value
-	public void Should_merge_values_correctly(int baseValue, int targetValue, int sourceValue, int expectedValue)
+	[Test]
+	[Arguments(100, 200, 100, 200)] // only target value changed; use target value
+	[Arguments(100, 100, 300, 300)] // only source value changed; use source value
+	[Arguments(100, 200, 300, 300)] // both changed, use source value
+	public async Task Should_merge_values_correctly(int baseValue, int targetValue, int sourceValue, int expectedValue)
 	{
 		Span<byte> buffer = stackalloc byte[sizeof(int) * 3];
 		var baseBuffer = buffer.Slice(0, sizeof(int));
@@ -24,6 +22,6 @@ public class MergeInline
 
 		MergeUtils.MergeInline(baseBuffer, targetBuffer, sourceBuffer);
 
-		expectedValue.Should().Be(BinaryPrimitives.ReadInt32LittleEndian(baseBuffer));
+		await Assert.That(expectedValue).IsEqualTo(BinaryPrimitives.ReadInt32LittleEndian(baseBuffer));
 	}
 }

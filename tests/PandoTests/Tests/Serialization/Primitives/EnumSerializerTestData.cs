@@ -1,19 +1,24 @@
+using System;
+using System.Collections.Generic;
+using Pando.Serialization;
 using Pando.Serialization.Primitives;
 using Pando.Serialization.PrimitiveSerializers;
-using Xunit;
 
 namespace PandoTests.Tests.Serialization.Primitives;
 
-public class EnumSerializerTestData
+[InheritsTests]
+public class EnumSerializerTests : PrimitiveSerializerTest<TestEnum>
 {
-	public static TheoryData<TestEnum, byte[], EnumSerializer<TestEnum, long>> SerializationTestData => new()
+	public override IPandoSerializer<TestEnum> CreateSerializer() =>
+		new EnumSerializer<TestEnum, long>(Int64LittleEndianSerializer.Default);
+
+	public override IEnumerable<Func<(TestEnum, byte[])>> SerializationTestData()
 	{
-		{
+		yield return () => (
 			TestEnum.Value,
-			[0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF], // little endian
-			new EnumSerializer<TestEnum, long>(Int64LittleEndianSerializer.Default)
-		},
-	};
+			[0x01, 0x03, 0x07, 0x0F, 0x1F, 0x3F, 0x7F, 0xFF] // little endian
+		);
+	}
 }
 
 public enum TestEnum : long

@@ -1,68 +1,102 @@
+using System;
+using System.Collections.Generic;
+using Pando.Serialization;
 using Pando.Serialization.Primitives;
-using Xunit;
 
 namespace PandoTests.Tests.Serialization.Primitives;
 
-public class SByteSerializerTestData
+[InheritsTests]
+public class SByteSerializerTests : PrimitiveSerializerTest<sbyte>
 {
-	public static TheoryData<sbyte, byte[], SByteSerializer> SerializationTestData => new()
+	public override IPandoSerializer<sbyte> CreateSerializer() =>
+		new SByteSerializer();
+
+	public override IEnumerable<Func<(sbyte, byte[])>> SerializationTestData()
 	{
-		{ sbyte.MaxValue, [0x7F], new SByteSerializer() },
-	};
+		yield return () => (sbyte.MaxValue, [0x7F]);
+	}
 }
 
-public class ByteSerializerTestData
+[InheritsTests]
+public class ByteSerializerTests : PrimitiveSerializerTest<byte>
 {
-	public static TheoryData<byte, byte[], ByteSerializer> SerializationTestData => new()
+	public override IPandoSerializer<byte> CreateSerializer() =>
+		new ByteSerializer();
+
+	public override IEnumerable<Func<(byte, byte[])>> SerializationTestData()
 	{
-		{ byte.MaxValue, [0xFF], new ByteSerializer() },
-	};
+		yield return () => (byte.MaxValue, [0xFF]);
+	}
 }
 
-public class Int16LittleEndianSerializerTestData
+[InheritsTests]
+public class Int16LittleEndianSerializerTests : PrimitiveSerializerTest<short>
 {
-	public static TheoryData<short, byte[], Int16LittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<short> CreateSerializer() =>
+		new Int16LittleEndianSerializer();
+
+	public override IEnumerable<Func<(short, byte[])>> SerializationTestData()
 	{
-		{ -16321, [0x3F, 0xC0], new Int16LittleEndianSerializer() },
-	};
+		yield return () => (-16321, [0x3F, 0xC0]);
+	}
 }
 
-public class UInt16LittleEndianSerializerTestData
+[InheritsTests]
+public class UInt16LittleEndianSerializerTests : PrimitiveSerializerTest<ushort>
 {
-	public static TheoryData<ushort, byte[], UInt16LittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<ushort> CreateSerializer() =>
+		new UInt16LittleEndianSerializer();
+
+	public override IEnumerable<Func<(ushort, byte[])>> SerializationTestData()
 	{
-		{ 49215, [0x3F, 0xC0], new UInt16LittleEndianSerializer() },
-	};
+		yield return () => (49215, [0x3F, 0xC0]);
+	}
 }
 
-public class Int32LittleEndianSerializerTestData
+[InheritsTests]
+public class Int32LittleEndianSerializerTests : PrimitiveSerializerTest<int>
 {
-	public static TheoryData<int, byte[], Int32LittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<int> CreateSerializer() =>
+		new Int32LittleEndianSerializer();
+
+	public override IEnumerable<Func<(int, byte[])>> SerializationTestData()
 	{
-		{ -2143297521, [0x0F, 0xE0, 0x3F, 0x80], new Int32LittleEndianSerializer() },
-	};
+		yield return () => (-2143297521, [0x0F, 0xE0, 0x3F, 0x80]);
+	}
 }
 
-public class UInt32LittleEndianSerializerTestData
+[InheritsTests]
+public class UInt32LittleEndianSerializerTests : PrimitiveSerializerTest<uint>
 {
-	public static TheoryData<uint, byte[], UInt32LittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<uint> CreateSerializer() =>
+		new UInt32LittleEndianSerializer();
+
+	public override IEnumerable<Func<(uint, byte[])>> SerializationTestData()
 	{
-		{ 2151669775, [0x0F, 0xE0, 0x3F, 0x80], new UInt32LittleEndianSerializer() },
-	};
+		yield return () => (2151669775, [0x0F, 0xE0, 0x3F, 0x80]);
+	}
 }
 
-public class Int64LittleEndianSerializerTestData
+[InheritsTests]
+public class Int64LittleEndianSerializerTests : PrimitiveSerializerTest<long>
 {
-	public static TheoryData<long, byte[], Int64LittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<long> CreateSerializer() =>
+		new Int64LittleEndianSerializer();
+
+	public override IEnumerable<Func<(long, byte[])>> SerializationTestData()
 	{
-		{ -9205392754131862016, [0x00, 0xFE, 0x03, 0xF8, 0x0F, 0xE0, 0x3F, 0x80], new Int64LittleEndianSerializer() },
-	};
+		yield return () => (-9205392754131862016, [0x00, 0xFE, 0x03, 0xF8, 0x0F, 0xE0, 0x3F, 0x80]);
+	}
 }
 
-public class UInt64LittleEndianSerializerTestData
+[InheritsTests]
+public class UInt64LittleEndianSerializerTests : PrimitiveSerializerTest<ulong>
 {
-	public static TheoryData<ulong, byte[], UInt64LittleEndianSerializer> SerializationTestData => new()
+	public override IPandoSerializer<ulong> CreateSerializer() =>
+		new UInt64LittleEndianSerializer();
+
+	public override IEnumerable<Func<(ulong, byte[])>> SerializationTestData()
 	{
-		{ 9241351319577689600, [0x00, 0xFE, 0x03, 0xF8, 0x0F, 0xE0, 0x3F, 0x80], new UInt64LittleEndianSerializer() },
-	};
+		yield return () => (9241351319577689600, [0x00, 0xFE, 0x03, 0xF8, 0x0F, 0xE0, 0x3F, 0x80]);
+	}
 }

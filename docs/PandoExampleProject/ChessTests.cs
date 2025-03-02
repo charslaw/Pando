@@ -1,12 +1,11 @@
 using System;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Pando.DataSources;
 using Pando.Repositories;
 using Pando.Serialization;
 using Pando.Serialization.Collections;
 using Pando.Serialization.Primitives;
 using PandoExampleProject.Serializers;
-using Xunit;
 
 namespace PandoExampleProject;
 
@@ -22,8 +21,8 @@ public class ChessTests
 		)
 	);
 
-	[Fact]
-	public void MakeSomeMoves()
+	[Test]
+	public async Task MakeSomeMoves()
 	{
 		// Initialize a pando repository that stores data in memory and uses our serializer
 		var pandoRepository = new PandoRepository<ChessGameState>(
@@ -50,7 +49,7 @@ public class ChessTests
 			""";
 
 		var initialActual = ChessBoardRenderer.RenderBoard(pandoRepository.GetSnapshot(initialHash));
-		Assert.Equal(initialExpected, initialActual);
+		await Assert.That(initialExpected).IsEqualTo(initialActual);
 
 		// First move: e4
 		var firstMove = ChessPieceMover.MovePiece(initialState, Player.White, 4, Rank.Four, File.E);
@@ -70,6 +69,7 @@ public class ChessTests
 			""";
 
 		var firstMoveActual = ChessBoardRenderer.RenderBoard(pandoRepository.GetSnapshot(firstMoveHash));
-		Assert.Equal(firstMoveExpected, firstMoveActual);
+
+		await Assert.That(firstMoveActual).IsEqualTo(firstMoveExpected);
 	}
 }
