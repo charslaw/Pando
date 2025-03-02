@@ -26,6 +26,11 @@ public class MemoryNodeStore : INodeDataStore
 		_nodeData = nodeData ?? new SpannableList<byte>();
 	}
 
+	public void AddNode(ReadOnlySpan<byte> bytes, Span<byte> idBuffer)
+	{
+		AddNode(bytes).CopyTo(idBuffer);
+	}
+
 	/// <remarks>This implementation is guaranteed not to insert duplicate nodes.</remarks>
 	/// <inheritdoc/>
 	public NodeId AddNode(ReadOnlySpan<byte> bytes)
@@ -43,7 +48,7 @@ public class MemoryNodeStore : INodeDataStore
 	///     and because it will blindly add the data to the node data collection
 	///     even if it already exists in the collection.</para>
 	///     <para>When calling this method, ensure the correct id is given and
-	///     call <see cref="HasNode"/> first to ensure that this is not a duplicate node.</para>
+	///     call <see cref="HasNode(NodeId)"/> first to ensure that this is not a duplicate node.</para>
 	/// </remarks>
 	internal void AddNodeWithIdUnsafe(NodeId nodeId, ReadOnlySpan<byte> bytes)
 	{
@@ -51,7 +56,11 @@ public class MemoryNodeStore : INodeDataStore
 		_nodeIndex.Add(nodeId, dataSlice);
 	}
 
+	public bool HasNode(ReadOnlySpan<byte> idBuffer) => HasNode(NodeId.FromBuffer(idBuffer));
+
 	public bool HasNode(NodeId nodeId) => _nodeIndex.ContainsKey(nodeId);
+
+	public int GetSizeOfNode(ReadOnlySpan<byte> idBuffer) => GetSizeOfNode(NodeId.FromBuffer(idBuffer));
 
 	public int GetSizeOfNode(NodeId nodeId)
 	{
@@ -59,6 +68,8 @@ public class MemoryNodeStore : INodeDataStore
 		var (_, dataLength) = _nodeIndex[nodeId].GetOffsetAndLength(_nodeData.Count);
 		return dataLength;
 	}
+
+	public void CopyNodeBytesTo(ReadOnlySpan<byte> idBuffer, Span<byte> outputBytes) => CopyNodeBytesTo(NodeId.FromBuffer(idBuffer), outputBytes);
 
 	public void CopyNodeBytesTo(NodeId nodeId, Span<byte> outputBytes)
 	{
