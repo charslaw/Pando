@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Pando.DataSources;
 using Pando.DataSources.Utils;
 using Pando.Serialization.Generic;
@@ -7,6 +8,7 @@ using PandoTests.Utils;
 
 namespace PandoTests.Tests.Serialization.Generic.GenericNodeSerializerTests;
 
+[SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]
 file record Pair(int A, int B) : IGenericSerializable<Pair, int, int>
 {
 	public static Pair Construct(int a, int b) => new(a, b);

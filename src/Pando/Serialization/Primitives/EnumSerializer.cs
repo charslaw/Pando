@@ -1,9 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
 using Pando.DataSources;
-using Pando.Serialization.Primitives;
 
-namespace Pando.Serialization.PrimitiveSerializers;
+namespace Pando.Serialization.Primitives;
 
 /// <summary>
 /// Serializes a specified enum via a serializer capable of serializing the enum's underlying type.

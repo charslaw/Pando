@@ -5,7 +5,7 @@ using Pando.Serialization.Utils;
 namespace Pando.Serialization;
 
 /// <summary>
-/// Interface for a type that serializes and deserializes <typeparamref name="T"/> into/out of a <see cref="IDataSource"/>.
+/// Interface for a type that serializes and deserializes snapshots of <typeparamref name="T"/>.
 /// </summary>
 public interface IPandoSerializer<T>
 {

@@ -18,6 +18,8 @@ public class StringSerializer(Encoding encoding) : IPandoSerializer<string>
 
 	public void Serialize(string value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		var bytesSize = encoding.GetByteCount(value);
 		Span<byte> elementBytes = stackalloc byte[bytesSize];
 		encoding.GetBytes(value, elementBytes);
@@ -27,6 +29,8 @@ public class StringSerializer(Encoding encoding) : IPandoSerializer<string>
 
 	public string Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		var nodeDataSize = dataStore.GetSizeOfNode(buffer);
 		Span<byte> elementBytes = stackalloc byte[nodeDataSize];
 		dataStore.CopyNodeBytesTo(buffer, elementBytes);

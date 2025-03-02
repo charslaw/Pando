@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Pando.DataSources;
 using Pando.Serialization;
 using Pando.Serialization.Generic;
@@ -10,6 +11,7 @@ public static partial class GenericNodeSerializerTests
 {
 	public class Merge
 	{
+		[SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]
 		private record Node(int Value1, int Value2) : IGenericSerializable<Node, int, int>
 		{
 			public static Node Construct(int value1, int value2) => new(value1, value2);

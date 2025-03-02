@@ -20,6 +20,8 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 
 	public void Serialize(TCollection collection, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		var elementSize = ElementSerializer.SerializedSize;
 		var elementBytesSize = collection.Count * elementSize;
 		var elementBytesArr = ArrayPool<byte>.Shared.Rent(elementBytesSize);
@@ -45,6 +47,8 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 
 	public TCollection Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		var nodeDataSize = dataStore.GetSizeOfNode(buffer);
 		var elementBytesArr = ArrayPool<byte>.Shared.Rent(nodeDataSize);
 
@@ -68,6 +72,8 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 		INodeDataStore dataStore
 	)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer))
 			return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer))

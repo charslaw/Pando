@@ -8,7 +8,7 @@ using PandoTests.Utils;
 
 namespace PandoTests.Tests.Serialization.Collections.HashSetSerializerTests;
 
-public static partial class HashSetSerializerTests
+public static class HashSetSerializerTests
 {
 	public class SerDes
 	{
