@@ -13,12 +13,12 @@ public class DateTimeToBinarySerializerTests : PrimitiveSerializerTest<DateTime>
 
 	public override IEnumerable<Func<(DateTime, byte[])>> SerializationTestData()
 	{
-		yield return () => (
-			new DateTime(1415, 10, 25, 12, 34, 56, 789, DateTimeKind.Utc),
-			[0x50, 0x3C, 0xBC, 0x6E, 0x8B, 0x2F, 0x32, 0x46] // Little endian
-		);
+		yield return () =>
+			(
+				new DateTime(1415, 10, 25, 12, 34, 56, 789, DateTimeKind.Utc),
+				[0x50, 0x3C, 0xBC, 0x6E, 0x8B, 0x2F, 0x32, 0x46] // Little endian
+			);
 	}
-
 
 	[Test]
 	[MethodDataSource(nameof(SerializationTestData))]
@@ -47,10 +47,11 @@ public class TimeSpanTicksSerializerTests : PrimitiveSerializerTest<TimeSpan>
 
 	public override IEnumerable<Func<(TimeSpan, byte[])>> SerializationTestData()
 	{
-		yield return () => (
-			new TimeSpan(1234567, 89, 87, 65, 4321),
-			[0x90, 0xBD, 0x3A, 0x92, 0xEF, 0x91, 0xCD, 0x0E] // little endian
-		);
+		yield return () =>
+			(
+				new TimeSpan(1234567, 89, 87, 65, 4321),
+				[0x90, 0xBD, 0x3A, 0x92, 0xEF, 0x91, 0xCD, 0x0E] // little endian
+			);
 	}
 }
 
@@ -62,11 +63,11 @@ public class DateOnlyDayNumberSerializerTests : PrimitiveSerializerTest<DateOnly
 
 	public override IEnumerable<Func<(DateOnly, byte[])>> SerializationTestData()
 	{
-		yield return () => (
-			DateOnly.MaxValue,
-			[0xDA, 0xB9, 0x37, 0x00] // little endian
-
-		);
+		yield return () =>
+			(
+				DateOnly.MaxValue,
+				[0xDA, 0xB9, 0x37, 0x00] // little endian
+			);
 	}
 }
 
@@ -78,9 +79,10 @@ public class TimeOnlyDayNumberSerializerTests : PrimitiveSerializerTest<TimeOnly
 
 	public override IEnumerable<Func<(TimeOnly, byte[])>> SerializationTestData()
 	{
-		yield return () => (
-			TimeOnly.MaxValue,
-			[0xFF, 0xBF, 0x69, 0x2A, 0xC9, 0x00, 0x00, 0x00] // little endian
-		);
+		yield return () =>
+			(
+				TimeOnly.MaxValue,
+				[0xFF, 0xBF, 0x69, 0x2A, 0xC9, 0x00, 0x00, 0x00] // little endian
+			);
 	}
 }

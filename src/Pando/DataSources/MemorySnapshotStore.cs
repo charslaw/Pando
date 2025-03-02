@@ -12,7 +12,12 @@ public class MemorySnapshotStore : ISnapshotDataStore
 {
 	private readonly Dictionary<SnapshotId, TreeEntry> _snapshotIndex;
 
-	internal class TreeEntry(SnapshotId sourceParentId, SnapshotId targetParentId, NodeId rootNodeId, HashSet<SnapshotId>? children)
+	internal class TreeEntry(
+		SnapshotId sourceParentId,
+		SnapshotId targetParentId,
+		NodeId rootNodeId,
+		HashSet<SnapshotId>? children
+	)
 	{
 		public SnapshotId SourceParentId { get; } = sourceParentId;
 		public SnapshotId TargetParentId { get; } = targetParentId;
@@ -20,7 +25,8 @@ public class MemorySnapshotStore : ISnapshotDataStore
 		public HashSet<SnapshotId>? Children { get; set; } = children;
 	}
 
-	public MemorySnapshotStore() : this(new Dictionary<SnapshotId, TreeEntry>()) { }
+	public MemorySnapshotStore()
+		: this(new Dictionary<SnapshotId, TreeEntry>()) { }
 
 	internal MemorySnapshotStore(Dictionary<SnapshotId, TreeEntry> snapshotIndex)
 	{
@@ -35,7 +41,8 @@ public class MemorySnapshotStore : ISnapshotDataStore
 
 	public NodeId GetSnapshotRootNodeId(SnapshotId snapshotId)
 	{
-		if (_snapshotIndex.TryGetValue(snapshotId, out var entry)) return entry.RootNodeId;
+		if (_snapshotIndex.TryGetValue(snapshotId, out var entry))
+			return entry.RootNodeId;
 
 		throw new SnapshotIdNotFoundException(snapshotId, nameof(snapshotId));
 	}
@@ -52,15 +59,18 @@ public class MemorySnapshotStore : ISnapshotDataStore
 
 	public IEnumerable<SnapshotId> GetSnapshotChildren(SnapshotId snapshotId)
 	{
-		if (_snapshotIndex.TryGetValue(snapshotId, out var entry)) return entry.Children ?? Enumerable.Empty<SnapshotId>();
+		if (_snapshotIndex.TryGetValue(snapshotId, out var entry))
+			return entry.Children ?? Enumerable.Empty<SnapshotId>();
 
 		throw new SnapshotIdNotFoundException(snapshotId, nameof(snapshotId));
 	}
 
 	public SnapshotId GetSnapshotLeastCommonAncestor(SnapshotId id1, SnapshotId id2)
 	{
-		if (!_snapshotIndex.ContainsKey(id1)) throw new SnapshotIdNotFoundException(id1, nameof(id1));
-		if (!_snapshotIndex.ContainsKey(id2)) throw new SnapshotIdNotFoundException(id2, nameof(id2));
+		if (!_snapshotIndex.ContainsKey(id1))
+			throw new SnapshotIdNotFoundException(id1, nameof(id1));
+		if (!_snapshotIndex.ContainsKey(id2))
+			throw new SnapshotIdNotFoundException(id2, nameof(id2));
 
 		HashSet<SnapshotId> snapshot1Ancestors = [];
 		var current = id1;
@@ -73,7 +83,8 @@ public class MemorySnapshotStore : ISnapshotDataStore
 		current = id2;
 		while (current != SnapshotId.None)
 		{
-			if (snapshot1Ancestors.Contains(current)) return current;
+			if (snapshot1Ancestors.Contains(current))
+				return current;
 			current = _snapshotIndex[current].SourceParentId;
 		}
 
@@ -84,7 +95,8 @@ public class MemorySnapshotStore : ISnapshotDataStore
 	public void WalkTree(TreeEntryVisitor visitor)
 	{
 		ArgumentNullException.ThrowIfNull(visitor);
-		if (!RootSnapshot.HasValue) throw new NoRootSnapshotException();
+		if (!RootSnapshot.HasValue)
+			throw new NoRootSnapshotException();
 
 		var rootId = RootSnapshot.Value;
 		var rootEntry = _snapshotIndex[rootId];
@@ -92,22 +104,26 @@ public class MemorySnapshotStore : ISnapshotDataStore
 		visitor(rootId, SnapshotId.None, SnapshotId.None, rootEntry.RootNodeId);
 
 		var rootChildren = rootEntry.Children;
-		if (rootChildren is null || rootChildren.Count == 0) return;
+		if (rootChildren is null || rootChildren.Count == 0)
+			return;
 
 		var stack = ArrayPool<SnapshotId>.Shared.Rent(_snapshotIndex.Count);
 		var top = 0;
 
 		try
 		{
-			foreach (var rootChild in rootChildren.Reverse()) stack[top++] = rootChild;
+			foreach (var rootChild in rootChildren.Reverse())
+				stack[top++] = rootChild;
 
 			while (top > 0)
 			{
 				var current = stack[--top];
 				var currentEntry = _snapshotIndex[current];
 				visitor(current, currentEntry.SourceParentId, currentEntry.TargetParentId, currentEntry.RootNodeId);
-				if (currentEntry.Children is null) continue;
-				foreach (var child in currentEntry.Children.Reverse()) stack[top++] = child;
+				if (currentEntry.Children is null)
+					continue;
+				foreach (var child in currentEntry.Children.Reverse())
+					stack[top++] = child;
 			}
 		}
 		finally
@@ -145,7 +161,8 @@ public class MemorySnapshotStore : ISnapshotDataStore
 
 		var snapshotId = HashUtils.ComputeSnapshotHash(rootNodeId, sourceSnapshotId, targetSnapshotId);
 
-		if (_snapshotIndex.ContainsKey(snapshotId)) return snapshotId;
+		if (_snapshotIndex.ContainsKey(snapshotId))
+			return snapshotId;
 
 		_snapshotIndex.Add(snapshotId, new TreeEntry(sourceSnapshotId, targetSnapshotId, rootNodeId, null));
 		sourceParentEntry.Children ??= [];

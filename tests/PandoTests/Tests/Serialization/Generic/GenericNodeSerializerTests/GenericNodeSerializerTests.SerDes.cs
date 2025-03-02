@@ -21,7 +21,10 @@ public static partial class GenericNodeSerializerTests
 		{
 			var pair = new Pair(1337, 42);
 
-			var pairSerializer = new GenericNodeSerializer<Pair, int, int>(Int32LittleEndianSerializer.Default, Int32LittleEndianSerializer.Default);
+			var pairSerializer = new GenericNodeSerializer<Pair, int, int>(
+				Int32LittleEndianSerializer.Default,
+				Int32LittleEndianSerializer.Default
+			);
 			var nodeData = new SpannableList<byte>();
 			var dataSource = new MemoryNodeStore(null, nodeData);
 
@@ -37,7 +40,10 @@ public static partial class GenericNodeSerializerTests
 		{
 			var pair = new Pair(1337, 42);
 
-			var pairSerializer = new GenericNodeSerializer<Pair, int, int>(Int32LittleEndianSerializer.Default, Int32LittleEndianSerializer.Default);
+			var pairSerializer = new GenericNodeSerializer<Pair, int, int>(
+				Int32LittleEndianSerializer.Default,
+				Int32LittleEndianSerializer.Default
+			);
 			var dataSource = new MemoryNodeStore();
 
 			Span<byte> hashSpan = stackalloc byte[8];

@@ -4,7 +4,8 @@ using Pando.DataSources;
 namespace Pando.Serialization.Primitives;
 
 /// <summary> Serializes/deserializes <see cref="Nullable{T}"/> values via a provided inner serializer.</summary>
-public class NullableSerializer<T>(IPandoSerializer<T> innerSerializer) : IPandoSerializer<T?> where T : struct
+public class NullableSerializer<T>(IPandoSerializer<T> innerSerializer) : IPandoSerializer<T?>
+	where T : struct
 {
 	public int SerializedSize { get; } = 1 + innerSerializer.SerializedSize;
 

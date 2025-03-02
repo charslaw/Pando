@@ -10,7 +10,8 @@ namespace Pando.Serialization.Collections;
 /// <summary>
 /// Base class for serializers of <see cref="ICollection{T}"/>.
 /// </summary>
-public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializer<TElement> elementSerializer) : IPandoSerializer<TCollection>
+public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializer<TElement> elementSerializer)
+	: IPandoSerializer<TCollection>
 	where TCollection : ICollection<TElement>
 {
 	protected IPandoSerializer<TElement> ElementSerializer { get; } = elementSerializer;
@@ -60,10 +61,17 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 		}
 	}
 
-	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
+	public void Merge(
+		Span<byte> baseBuffer,
+		ReadOnlySpan<byte> targetBuffer,
+		ReadOnlySpan<byte> sourceBuffer,
+		INodeDataStore dataStore
+	)
 	{
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer))
+			return;
+		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer))
+			return;
 
 		var baseBytesSize = dataStore.GetSizeOfNode(baseBuffer);
 		var targetBytesSize = dataStore.GetSizeOfNode(targetBuffer);
@@ -120,5 +128,9 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 		}
 	}
 
-	protected abstract TCollection CreateCollection(ReadOnlySpan<byte> elementBytes, int elementSize, IReadOnlyNodeDataStore dataSource);
+	protected abstract TCollection CreateCollection(
+		ReadOnlySpan<byte> elementBytes,
+		int elementSize,
+		IReadOnlyNodeDataStore dataSource
+	);
 }

@@ -27,12 +27,12 @@ public static partial class MemorySnapshotStoreTests
 
 			var rootSnapshotId = dataSource.AddRootSnapshot(NodeId.None);
 
-			await Assert.That(() =>
-					{
-						dataSource.AddSnapshot(new NodeId(1), rootSnapshotId);
-						dataSource.AddSnapshot(new NodeId(1), rootSnapshotId);
-					}
-				)
+			await Assert
+				.That(() =>
+				{
+					dataSource.AddSnapshot(new NodeId(1), rootSnapshotId);
+					dataSource.AddSnapshot(new NodeId(1), rootSnapshotId);
+				})
 				.ThrowsNothing();
 		}
 

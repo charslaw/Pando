@@ -8,8 +8,7 @@ namespace PandoTests.Tests.Serialization.Primitives;
 [InheritsTests]
 public class SByteSerializerTests : PrimitiveSerializerTest<sbyte>
 {
-	public override IPandoSerializer<sbyte> CreateSerializer() =>
-		new SByteSerializer();
+	public override IPandoSerializer<sbyte> CreateSerializer() => new SByteSerializer();
 
 	public override IEnumerable<Func<(sbyte, byte[])>> SerializationTestData()
 	{
@@ -20,8 +19,7 @@ public class SByteSerializerTests : PrimitiveSerializerTest<sbyte>
 [InheritsTests]
 public class ByteSerializerTests : PrimitiveSerializerTest<byte>
 {
-	public override IPandoSerializer<byte> CreateSerializer() =>
-		new ByteSerializer();
+	public override IPandoSerializer<byte> CreateSerializer() => new ByteSerializer();
 
 	public override IEnumerable<Func<(byte, byte[])>> SerializationTestData()
 	{
@@ -32,8 +30,7 @@ public class ByteSerializerTests : PrimitiveSerializerTest<byte>
 [InheritsTests]
 public class Int16LittleEndianSerializerTests : PrimitiveSerializerTest<short>
 {
-	public override IPandoSerializer<short> CreateSerializer() =>
-		new Int16LittleEndianSerializer();
+	public override IPandoSerializer<short> CreateSerializer() => new Int16LittleEndianSerializer();
 
 	public override IEnumerable<Func<(short, byte[])>> SerializationTestData()
 	{
@@ -44,8 +41,7 @@ public class Int16LittleEndianSerializerTests : PrimitiveSerializerTest<short>
 [InheritsTests]
 public class UInt16LittleEndianSerializerTests : PrimitiveSerializerTest<ushort>
 {
-	public override IPandoSerializer<ushort> CreateSerializer() =>
-		new UInt16LittleEndianSerializer();
+	public override IPandoSerializer<ushort> CreateSerializer() => new UInt16LittleEndianSerializer();
 
 	public override IEnumerable<Func<(ushort, byte[])>> SerializationTestData()
 	{
@@ -56,8 +52,7 @@ public class UInt16LittleEndianSerializerTests : PrimitiveSerializerTest<ushort>
 [InheritsTests]
 public class Int32LittleEndianSerializerTests : PrimitiveSerializerTest<int>
 {
-	public override IPandoSerializer<int> CreateSerializer() =>
-		new Int32LittleEndianSerializer();
+	public override IPandoSerializer<int> CreateSerializer() => new Int32LittleEndianSerializer();
 
 	public override IEnumerable<Func<(int, byte[])>> SerializationTestData()
 	{
@@ -68,8 +63,7 @@ public class Int32LittleEndianSerializerTests : PrimitiveSerializerTest<int>
 [InheritsTests]
 public class UInt32LittleEndianSerializerTests : PrimitiveSerializerTest<uint>
 {
-	public override IPandoSerializer<uint> CreateSerializer() =>
-		new UInt32LittleEndianSerializer();
+	public override IPandoSerializer<uint> CreateSerializer() => new UInt32LittleEndianSerializer();
 
 	public override IEnumerable<Func<(uint, byte[])>> SerializationTestData()
 	{
@@ -80,8 +74,7 @@ public class UInt32LittleEndianSerializerTests : PrimitiveSerializerTest<uint>
 [InheritsTests]
 public class Int64LittleEndianSerializerTests : PrimitiveSerializerTest<long>
 {
-	public override IPandoSerializer<long> CreateSerializer() =>
-		new Int64LittleEndianSerializer();
+	public override IPandoSerializer<long> CreateSerializer() => new Int64LittleEndianSerializer();
 
 	public override IEnumerable<Func<(long, byte[])>> SerializationTestData()
 	{
@@ -92,8 +85,7 @@ public class Int64LittleEndianSerializerTests : PrimitiveSerializerTest<long>
 [InheritsTests]
 public class UInt64LittleEndianSerializerTests : PrimitiveSerializerTest<ulong>
 {
-	public override IPandoSerializer<ulong> CreateSerializer() =>
-		new UInt64LittleEndianSerializer();
+	public override IPandoSerializer<ulong> CreateSerializer() => new UInt64LittleEndianSerializer();
 
 	public override IEnumerable<Func<(ulong, byte[])>> SerializationTestData()
 	{

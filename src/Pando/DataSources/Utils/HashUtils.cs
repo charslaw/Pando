@@ -6,9 +6,14 @@ namespace Pando.DataSources.Utils;
 
 internal static class HashUtils
 {
-	public static NodeId ComputeNodeHash(ReadOnlySpan<byte> nodeData) => new(xxHash64.ComputeHash(nodeData, nodeData.Length));
+	public static NodeId ComputeNodeHash(ReadOnlySpan<byte> nodeData) =>
+		new(xxHash64.ComputeHash(nodeData, nodeData.Length));
 
-	public static SnapshotId ComputeSnapshotHash(NodeId rootNodeId, SnapshotId sourceSnapshotId, SnapshotId targetSnapshotId)
+	public static SnapshotId ComputeSnapshotHash(
+		NodeId rootNodeId,
+		SnapshotId sourceSnapshotId,
+		SnapshotId targetSnapshotId
+	)
 	{
 		Span<byte> buffer = stackalloc byte[SnapshotId.SIZE + SnapshotId.SIZE + NodeId.SIZE];
 		sourceSnapshotId.CopyTo(buffer.Slice(0, SnapshotId.SIZE));

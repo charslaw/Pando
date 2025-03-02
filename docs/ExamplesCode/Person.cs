@@ -8,16 +8,25 @@ using Pando.Serialization.PrimitiveSerializers;
 
 namespace ExamplesCode;
 
-internal record Person(
-	string Name,
-	DateTime DateOfBirth,
-	Gender Gender,
-	EyeColor EyeColor
-);
+internal record Person(string Name, DateTime DateOfBirth, Gender Gender, EyeColor EyeColor);
 
-internal enum Gender { Male, Female, Nonbinary, Unspecified }
+internal enum Gender
+{
+	Male,
+	Female,
+	Nonbinary,
+	Unspecified,
+}
 
-internal enum EyeColor { Blue, Green, Brown, Hazel, Black, Other }
+internal enum EyeColor
+{
+	Blue,
+	Green,
+	Brown,
+	Hazel,
+	Black,
+	Other,
+}
 
 /// Serializes and deserializes a Person node
 internal class PersonSerializer : IPandoSerializer<Person>

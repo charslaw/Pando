@@ -9,6 +9,7 @@ public readonly record struct NodeId(ulong Hash)
 	public static readonly NodeId None = new(0);
 
 	public static NodeId FromBuffer(ReadOnlySpan<byte> buffer) => new(BinaryPrimitives.ReadUInt64LittleEndian(buffer));
+
 	public void CopyTo(Span<byte> buffer) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, Hash);
 
 	public byte[] ToByteArray()

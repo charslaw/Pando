@@ -14,8 +14,9 @@ public class TimeOnlyTicksSerializer(IPandoSerializer<long> innerSerializer) : I
 
 	public int SerializedSize { get; } = innerSerializer.SerializedSize;
 
-	public void Serialize(TimeOnly value, Span<byte> buffer, INodeDataStore dataStore) => innerSerializer.Serialize(value.Ticks, buffer, dataStore);
+	public void Serialize(TimeOnly value, Span<byte> buffer, INodeDataStore dataStore) =>
+		innerSerializer.Serialize(value.Ticks, buffer, dataStore);
 
-
-	public TimeOnly Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) => new(innerSerializer.Deserialize(buffer, dataStore));
+	public TimeOnly Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) =>
+		new(innerSerializer.Deserialize(buffer, dataStore));
 }

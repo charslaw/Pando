@@ -17,10 +17,7 @@ public class MemoryNodeStore : INodeDataStore
 		_nodeData = new SpannableList<byte>();
 	}
 
-	internal MemoryNodeStore(
-		Dictionary<NodeId, Range>? nodeIndex = null,
-		SpannableList<byte>? nodeData = null
-	)
+	internal MemoryNodeStore(Dictionary<NodeId, Range>? nodeIndex = null, SpannableList<byte>? nodeData = null)
 	{
 		_nodeIndex = nodeIndex ?? new Dictionary<NodeId, Range>();
 		_nodeData = nodeData ?? new SpannableList<byte>();
@@ -36,7 +33,8 @@ public class MemoryNodeStore : INodeDataStore
 	public NodeId AddNode(ReadOnlySpan<byte> bytes)
 	{
 		var nodeId = HashUtils.ComputeNodeHash(bytes);
-		if (HasNode(nodeId)) return nodeId;
+		if (HasNode(nodeId))
+			return nodeId;
 
 		AddNodeWithIdUnsafe(nodeId, bytes);
 		return nodeId;
@@ -69,7 +67,8 @@ public class MemoryNodeStore : INodeDataStore
 		return dataLength;
 	}
 
-	public void CopyNodeBytesTo(ReadOnlySpan<byte> idBuffer, Span<byte> outputBytes) => CopyNodeBytesTo(NodeId.FromBuffer(idBuffer), outputBytes);
+	public void CopyNodeBytesTo(ReadOnlySpan<byte> idBuffer, Span<byte> outputBytes) =>
+		CopyNodeBytesTo(NodeId.FromBuffer(idBuffer), outputBytes);
 
 	public void CopyNodeBytesTo(NodeId nodeId, Span<byte> outputBytes)
 	{
@@ -79,6 +78,7 @@ public class MemoryNodeStore : INodeDataStore
 
 	private void EnsureNodePresence(NodeId nodeId, string paramName)
 	{
-		if (!HasNode(nodeId)) throw new NodeIdNotFoundException(nodeId, paramName);
+		if (!HasNode(nodeId))
+			throw new NodeIdNotFoundException(nodeId, paramName);
 	}
 }

@@ -15,7 +15,8 @@ public static class MergeUtils
 		ReadOnlySpan<byte> sourceBuffer
 	)
 	{
-		if (MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer))
+			return;
 		sourceBuffer.CopyTo(baseBuffer);
 	}
 
@@ -27,10 +28,10 @@ public static class MergeUtils
 		ReadOnlySpan<byte> mergeBuffer
 	)
 	{
-		if (!baseBuffer.SequenceEqual(cmpBuffer)) return false;
+		if (!baseBuffer.SequenceEqual(cmpBuffer))
+			return false;
 
 		mergeBuffer.CopyTo(baseBuffer);
 		return true;
-
 	}
 }

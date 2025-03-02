@@ -16,9 +16,7 @@ public static partial class PandoRepositoryTests
 			var root = repository.SaveRootSnapshot(0);
 			var child = repository.SaveSnapshot(1, root);
 
-			await Assert
-				.That(() => repository.MergeSnapshots(root, child))
-				.ThrowsExactly<InvalidMergeException>();
+			await Assert.That(() => repository.MergeSnapshots(root, child)).ThrowsExactly<InvalidMergeException>();
 		}
 
 		[Test]
@@ -28,9 +26,7 @@ public static partial class PandoRepositoryTests
 			var root = repository.SaveRootSnapshot(0);
 			var child = repository.SaveSnapshot(1, root);
 
-			await Assert
-				.That(() => repository.MergeSnapshots(child, root))
-				.ThrowsExactly<InvalidMergeException>();
+			await Assert.That(() => repository.MergeSnapshots(child, root)).ThrowsExactly<InvalidMergeException>();
 		}
 
 		[Test]
@@ -39,9 +35,7 @@ public static partial class PandoRepositoryTests
 			var repository = new PandoRepository<int>(new Int32LittleEndianSerializer());
 			var root = repository.SaveRootSnapshot(0);
 
-			await Assert
-				.That(() => repository.MergeSnapshots(root, root))
-				.ThrowsExactly<InvalidMergeException>();
+			await Assert.That(() => repository.MergeSnapshots(root, root)).ThrowsExactly<InvalidMergeException>();
 		}
 	}
 }

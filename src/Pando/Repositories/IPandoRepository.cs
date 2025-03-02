@@ -26,4 +26,9 @@ public interface IPandoRepository<T>
 	void WalkSnapshots(SnapshotVisitor<T> visitor);
 }
 
-public delegate void SnapshotVisitor<in T>(SnapshotId snapshotId, T node, SnapshotId sourceParentId, SnapshotId targetParentId);
+public delegate void SnapshotVisitor<in T>(
+	SnapshotId snapshotId,
+	T node,
+	SnapshotId sourceParentId,
+	SnapshotId targetParentId
+);

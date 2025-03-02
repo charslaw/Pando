@@ -99,8 +99,10 @@ public interface IPandoSerializer<T>
 	/// <param name="targetBuffer">The target of the 3-way merge.</param>
 	/// <param name="sourceBuffer">The source of the 3-way merge.</param>
 	/// <param name="dataStore"></param>
-	void Merge(Span<byte> baseBuffer,
+	void Merge(
+		Span<byte> baseBuffer,
 		ReadOnlySpan<byte> targetBuffer,
 		ReadOnlySpan<byte> sourceBuffer,
-		INodeDataStore dataStore) => MergeUtils.MergeInline(baseBuffer, targetBuffer, sourceBuffer);
+		INodeDataStore dataStore
+	) => MergeUtils.MergeInline(baseBuffer, targetBuffer, sourceBuffer);
 }

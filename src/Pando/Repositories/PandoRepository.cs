@@ -5,17 +5,22 @@ using Pando.Serialization;
 
 namespace Pando.Repositories;
 
-public class PandoRepository<T>(INodeDataStore nodeDataStore, ISnapshotDataStore snapshotDataStore, IPandoSerializer<T> serializer)
-	: IPandoRepository<T>
+public class PandoRepository<T>(
+	INodeDataStore nodeDataStore,
+	ISnapshotDataStore snapshotDataStore,
+	IPandoSerializer<T> serializer
+) : IPandoRepository<T>
 {
 	public INodeDataStore NodeDataStore { get; } = nodeDataStore;
 	public ISnapshotDataStore SnapshotDataStore { get; } = snapshotDataStore;
 
-	public PandoRepository(IPandoSerializer<T> serializer) : this(new MemoryNodeStore(), new MemorySnapshotStore(), serializer) { }
+	public PandoRepository(IPandoSerializer<T> serializer)
+		: this(new MemoryNodeStore(), new MemorySnapshotStore(), serializer) { }
 
 	public SnapshotId SaveRootSnapshot(T tree)
 	{
-		if (SnapshotDataStore.RootSnapshot is not null) throw new AlreadyHasRootSnapshotException();
+		if (SnapshotDataStore.RootSnapshot is not null)
+			throw new AlreadyHasRootSnapshotException();
 
 		var rootNodeId = SerializeToNodeId(tree);
 		return SnapshotDataStore.AddRootSnapshot(rootNodeId);
@@ -36,12 +41,15 @@ public class PandoRepository<T>(INodeDataStore nodeDataStore, ISnapshotDataStore
 	/// Conflict resolution is determined by the passed in <see cref="IPandoSerializer{T}"/>.
 	public SnapshotId MergeSnapshots(SnapshotId sourceSnapshotId, SnapshotId targetSnapshotId)
 	{
-		if (sourceSnapshotId == targetSnapshotId) throw new InvalidMergeException($"cannot merge a snapshot with itself ({sourceSnapshotId})");
+		if (sourceSnapshotId == targetSnapshotId)
+			throw new InvalidMergeException($"cannot merge a snapshot with itself ({sourceSnapshotId})");
 
 		var baseSnapshotHash = SnapshotDataStore.GetSnapshotLeastCommonAncestor(sourceSnapshotId, targetSnapshotId);
 
-		if (baseSnapshotHash == targetSnapshotId) throw new InvalidMergeException("cannot merge a snapshot into one of its ancestors");
-		if (baseSnapshotHash == sourceSnapshotId) throw new InvalidMergeException("cannot merge a snapshot into one of its descendants");
+		if (baseSnapshotHash == targetSnapshotId)
+			throw new InvalidMergeException("cannot merge a snapshot into one of its ancestors");
+		if (baseSnapshotHash == sourceSnapshotId)
+			throw new InvalidMergeException("cannot merge a snapshot into one of its descendants");
 
 		Span<byte> idBuffer = stackalloc byte[NodeId.SIZE * 3];
 		var baseNodeIdBuffer = idBuffer.Slice(0, NodeId.SIZE);
@@ -51,12 +59,7 @@ public class PandoRepository<T>(INodeDataStore nodeDataStore, ISnapshotDataStore
 		SnapshotDataStore.GetSnapshotData(targetSnapshotId).RootNodeId.CopyTo(targetNodeIdBuffer);
 		SnapshotDataStore.GetSnapshotData(sourceSnapshotId).RootNodeId.CopyTo(sourceNodeIdBuffer);
 
-		serializer.Merge(
-			baseNodeIdBuffer,
-			targetNodeIdBuffer,
-			sourceNodeIdBuffer,
-			NodeDataStore
-		);
+		serializer.Merge(baseNodeIdBuffer, targetNodeIdBuffer, sourceNodeIdBuffer, NodeDataStore);
 
 		var mergedNodeId = NodeId.FromBuffer(baseNodeIdBuffer);
 
@@ -65,10 +68,10 @@ public class PandoRepository<T>(INodeDataStore nodeDataStore, ISnapshotDataStore
 	}
 
 	public void WalkSnapshots(SnapshotVisitor<T> visitor) =>
-		SnapshotDataStore.WalkTree((snapshotId, sourceSnapshotId, targetSnapshotId, nodeId) =>
-			visitor(snapshotId, DeserializeFromNodeId(nodeId), sourceSnapshotId, targetSnapshotId)
+		SnapshotDataStore.WalkTree(
+			(snapshotId, sourceSnapshotId, targetSnapshotId, nodeId) =>
+				visitor(snapshotId, DeserializeFromNodeId(nodeId), sourceSnapshotId, targetSnapshotId)
 		);
-
 
 	public T GetSnapshot(SnapshotId snapshotId)
 	{

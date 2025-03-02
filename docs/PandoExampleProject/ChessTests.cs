@@ -13,13 +13,12 @@ namespace PandoExampleProject;
 /// than to assert functionality about the system.
 public class ChessTests
 {
-	private static IPandoSerializer<ChessGameState> MakeSerializer() => new ChessStateTreeSerializer(
-		new ChessPlayerStateSerializer(),
-		new WhiteBlackPairSerializer<TimeSpan>(TimeSpanTicksSerializer.Default),
-		new WhiteBlackPairSerializer<ChessPiece[]>(
-			new ArraySerializer<ChessPiece>(new ChessPieceSerializer())
-		)
-	);
+	private static IPandoSerializer<ChessGameState> MakeSerializer() =>
+		new ChessStateTreeSerializer(
+			new ChessPlayerStateSerializer(),
+			new WhiteBlackPairSerializer<TimeSpan>(TimeSpanTicksSerializer.Default),
+			new WhiteBlackPairSerializer<ChessPiece[]>(new ArraySerializer<ChessPiece>(new ChessPieceSerializer()))
+		);
 
 	[Test]
 	public async Task MakeSomeMoves()
@@ -35,8 +34,7 @@ public class ChessTests
 		var initialState = ChessSetup.InitialGameState();
 		var initialHash = pandoRepository.SaveRootSnapshot(initialState);
 
-		var initialExpected =
-			"""
+		var initialExpected = """
 			♜♞♝♛♚♝♞♜ 8
 			♟♟♟♟♟♟♟♟ 7
 			￣＃￣＃￣＃￣＃ 6
@@ -55,8 +53,7 @@ public class ChessTests
 		var firstMove = ChessPieceMover.MovePiece(initialState, Player.White, 4, Rank.Four, File.E);
 		var firstMoveHash = pandoRepository.SaveSnapshot(firstMove, initialHash);
 
-		var firstMoveExpected =
-			"""
+		var firstMoveExpected = """
 			♜♞♝♛♚♝♞♜ 8
 			♟♟♟♟♟♟♟♟ 7
 			￣＃￣＃￣＃￣＃ 6

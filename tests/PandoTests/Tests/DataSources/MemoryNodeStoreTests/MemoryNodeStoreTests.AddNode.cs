@@ -17,12 +17,9 @@ public static partial class MemoryNodeStoreTests
 
 			var nodeIndex = new Dictionary<NodeId, Range>();
 			var nodeDataList = new SpannableList<byte>();
-			var dataSource = new MemoryNodeStore(
-				nodeIndex: nodeIndex,
-				nodeData: nodeDataList
-			);
+			var dataSource = new MemoryNodeStore(nodeIndex: nodeIndex, nodeData: nodeDataList);
 
-			dataSource.AddNode([..nodeData]);
+			dataSource.AddNode([.. nodeData]);
 
 			using (Assert.Multiple())
 			{
@@ -38,12 +35,12 @@ public static partial class MemoryNodeStoreTests
 
 			var dataSource = new MemoryNodeStore();
 
-			await Assert.That(() =>
-					{
-						dataSource.AddNode([..nodeData]);
-						dataSource.AddNode([..nodeData]);
-					}
-				)
+			await Assert
+				.That(() =>
+				{
+					dataSource.AddNode([.. nodeData]);
+					dataSource.AddNode([.. nodeData]);
+				})
 				.ThrowsNothing();
 		}
 
@@ -55,9 +52,9 @@ public static partial class MemoryNodeStoreTests
 			var nodeDataList = new SpannableList<byte>();
 			var dataSource = new MemoryNodeStore(nodeData: nodeDataList);
 
-			dataSource.AddNode([..nodeData]);
+			dataSource.AddNode([.. nodeData]);
 			var preNodeDataListBytes = nodeDataList.Count;
-			dataSource.AddNode([..nodeData]);
+			dataSource.AddNode([.. nodeData]);
 			var postNodeDataListBytes = nodeDataList.Count;
 
 			await Assert.That(postNodeDataListBytes - preNodeDataListBytes).IsZero();

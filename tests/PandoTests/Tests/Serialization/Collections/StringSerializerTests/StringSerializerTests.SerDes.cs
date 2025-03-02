@@ -14,28 +14,32 @@ public static partial class StringSerializerTests
 	{
 		public static IEnumerable<Func<(string, Encoding, byte[])>> SerializeData()
 		{
-			yield return () => (
-				"Hello World",
-				Encoding.ASCII,
-				[
-					0x48, 0x65, 0x6C, 0x6C, 0x6F, // "Hello"
-					0x20,                         // " "
-					0x57, 0x6F, 0x72, 0x6C, 0x64, // "World"
-				]
-			);
-			yield return () => (
-				"👋 Hello World 👋",
-				Encoding.UTF8,
-				[
-					0xF0, 0x9F, 0x91, 0x8B,       // "👋"
-					0x20,                         // " "
-					0x48, 0x65, 0x6C, 0x6C, 0x6F, // "Hello"
-					0x20,                         // " "
-					0x57, 0x6F, 0x72, 0x6C, 0x64, // "World"
-					0x20,                         // " "
-					0xF0, 0x9F, 0x91, 0x8B,       // "👋"
-				]
-			);
+			// csharpier-ignore-start
+			yield return () =>
+				(
+					"Hello World",
+					Encoding.ASCII,
+					[
+						0x48, 0x65, 0x6C, 0x6C, 0x6F, // "Hello"
+						0x20,                         // " "
+						0x57, 0x6F, 0x72, 0x6C, 0x64, // "World"
+					]
+				);
+			yield return () =>
+				(
+					"👋 Hello World 👋",
+					Encoding.UTF8,
+					[
+						0xF0, 0x9F, 0x91, 0x8B,       // "👋"
+						0x20,                         // " "
+						0x48, 0x65, 0x6C, 0x6C, 0x6F, // "Hello"
+						0x20,                         // " "
+						0x57, 0x6F, 0x72, 0x6C, 0x64, // "World"
+						0x20,                         // " "
+						0xF0, 0x9F, 0x91, 0x8B,       // "👋"
+					]
+				);
+			// csharpier-ignore-end
 		}
 
 		[Test]

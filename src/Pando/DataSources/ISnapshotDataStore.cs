@@ -29,7 +29,12 @@ public interface IReadOnlySnapshotDataStore
 	void WalkTree(TreeEntryVisitor visitor);
 }
 
-public delegate void TreeEntryVisitor(SnapshotId snapshotId, SnapshotId sourceSnapshotId, SnapshotId targetSnapshotId, NodeId rootNodeId);
+public delegate void TreeEntryVisitor(
+	SnapshotId snapshotId,
+	SnapshotId sourceSnapshotId,
+	SnapshotId targetSnapshotId,
+	NodeId rootNodeId
+);
 
 public interface ISnapshotDataStore : IReadOnlySnapshotDataStore
 {
@@ -38,5 +43,9 @@ public interface ISnapshotDataStore : IReadOnlySnapshotDataStore
 	public SnapshotId AddRootSnapshot(NodeId rootNodeId);
 
 	/// Adds a snapshot to the tree with the given source parent (non merged).
-	public SnapshotId AddSnapshot(NodeId rootNodeId, SnapshotId sourceSnapshotId, SnapshotId targetSnapshotId = default);
+	public SnapshotId AddSnapshot(
+		NodeId rootNodeId,
+		SnapshotId sourceSnapshotId,
+		SnapshotId targetSnapshotId = default
+	);
 }

@@ -8,8 +8,7 @@ namespace PandoTests.Tests.Serialization.Primitives;
 [InheritsTests]
 public class NullableSerializerTests : PrimitiveSerializerTest<byte?>
 {
-	public override IPandoSerializer<byte?> CreateSerializer() =>
-		new NullableSerializer<byte>(new ByteSerializer());
+	public override IPandoSerializer<byte?> CreateSerializer() => new NullableSerializer<byte>(new ByteSerializer());
 
 	public override IEnumerable<Func<(byte?, byte[])>> SerializationTestData()
 	{

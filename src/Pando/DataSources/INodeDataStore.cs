@@ -4,7 +4,6 @@ using Pando.Repositories;
 
 namespace Pando.DataSources;
 
-
 public interface INodeDataStore : IReadOnlyNodeDataStore
 {
 	/// Adds a node to the data store and populates the given <paramref name="idBuffer"/> with

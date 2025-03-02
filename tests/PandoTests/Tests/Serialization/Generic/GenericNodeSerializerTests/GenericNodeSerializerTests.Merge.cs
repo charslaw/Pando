@@ -18,8 +18,10 @@ public static partial class GenericNodeSerializerTests
 		[Test]
 		public async Task Should_merge_two_nodes_no_conflicts()
 		{
-			IPandoSerializer<Node> serializer =
-				new GenericNodeSerializer<Node, int, int>(Int32LittleEndianSerializer.Default, Int32LittleEndianSerializer.Default);
+			IPandoSerializer<Node> serializer = new GenericNodeSerializer<Node, int, int>(
+				Int32LittleEndianSerializer.Default,
+				Int32LittleEndianSerializer.Default
+			);
 			var dataSource = new MemoryNodeStore();
 
 			Span<byte> buffer = stackalloc byte[sizeof(ulong) * 3];
@@ -39,12 +41,13 @@ public static partial class GenericNodeSerializerTests
 			await Assert.That(actual).IsEqualTo(new Node(200, 300));
 		}
 
-
 		[Test]
 		public async Task Should_merge_two_nodes_with_conflict()
 		{
-			IPandoSerializer<Node> serializer =
-				new GenericNodeSerializer<Node, int, int>(Int32LittleEndianSerializer.Default, Int32LittleEndianSerializer.Default);
+			IPandoSerializer<Node> serializer = new GenericNodeSerializer<Node, int, int>(
+				Int32LittleEndianSerializer.Default,
+				Int32LittleEndianSerializer.Default
+			);
 			var dataSource = new MemoryNodeStore();
 
 			Span<byte> buffer = stackalloc byte[sizeof(ulong) * 3];
@@ -63,6 +66,5 @@ public static partial class GenericNodeSerializerTests
 
 			await Assert.That(actual).IsEqualTo(new Node(400, 300));
 		}
-
 	}
 }

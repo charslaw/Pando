@@ -8,8 +8,7 @@ namespace PandoTests.Tests.Serialization.Primitives;
 [InheritsTests]
 public class SingleLittleEndianSerializerTests : PrimitiveSerializerTest<float>
 {
-	public override IPandoSerializer<float> CreateSerializer() =>
-		new SingleLittleEndianSerializer();
+	public override IPandoSerializer<float> CreateSerializer() => new SingleLittleEndianSerializer();
 
 	public override IEnumerable<Func<(float, byte[])>> SerializationTestData()
 	{
@@ -20,8 +19,7 @@ public class SingleLittleEndianSerializerTests : PrimitiveSerializerTest<float>
 [InheritsTests]
 public class DoubleLittleEndianSerializerTests : PrimitiveSerializerTest<double>
 {
-	public override IPandoSerializer<double> CreateSerializer() =>
-		new DoubleLittleEndianSerializer();
+	public override IPandoSerializer<double> CreateSerializer() => new DoubleLittleEndianSerializer();
 
 	public override IEnumerable<Func<(double, byte[])>> SerializationTestData()
 	{
@@ -32,8 +30,7 @@ public class DoubleLittleEndianSerializerTests : PrimitiveSerializerTest<double>
 [InheritsTests]
 public class HalfLittleEndianSerializerTests : PrimitiveSerializerTest<Half>
 {
-	public override IPandoSerializer<Half> CreateSerializer() =>
-		new HalfLittleEndianSerializer();
+	public override IPandoSerializer<Half> CreateSerializer() => new HalfLittleEndianSerializer();
 
 	public override IEnumerable<Func<(Half, byte[])>> SerializationTestData()
 	{

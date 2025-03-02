@@ -42,7 +42,8 @@ internal static class ChessBoardRenderer
 		allPieces.AddRange(gameState.PlayerPieces.BlackValue);
 		foreach (var piece in allPieces)
 		{
-			if (piece.State == ChessPieceState.Captured) continue;
+			if (piece.State == ChessPieceState.Captured)
+				continue;
 
 			var rankIndex = piece.CurrentRank - Rank.One;
 			var fileIndex = piece.CurrentFile - File.A;
@@ -62,20 +63,21 @@ internal static class ChessBoardRenderer
 		return string.Join("\n", lines);
 	}
 
-	private static char GetPieceChar(ChessPiece piece) => piece switch
-	{
-		(Player.White, PieceType.Pawn, _, _, _)   => WHITE_PAWN,
-		(Player.White, PieceType.Knight, _, _, _) => WHITE_KNIGHT,
-		(Player.White, PieceType.Bishop, _, _, _) => WHITE_BISHOP,
-		(Player.White, PieceType.Rook, _, _, _)   => WHITE_ROOK,
-		(Player.White, PieceType.Queen, _, _, _)  => WHITE_QUEEN,
-		(Player.White, PieceType.King, _, _, _)   => WHITE_KING,
-		(Player.Black, PieceType.Pawn, _, _, _)   => BLACK_PAWN,
-		(Player.Black, PieceType.Knight, _, _, _) => BLACK_KNIGHT,
-		(Player.Black, PieceType.Bishop, _, _, _) => BLACK_BISHOP,
-		(Player.Black, PieceType.Rook, _, _, _)   => BLACK_ROOK,
-		(Player.Black, PieceType.Queen, _, _, _)  => BLACK_QUEEN,
-		(Player.Black, PieceType.King, _, _, _)   => BLACK_KING,
-		_                                         => throw new ArgumentException($"Unknown piece: {piece.Owner} {piece.Type}", nameof(piece))
-	};
+	private static char GetPieceChar(ChessPiece piece) =>
+		piece switch
+		{
+			(Player.White, PieceType.Pawn, _, _, _) => WHITE_PAWN,
+			(Player.White, PieceType.Knight, _, _, _) => WHITE_KNIGHT,
+			(Player.White, PieceType.Bishop, _, _, _) => WHITE_BISHOP,
+			(Player.White, PieceType.Rook, _, _, _) => WHITE_ROOK,
+			(Player.White, PieceType.Queen, _, _, _) => WHITE_QUEEN,
+			(Player.White, PieceType.King, _, _, _) => WHITE_KING,
+			(Player.Black, PieceType.Pawn, _, _, _) => BLACK_PAWN,
+			(Player.Black, PieceType.Knight, _, _, _) => BLACK_KNIGHT,
+			(Player.Black, PieceType.Bishop, _, _, _) => BLACK_BISHOP,
+			(Player.Black, PieceType.Rook, _, _, _) => BLACK_ROOK,
+			(Player.Black, PieceType.Queen, _, _, _) => BLACK_QUEEN,
+			(Player.Black, PieceType.King, _, _, _) => BLACK_KING,
+			_ => throw new ArgumentException($"Unknown piece: {piece.Owner} {piece.Type}", nameof(piece)),
+		};
 }

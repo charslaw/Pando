@@ -18,10 +18,7 @@ public static partial class PandoRepositoryTests
 			var tree1 = new TestTree(
 				"Test Tree 1",
 				new TestTree.A(1),
-				new TestTree.B(
-					new DateTime(1970, 01, 01),
-					1000
-				)
+				new TestTree.B(new DateTime(1970, 01, 01), 1000)
 			);
 			var tree1Copy = tree1 with { };
 
@@ -36,14 +33,7 @@ public static partial class PandoRepositoryTests
 		[Test]
 		public async Task Should_not_create_duplicate_blobs_when_equivalent_state_tree_is_added()
 		{
-			var tree = new TestTree(
-				"Test Tree 1",
-				new TestTree.A(1),
-				new TestTree.B(
-					new DateTime(1970, 01, 01),
-					1000
-				)
-			);
+			var tree = new TestTree("Test Tree 1", new TestTree.A(1), new TestTree.B(new DateTime(1970, 01, 01), 1000));
 			var tree2 = tree with { };
 
 			var nodeIndex = new Dictionary<NodeId, Range>();
@@ -66,18 +56,11 @@ public static partial class PandoRepositoryTests
 			var tree1 = new TestTree(
 				"Test Tree 1",
 				new TestTree.A(1),
-				new TestTree.B(
-					new DateTime(1970, 01, 01),
-					1000
-				)
+				new TestTree.B(new DateTime(1970, 01, 01), 1000)
 			);
 
 			var source = new MemorySnapshotStore();
-			var repository = new PandoRepository<TestTree>(
-				new MemoryNodeStore(),
-				source,
-				TestTree.GenericSerializer()
-			);
+			var repository = new PandoRepository<TestTree>(new MemoryNodeStore(), source, TestTree.GenericSerializer());
 
 			using (Assert.Multiple())
 			{

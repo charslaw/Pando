@@ -12,7 +12,9 @@ public class UInt64LittleEndianSerializer : IPandoSerializer<ulong>
 
 	public int SerializedSize => sizeof(ulong);
 
-	public void Serialize(ulong value, Span<byte> buffer, INodeDataStore dataStore) => BinaryPrimitives.WriteUInt64LittleEndian(buffer, value);
+	public void Serialize(ulong value, Span<byte> buffer, INodeDataStore dataStore) =>
+		BinaryPrimitives.WriteUInt64LittleEndian(buffer, value);
 
-	public ulong Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) => BinaryPrimitives.ReadUInt64LittleEndian(buffer);
+	public ulong Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) =>
+		BinaryPrimitives.ReadUInt64LittleEndian(buffer);
 }

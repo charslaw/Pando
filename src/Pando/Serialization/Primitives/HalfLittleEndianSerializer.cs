@@ -11,7 +11,9 @@ public class HalfLittleEndianSerializer : IPandoSerializer<Half>
 
 	public int SerializedSize => sizeof(short);
 
-	public void Serialize(Half value, Span<byte> buffer, INodeDataStore dataStore) => BinaryPrimitives.WriteHalfLittleEndian(buffer, value);
+	public void Serialize(Half value, Span<byte> buffer, INodeDataStore dataStore) =>
+		BinaryPrimitives.WriteHalfLittleEndian(buffer, value);
 
-	public Half Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) => BinaryPrimitives.ReadHalfLittleEndian(buffer);
+	public Half Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) =>
+		BinaryPrimitives.ReadHalfLittleEndian(buffer);
 }

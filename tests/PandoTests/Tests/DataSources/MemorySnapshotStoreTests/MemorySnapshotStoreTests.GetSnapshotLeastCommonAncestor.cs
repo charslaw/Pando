@@ -36,8 +36,6 @@ public static partial class MemorySnapshotStoreTests
 			await Assert.That(lca).IsEqualTo(childId);
 		}
 
-
-
 		[Test]
 		public async Task Should_return_correct_lca_when_second_snapshot_is_ancestor_of_first()
 		{

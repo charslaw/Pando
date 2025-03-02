@@ -12,14 +12,7 @@ public static partial class PandoRepositoryTests
 		[Test]
 		public async Task Should_save_state_tree()
 		{
-			var tree = new TestTree(
-				"Test Tree 1",
-				new TestTree.A(1),
-				new TestTree.B(
-					new DateTime(1970, 01, 01),
-					1000
-				)
-			);
+			var tree = new TestTree("Test Tree 1", new TestTree.A(1), new TestTree.B(new DateTime(1970, 01, 01), 1000));
 
 			var repository = new PandoRepository<TestTree>(TestTree.GenericSerializer());
 
@@ -29,24 +22,13 @@ public static partial class PandoRepositoryTests
 			await Assert.That(actual).IsNotSameReferenceAs(tree).And.IsEqualTo(tree);
 		}
 
-
-
 		[Test]
 		public async Task Should_throw_if_a_root_snapshot_already_exists()
 		{
-			var tree = new TestTree(
-				"Test Tree 1",
-				new TestTree.A(1),
-				new TestTree.B(
-					new DateTime(1970, 01, 01),
-					1000
-				)
-			);
+			var tree = new TestTree("Test Tree 1", new TestTree.A(1), new TestTree.B(new DateTime(1970, 01, 01), 1000));
 			var tree2 = tree with { Name = "Different Tree" };
 
-			var repository = new PandoRepository<TestTree>(
-				TestTree.GenericSerializer()
-			);
+			var repository = new PandoRepository<TestTree>(TestTree.GenericSerializer());
 			repository.SaveRootSnapshot(tree);
 
 			await Assert

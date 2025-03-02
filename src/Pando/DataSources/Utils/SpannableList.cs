@@ -12,7 +12,10 @@ internal class SpannableList<T>
 	private T[] _array;
 	private int _head;
 
-	public SpannableList(int capacity = 8) { _array = new T[capacity]; }
+	public SpannableList(int capacity = 8)
+	{
+		_array = new T[capacity];
+	}
 
 	public SpannableList(ReadOnlySpan<T> initialValues)
 	{
@@ -44,7 +47,8 @@ internal class SpannableList<T>
 		lock (_array)
 		{
 			var currentHeadspace = _array.Length - _head;
-			if (currentHeadspace >= length) return;
+			if (currentHeadspace >= length)
+				return;
 
 			var minimumNewSize = _head + length;
 			Array.Resize(ref _array, minimumNewSize * EXPANSION_FACTOR);

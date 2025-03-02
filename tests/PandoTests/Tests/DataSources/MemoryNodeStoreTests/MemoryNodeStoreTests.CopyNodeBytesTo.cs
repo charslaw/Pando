@@ -17,7 +17,7 @@ public static partial class MemoryNodeStoreTests
 			var nodeId = HashUtils.ComputeNodeHash(nodeData);
 
 			var dataSource = new MemoryNodeStore();
-			dataSource.AddNode([..nodeData]);
+			dataSource.AddNode([.. nodeData]);
 
 			var actual = new byte[4];
 			dataSource.CopyNodeBytesTo(nodeId, actual);
@@ -34,9 +34,9 @@ public static partial class MemoryNodeStoreTests
 			var node2Id = HashUtils.ComputeNodeHash(nodeData2);
 
 			var dataSource = new MemoryNodeStore();
-			dataSource.AddNode([..nodeData1]);
-			dataSource.AddNode([..nodeData2]);
-			dataSource.AddNode([..nodeData3]);
+			dataSource.AddNode([.. nodeData1]);
+			dataSource.AddNode([.. nodeData2]);
+			dataSource.AddNode([.. nodeData3]);
 
 			var actual = new byte[4];
 			dataSource.CopyNodeBytesTo(node2Id, actual);
@@ -49,12 +49,12 @@ public static partial class MemoryNodeStoreTests
 		{
 			var dataSource = new MemoryNodeStore();
 
-			await Assert.That(() =>
-					{
-						Span<byte> buffer = [];
-						dataSource.CopyNodeBytesTo(NodeId.None, buffer);
-					}
-				)
+			await Assert
+				.That(() =>
+				{
+					Span<byte> buffer = [];
+					dataSource.CopyNodeBytesTo(NodeId.None, buffer);
+				})
 				.ThrowsExactly<NodeIdNotFoundException>();
 		}
 	}

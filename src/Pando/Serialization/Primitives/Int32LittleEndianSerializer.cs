@@ -12,7 +12,9 @@ public class Int32LittleEndianSerializer : IPandoSerializer<int>
 
 	public int SerializedSize => sizeof(int);
 
-	public void Serialize(int value, Span<byte> buffer, INodeDataStore dataStore) => BinaryPrimitives.WriteInt32LittleEndian(buffer, value);
+	public void Serialize(int value, Span<byte> buffer, INodeDataStore dataStore) =>
+		BinaryPrimitives.WriteInt32LittleEndian(buffer, value);
 
-	public int Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) => BinaryPrimitives.ReadInt32LittleEndian(buffer);
+	public int Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) =>
+		BinaryPrimitives.ReadInt32LittleEndian(buffer);
 }

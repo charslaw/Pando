@@ -39,11 +39,10 @@ public abstract class PrimitiveSerializerTest<T>
 	{
 		await Assert
 			.That(() =>
-				{
-					Span<byte> undersizedBuffer = new byte[expectedBytes.Length - 1];
-					CreateSerializer().Serialize(inputValue, undersizedBuffer, null!);
-				}
-			)
+			{
+				Span<byte> undersizedBuffer = new byte[expectedBytes.Length - 1];
+				CreateSerializer().Serialize(inputValue, undersizedBuffer, null!);
+			})
 			.ThrowsExactly<ArgumentOutOfRangeException>();
 	}
 

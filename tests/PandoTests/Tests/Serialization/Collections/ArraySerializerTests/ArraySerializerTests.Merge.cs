@@ -16,9 +16,14 @@ public static partial class ArraySerializerTests
 			var dataSource = new MemoryNodeStore();
 
 			InitializeBuffers(
-				[0, 0, 0, 0], [0, 1, 0, 1], [0, 0, 2, 2],
-				out var baseBuffer, out var targetBuffer, out var sourceBuffer,
-				serializer, dataSource
+				[0, 0, 0, 0],
+				[0, 1, 0, 1],
+				[0, 0, 2, 2],
+				out var baseBuffer,
+				out var targetBuffer,
+				out var sourceBuffer,
+				serializer,
+				dataSource
 			);
 
 			serializer.Merge(baseBuffer, targetBuffer, sourceBuffer, dataSource);
@@ -37,9 +42,14 @@ public static partial class ArraySerializerTests
 			var dataSource = new MemoryNodeStore();
 
 			InitializeBuffers(
-				[0, 0, 0, 0], [0, 1, 0, 1, 1], [0, 0, 2, 2],
-				out var baseBuffer, out var targetBuffer, out var sourceBuffer,
-				serializer, dataSource
+				[0, 0, 0, 0],
+				[0, 1, 0, 1, 1],
+				[0, 0, 2, 2],
+				out var baseBuffer,
+				out var targetBuffer,
+				out var sourceBuffer,
+				serializer,
+				dataSource
 			);
 
 			serializer.Merge(baseBuffer, targetBuffer, sourceBuffer, dataSource);
@@ -57,9 +67,14 @@ public static partial class ArraySerializerTests
 			var dataSource = new MemoryNodeStore();
 
 			InitializeBuffers(
-				[0, 0, 0, 0], [0, 1, 0, 1], [0, 0, 2, 2, 2],
-				out var baseBuffer, out var targetBuffer, out var sourceBuffer,
-				serializer, dataSource
+				[0, 0, 0, 0],
+				[0, 1, 0, 1],
+				[0, 0, 2, 2, 2],
+				out var baseBuffer,
+				out var targetBuffer,
+				out var sourceBuffer,
+				serializer,
+				dataSource
 			);
 
 			serializer.Merge(baseBuffer, targetBuffer, sourceBuffer, dataSource);
@@ -77,9 +92,14 @@ public static partial class ArraySerializerTests
 			var dataSource = new MemoryNodeStore();
 
 			InitializeBuffers(
-				[0, 0, 0, 0, 0], [0, 1, 0, 1], [0, 0, 2, 2],
-				out var baseBuffer, out var targetBuffer, out var sourceBuffer,
-				serializer, dataSource
+				[0, 0, 0, 0, 0],
+				[0, 1, 0, 1],
+				[0, 0, 2, 2],
+				out var baseBuffer,
+				out var targetBuffer,
+				out var sourceBuffer,
+				serializer,
+				dataSource
 			);
 
 			serializer.Merge(baseBuffer, targetBuffer, sourceBuffer, dataSource);
@@ -90,8 +110,16 @@ public static partial class ArraySerializerTests
 			await Assert.That(actual).IsEquivalentTo(expected);
 		}
 
-		private static void InitializeBuffers(int[] baseArr, int[] targetArr, int[] sourceArr, out Span<byte> baseBuffer, out Span<byte> targetBuffer,
-			out Span<byte> sourceBuffer, ArraySerializer<int> serializer, INodeDataStore dataStore)
+		private static void InitializeBuffers(
+			int[] baseArr,
+			int[] targetArr,
+			int[] sourceArr,
+			out Span<byte> baseBuffer,
+			out Span<byte> targetBuffer,
+			out Span<byte> sourceBuffer,
+			ArraySerializer<int> serializer,
+			INodeDataStore dataStore
+		)
 		{
 			Span<byte> buffer = new byte[sizeof(ulong) * 3];
 

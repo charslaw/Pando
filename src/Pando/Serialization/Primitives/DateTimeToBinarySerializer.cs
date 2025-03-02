@@ -14,7 +14,9 @@ public class DateTimeToBinarySerializer(IPandoSerializer<long> innerSerializer) 
 
 	public int SerializedSize { get; } = innerSerializer.SerializedSize;
 
-	public void Serialize(DateTime value, Span<byte> buffer, INodeDataStore dataStore) => innerSerializer.Serialize(value.ToBinary(), buffer, dataStore);
+	public void Serialize(DateTime value, Span<byte> buffer, INodeDataStore dataStore) =>
+		innerSerializer.Serialize(value.ToBinary(), buffer, dataStore);
 
-	public DateTime Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) => DateTime.FromBinary(innerSerializer.Deserialize(buffer, dataStore));
+	public DateTime Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) =>
+		DateTime.FromBinary(innerSerializer.Deserialize(buffer, dataStore));
 }
