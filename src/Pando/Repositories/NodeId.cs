@@ -17,4 +17,9 @@ public readonly record struct NodeId(ulong Hash)
 		CopyTo(bytes);
 		return bytes;
 	}
+
+	public override string ToString()
+	{
+		return $"NodeId( {Convert.ToHexStringLower(ToByteArray())} )";
+	}
 }

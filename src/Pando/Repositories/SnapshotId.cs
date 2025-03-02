@@ -17,4 +17,9 @@ public readonly record struct SnapshotId(ulong Hash)
 		CopyTo(bytes);
 		return bytes;
 	}
+
+	public override string ToString()
+	{
+		return $"SnapshotId( {Convert.ToHexStringLower(ToByteArray())} )";
+	}
 }
