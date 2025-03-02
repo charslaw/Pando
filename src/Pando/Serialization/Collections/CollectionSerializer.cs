@@ -13,7 +13,7 @@ namespace Pando.Serialization.Collections;
 public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializer<TElement> elementSerializer) : IPandoSerializer<TCollection>
 	where TCollection : ICollection<TElement>
 {
-	protected readonly IPandoSerializer<TElement> ElementSerializer = elementSerializer;
+	protected IPandoSerializer<TElement> ElementSerializer { get; } = elementSerializer;
 
 	public int SerializedSize => NodeId.SIZE;
 

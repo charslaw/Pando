@@ -81,6 +81,8 @@ public static class EnumSerializer
 		where TEnum : unmanaged, Enum
 		where TUnderlying : unmanaged
 	{
+		ArgumentNullException.ThrowIfNull(underlyingSerializer);
+
 		var enumType = typeof(TEnum);
 		var actualUnderlyingType = enumType.GetEnumUnderlyingType();
 		var givenUnderlyingType = typeof(TUnderlying);

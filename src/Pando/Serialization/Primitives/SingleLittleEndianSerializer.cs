@@ -11,7 +11,7 @@ public class SingleLittleEndianSerializer : IPandoSerializer<float>
 
 	public int SerializedSize => sizeof(float);
 
-	public void Serialize(float value, Span<byte> buffer, INodeDataStore _) => BinaryPrimitives.WriteSingleLittleEndian(buffer, value);
+	public void Serialize(float value, Span<byte> buffer, INodeDataStore dataStore) => BinaryPrimitives.WriteSingleLittleEndian(buffer, value);
 
-	public float Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore _) => BinaryPrimitives.ReadSingleLittleEndian(buffer);
+	public float Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) => BinaryPrimitives.ReadSingleLittleEndian(buffer);
 }

@@ -11,13 +11,13 @@ public class ByteSerializer : IPandoSerializer<byte>
 
 	public int SerializedSize => sizeof(byte);
 
-	public void Serialize(byte value, Span<byte> buffer, INodeDataStore _)
+	public void Serialize(byte value, Span<byte> buffer, INodeDataStore dataStore)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(buffer.Length, nameof(buffer));
 		buffer[0] = value;
 	}
 
-	public byte Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore _)
+	public byte Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(buffer.Length, nameof(buffer));
 		return buffer[0];
