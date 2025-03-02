@@ -30,10 +30,10 @@ command.SetHandler(
 		var writer = new IndentedTextWriter(fileWriter, "\t");
 
 		writer.WriteLine("using System;");
-		writer.WriteLine("using System.Buffers.Binary;");
 		writer.WriteLine("using Pando.DataSources;");
-		writer.WriteLine("using Pando.DataSources.Utils;");
+		writer.WriteLine("using Pando.Repositories;");
 		writer.WriteLine("using Pando.Serialization.Utils;");
+
 		writer.WriteLineNoTabs(null);
 		writer.WriteLine("namespace Pando.Serialization.Generic;");
 		writer.WriteLineNoTabs(null);
@@ -115,9 +115,11 @@ command.SetHandler(
 					// Serialize impl
 					writeMethod(
 						writer,
-						"public void Serialize(TNode value, Span<byte> buffer, INodeDataSink dataSink)",
+						"public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)",
 						() =>
 						{
+							writer.WriteLine("ArgumentNullException.ThrowIfNull(dataStore);");
+							writer.WriteLineNoTabs(null);
 							writer.WriteLine($"Span<byte> childrenBuffer = stackalloc byte[{offsetVar(children)}];");
 							writer.WriteLineNoTabs(null);
 							writer.WriteLine(
@@ -126,27 +128,29 @@ command.SetHandler(
 
 							for (int i = 1; i <= children; i++)
 								writer.WriteLine(
-									$"{serializerField(i)}.Serialize(t{i}, childrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], dataSink);"
+									$"{serializerField(i)}.Serialize(t{i}, childrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], dataStore);"
 								);
 							writer.WriteLineNoTabs(null);
 
-							writer.WriteLine("dataSink.AddNode(childrenBuffer, buffer);");
+							writer.WriteLine("dataStore.AddNode(childrenBuffer, buffer);");
 						}
 					);
 
 					// Deserialize impl
 					writeMethod(
 						writer,
-						"public TNode Deserialize(ReadOnlySpan<byte> buffer, INodeDataSource dataSource)",
+						"public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)",
 						() =>
 						{
+							writer.WriteLine("ArgumentNullException.ThrowIfNull(dataStore);");
+							writer.WriteLineNoTabs(null);
 							writer.WriteLine($"Span<byte> childrenBuffer = stackalloc byte[{offsetVar(children)}];");
-							writer.WriteLine("dataSource.CopyNodeBytesTo(buffer, childrenBuffer);");
+							writer.WriteLine("dataStore.CopyNodeBytesTo(buffer, childrenBuffer);");
 							writer.WriteLineNoTabs(null);
 
 							for (int i = 1; i <= children; i++)
 								writer.WriteLine(
-									$"var t{i} = {serializerField(i)}.Deserialize(childrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], dataSource);"
+									$"var t{i} = {serializerField(i)}.Deserialize(childrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], dataStore);"
 								);
 							writer.WriteLineNoTabs(null);
 
@@ -159,9 +163,11 @@ command.SetHandler(
 					// Merge impl
 					writeMethod(
 						writer,
-						"public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, IDataSource dataSource)",
+						"public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)",
 						() =>
 						{
+							writer.WriteLine("ArgumentNullException.ThrowIfNull(dataStore);");
+							writer.WriteLineNoTabs(null);
 							writer.WriteLine(
 								"if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;"
 							);
@@ -178,15 +184,15 @@ command.SetHandler(
 							);
 							writer.WriteLineNoTabs(null);
 							writer.WriteLine($"var baseChildrenBuffer = childrenBuffer[..{offsetVar(children)}];");
-							writer.WriteLine("dataSource.CopyNodeBytesTo(baseBuffer, baseChildrenBuffer);");
+							writer.WriteLine("dataStore.CopyNodeBytesTo(baseBuffer, baseChildrenBuffer);");
 							writer.WriteLine(
 								$"var targetChildrenBuffer = childrenBuffer[{offsetVar(children)}..({offsetVar(children)} * 2)];"
 							);
-							writer.WriteLine("dataSource.CopyNodeBytesTo(targetBuffer, targetChildrenBuffer);");
+							writer.WriteLine("dataStore.CopyNodeBytesTo(targetBuffer, targetChildrenBuffer);");
 							writer.WriteLine(
 								$"var sourceChildrenBuffer = childrenBuffer[({offsetVar(children)} * 2)..({offsetVar(children)} * 3)];"
 							);
-							writer.WriteLine("dataSource.CopyNodeBytesTo(sourceBuffer, sourceChildrenBuffer);");
+							writer.WriteLine("dataStore.CopyNodeBytesTo(sourceBuffer, sourceChildrenBuffer);");
 							writer.WriteLineNoTabs(null);
 
 							writer.WriteLine("// merge each child");
@@ -197,12 +203,12 @@ command.SetHandler(
 										+ $"baseChildrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], "
 										+ $"targetChildrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], "
 										+ $"sourceChildrenBuffer[{offsetVar(i - 1)}..{offsetVar(i)}], "
-										+ $"dataSource);"
+										+ $"dataStore);"
 								);
 							}
 							writer.WriteLineNoTabs(null);
 
-							writer.WriteLine("dataSource.AddNode(baseChildrenBuffer, baseBuffer);");
+							writer.WriteLine("dataStore.AddNode(baseChildrenBuffer, baseBuffer);");
 						}
 					);
 				}

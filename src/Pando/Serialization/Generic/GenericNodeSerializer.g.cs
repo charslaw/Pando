@@ -29,6 +29,8 @@ public class GenericNodeSerializer<TNode, T1> : IPandoSerializer<TNode>
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t1EndOffset];
 
 		value.Deconstruct(out var t1);
@@ -39,6 +41,8 @@ public class GenericNodeSerializer<TNode, T1> : IPandoSerializer<TNode>
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t1EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -49,6 +53,8 @@ public class GenericNodeSerializer<TNode, T1> : IPandoSerializer<TNode>
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -99,6 +105,8 @@ public class GenericNodeSerializer<TNode, T1, T2> : IPandoSerializer<TNode>
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t2EndOffset];
 
 		value.Deconstruct(out var t1, out var t2);
@@ -110,6 +118,8 @@ public class GenericNodeSerializer<TNode, T1, T2> : IPandoSerializer<TNode>
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t2EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -121,6 +131,8 @@ public class GenericNodeSerializer<TNode, T1, T2> : IPandoSerializer<TNode>
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -177,6 +189,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3> : IPandoSerializer<TNode>
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t3EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3);
@@ -189,6 +203,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3> : IPandoSerializer<TNode>
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t3EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -201,6 +217,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3> : IPandoSerializer<TNode>
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -263,6 +281,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4> : IPandoSerializer<TNo
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t4EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4);
@@ -276,6 +296,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4> : IPandoSerializer<TNo
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t4EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -289,6 +311,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4> : IPandoSerializer<TNo
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -357,6 +381,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5> : IPandoSerializer
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t5EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5);
@@ -371,6 +397,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5> : IPandoSerializer
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t5EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -385,6 +413,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5> : IPandoSerializer
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -459,6 +489,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6> : IPandoSerial
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t6EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6);
@@ -474,6 +506,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6> : IPandoSerial
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t6EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -489,6 +523,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6> : IPandoSerial
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -569,6 +605,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7> : IPandoSe
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t7EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7);
@@ -585,6 +623,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7> : IPandoSe
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t7EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -601,6 +641,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7> : IPandoSe
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -687,6 +729,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8> : IPan
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t8EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8);
@@ -704,6 +748,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8> : IPan
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t8EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -721,6 +767,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8> : IPan
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -813,6 +861,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9> : 
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t9EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8, out var t9);
@@ -831,6 +881,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9> : 
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t9EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -849,6 +901,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9> : 
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -947,6 +1001,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t10EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8, out var t9, out var t10);
@@ -966,6 +1022,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t10EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -985,6 +1043,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -1089,6 +1149,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t11EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8, out var t9, out var t10, out var t11);
@@ -1109,6 +1171,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t11EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -1129,6 +1193,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -1239,6 +1305,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t12EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8, out var t9, out var t10, out var t11, out var t12);
@@ -1260,6 +1328,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t12EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -1281,6 +1351,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -1397,6 +1469,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t13EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8, out var t9, out var t10, out var t11, out var t12, out var t13);
@@ -1419,6 +1493,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t13EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -1441,6 +1517,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -1563,6 +1641,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t14EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8, out var t9, out var t10, out var t11, out var t12, out var t13, out var t14);
@@ -1586,6 +1666,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t14EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -1609,6 +1691,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -1737,6 +1821,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t15EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8, out var t9, out var t10, out var t11, out var t12, out var t13, out var t14, out var t15);
@@ -1761,6 +1847,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t15EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -1785,6 +1873,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
@@ -1919,6 +2009,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Serialize(TNode value, Span<byte> buffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t16EndOffset];
 
 		value.Deconstruct(out var t1, out var t2, out var t3, out var t4, out var t5, out var t6, out var t7, out var t8, out var t9, out var t10, out var t11, out var t12, out var t13, out var t14, out var t15, out var t16);
@@ -1944,6 +2036,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public TNode Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		Span<byte> childrenBuffer = stackalloc byte[_t16EndOffset];
 		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
 
@@ -1969,6 +2063,8 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 
 	public void Merge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeDataStore dataStore)
 	{
+		ArgumentNullException.ThrowIfNull(dataStore);
+
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
 
