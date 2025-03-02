@@ -44,10 +44,10 @@ public class ChessTests
 			♙♙♙♙♙♙♙♙ 2
 			♖♘♗♕♔♗♘♖ 1
 			ＡＢＣＤＥＦＧＨ
-			""";
+			""".ReplaceLineEndings(Environment.NewLine);
 
 		var initialActual = ChessBoardRenderer.RenderBoard(pandoRepository.GetSnapshot(initialHash));
-		await Assert.That(initialExpected).IsEqualTo(initialActual);
+		await Assert.That(initialActual).IsEqualTo(initialExpected);
 
 		// First move: e4
 		var firstMove = ChessPieceMover.MovePiece(initialState, Player.White, 4, Rank.Four, File.E);
@@ -63,7 +63,7 @@ public class ChessTests
 			♙♙♙♙￣♙♙♙ 2
 			♖♘♗♕♔♗♘♖ 1
 			ＡＢＣＤＥＦＧＨ
-			""";
+			""".ReplaceLineEndings(Environment.NewLine);
 
 		var firstMoveActual = ChessBoardRenderer.RenderBoard(pandoRepository.GetSnapshot(firstMoveHash));
 

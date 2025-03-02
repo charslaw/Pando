@@ -60,7 +60,7 @@ internal static class ChessBoardRenderer
 
 		lines.Add("ＡＢＣＤＥＦＧＨ");
 
-		return string.Join("\n", lines);
+		return string.Join(Environment.NewLine, lines);
 	}
 
 	private static char GetPieceChar(ChessPiece piece) =>
