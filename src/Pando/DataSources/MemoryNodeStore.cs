@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
@@ -23,62 +24,43 @@ public class MemoryNodeStore : INodeDataStore
 		_nodeData = nodeData ?? new SpannableList<byte>();
 	}
 
-	public void AddNode(ReadOnlySpan<byte> bytes, Span<byte> idBuffer)
-	{
-		AddNode(bytes).CopyTo(idBuffer);
-	}
-
 	/// <remarks>This implementation is guaranteed not to insert duplicate nodes.</remarks>
 	/// <inheritdoc/>
 	public NodeId AddNode(ReadOnlySpan<byte> bytes)
 	{
-		var nodeId = HashUtils.ComputeNodeHash(bytes);
-		if (HasNode(nodeId))
-			return nodeId;
-
-		AddNodeWithIdUnsafe(nodeId, bytes);
+		_ = TryAddNode(bytes, out var nodeId);
 		return nodeId;
 	}
 
-	/// Adds a new node indexed with the given id, containing the given bytes.
-	/// <remarks>
-	///     <para>This method is unsafe because the given id and data might mismatch,
-	///     and because it will blindly add the data to the node data collection
-	///     even if it already exists in the collection.</para>
-	///     <para>When calling this method, ensure the correct id is given and
-	///     call <see cref="HasNode(NodeId)"/> first to ensure that this is not a duplicate node.</para>
-	/// </remarks>
-	internal void AddNodeWithIdUnsafe(NodeId nodeId, ReadOnlySpan<byte> bytes)
+	public bool TryAddNode(ReadOnlySpan<byte> bytes, out NodeId nodeId)
 	{
-		var dataSlice = _nodeData.AddSpan(bytes);
-		_nodeIndex.Add(nodeId, dataSlice);
-	}
+		nodeId = HashUtils.ComputeNodeHash(bytes);
+		if (HasNode(nodeId))
+			return false;
 
-	public bool HasNode(ReadOnlySpan<byte> idBuffer) => HasNode(NodeId.FromBuffer(idBuffer));
+		var range = _nodeData.AddSpan(bytes);
+		_nodeIndex.Add(nodeId, range);
+		return true;
+	}
 
 	public bool HasNode(NodeId nodeId) => _nodeIndex.ContainsKey(nodeId);
 
-	public int GetSizeOfNode(ReadOnlySpan<byte> idBuffer) => GetSizeOfNode(NodeId.FromBuffer(idBuffer));
-
 	public int GetSizeOfNode(NodeId nodeId)
 	{
-		EnsureNodePresence(nodeId, nameof(nodeId));
-		var (_, dataLength) = _nodeIndex[nodeId].GetOffsetAndLength(_nodeData.Count);
+		var (_, dataLength) = GetNodeRange(nodeId).GetOffsetAndLength(_nodeData.Count);
 		return dataLength;
 	}
 
-	public void CopyNodeBytesTo(ReadOnlySpan<byte> idBuffer, Span<byte> outputBytes) =>
-		CopyNodeBytesTo(NodeId.FromBuffer(idBuffer), outputBytes);
-
 	public void CopyNodeBytesTo(NodeId nodeId, Span<byte> outputBytes)
 	{
-		EnsureNodePresence(nodeId, nameof(nodeId));
-		_nodeData.CopyTo(_nodeIndex[nodeId], outputBytes);
+		_nodeData.CopyTo(GetNodeRange(nodeId), outputBytes);
 	}
 
-	private void EnsureNodePresence(NodeId nodeId, string paramName)
+	private Range GetNodeRange(NodeId nodeId, [CallerArgumentExpression(nameof(nodeId))] string? paramName = null)
 	{
-		if (!HasNode(nodeId))
-			throw new NodeIdNotFoundException(nodeId, paramName);
+		if (!_nodeIndex.TryGetValue(nodeId, out var range))
+			throw new NodeIdNotFoundException(nodeId, paramName!);
+
+		return range;
 	}
 }
