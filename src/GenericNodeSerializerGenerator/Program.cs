@@ -31,11 +31,11 @@ command.SetHandler(
 
 		writer.WriteLine("using System;");
 		writer.WriteLine("using Pando.Repositories;");
-		writer.WriteLine("using Pando.Serialization.Utils;");
+		writer.WriteLine("using Pando.Serializers.Utils;");
 		writer.WriteLine("using Pando.Vaults;");
 
 		writer.WriteLineNoTabs(null);
-		writer.WriteLine("namespace Pando.Serialization.Generic;");
+		writer.WriteLine("namespace Pando.Serializers.Generic;");
 		writer.WriteLineNoTabs(null);
 
 		for (var nChildren = 1; nChildren <= maxChildren; nChildren++)

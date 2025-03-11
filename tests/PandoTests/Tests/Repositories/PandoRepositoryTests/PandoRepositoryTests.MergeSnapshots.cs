@@ -1,6 +1,6 @@
 using Pando.Exceptions;
 using Pando.Repositories;
-using Pando.Serialization.Primitives;
+using Pando.Serializers.Primitives;
 
 namespace PandoTests.Tests.Repositories.PandoRepositoryTests;
 

@@ -4,9 +4,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Pando.Persistors;
 using Pando.Repositories;
-using Pando.Serialization;
-using Pando.Serialization.Collections;
-using Pando.Serialization.Primitives;
+using Pando.Serializers;
+using Pando.Serializers.Collections;
+using Pando.Serializers.Primitives;
 using Pando.Vaults;
 using PandoExampleProject.Serializers;
 

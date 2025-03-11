@@ -1,8 +1,8 @@
 using System;
-using Pando.Serialization;
-using Pando.Serialization.Collections;
-using Pando.Serialization.Generic;
-using Pando.Serialization.Primitives;
+using Pando.Serializers;
+using Pando.Serializers.Collections;
+using Pando.Serializers.Generic;
+using Pando.Serializers.Primitives;
 
 namespace PandoTests.Tests.Repositories.TestStateTrees;
 

@@ -1,7 +1,7 @@
 using System;
 using Pando.Repositories;
-using Pando.Serialization;
-using Pando.Serialization.Collections;
+using Pando.Serializers;
+using Pando.Serializers.Collections;
 using Pando.Vaults;
 
 namespace ExamplesCode;

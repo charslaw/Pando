@@ -1,5 +1,5 @@
 using System;
-using Pando.Serialization;
+using Pando.Serializers;
 using Pando.Vaults;
 
 namespace PandoExampleProject.Serializers;
