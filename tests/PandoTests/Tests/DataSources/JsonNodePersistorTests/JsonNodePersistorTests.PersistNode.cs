@@ -1,12 +1,13 @@
 using System.IO;
 using System.Text;
 using Pando.DataSources;
+using Pando.DataSources.Utils;
 
-namespace PandoTests.Tests.DataSources.JsonNodeStoreTests;
+namespace PandoTests.Tests.DataSources.JsonNodePersistorTests;
 
-public static partial class JsonNodeStoreTests
+public static partial class JsonNodePersistorTests
 {
-	public class AddNode
+	public class PersistNode
 	{
 		[Test]
 		public async Task Should_output_node_data_to_stream()
@@ -14,13 +15,14 @@ public static partial class JsonNodeStoreTests
 			byte[] nodeData = [0, 1, 2, 3];
 
 			var stream = new MemoryStream();
-			var dataStore = JsonNodeStore.CreateFromStream(stream);
+			var dataStore = JsonNodePersistor.CreateFromStream(stream);
 
-			var nodeId = dataStore.AddNode(nodeData);
+			var nodeId = HashUtils.ComputeNodeHash(nodeData);
+			dataStore.PersistNode(nodeId, nodeData);
 
-			var expected = $$"""
+			var expected = """
 				{
-				  "{{nodeId.ToHashString()}}": "00010203"
+				  "1ecc534460d8ceff": "00010203"
 				}
 				""";
 
@@ -34,14 +36,15 @@ public static partial class JsonNodeStoreTests
 			byte[] nodeData = [55, 161, 83, 255];
 
 			var stream = new MemoryStream();
-			var dataStore = JsonNodeStore.CreateFromStream(stream);
+			var dataStore = JsonNodePersistor.CreateFromStream(stream);
 
-			var nodeId = dataStore.AddNode(nodeData);
-			_ = dataStore.AddNode(nodeData);
+			var nodeId = HashUtils.ComputeNodeHash(nodeData);
+			dataStore.PersistNode(nodeId, nodeData);
+			dataStore.PersistNode(nodeId, nodeData);
 
-			var expected = $$"""
+			var expected = """
 				{
-				  "{{nodeId.ToHashString()}}": "37A153FF"
+				  "2860d87ea6df310b": "37A153FF"
 				}
 				""";
 
