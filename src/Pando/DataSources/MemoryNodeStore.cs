@@ -11,17 +11,29 @@ public class MemoryNodeStore : INodeDataStore
 {
 	private readonly Dictionary<NodeId, Range> _nodeIndex;
 	private readonly SpannableList<byte> _nodeData;
+	private readonly INodePersistor? _persistor;
 
 	public MemoryNodeStore()
 	{
 		_nodeIndex = new Dictionary<NodeId, Range>();
 		_nodeData = new SpannableList<byte>();
+		_persistor = null;
+	}
+
+	public MemoryNodeStore(INodePersistor persistor)
+	{
+		ArgumentNullException.ThrowIfNull(persistor);
+
+		_persistor = persistor;
+		(_nodeIndex, var data) = persistor.LoadNodeData();
+		_nodeData = new SpannableList<byte>(data);
 	}
 
 	internal MemoryNodeStore(Dictionary<NodeId, Range>? nodeIndex = null, SpannableList<byte>? nodeData = null)
 	{
 		_nodeIndex = nodeIndex ?? new Dictionary<NodeId, Range>();
 		_nodeData = nodeData ?? new SpannableList<byte>();
+		_persistor = null;
 	}
 
 	/// <remarks>This implementation is guaranteed not to insert duplicate nodes.</remarks>
@@ -40,6 +52,7 @@ public class MemoryNodeStore : INodeDataStore
 
 		var range = _nodeData.AddSpan(bytes);
 		_nodeIndex.Add(nodeId, range);
+		_persistor?.PersistNode(nodeId, bytes);
 		return true;
 	}
 
