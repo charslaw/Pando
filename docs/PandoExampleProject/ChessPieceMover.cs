@@ -9,7 +9,8 @@ internal static class ChessPieceMover
 		Player player,
 		Index pieceIndex,
 		Rank newRank,
-		File newFile
+		File newFile,
+		TimeSpan elapsed = default
 	)
 	{
 		if (player != startState.PlayerState.CurrentTurn)
@@ -26,11 +27,16 @@ internal static class ChessPieceMover
 			}
 		);
 
-		return startState with
-		{
-			PlayerState = startState.PlayerState with { CurrentTurn = OtherPlayer(player) },
-			PlayerPieces = newPlayerPieces,
-		};
+		var newRemainingTime = startState.RemainingTime.MutateSide(player, remainingTime => remainingTime - elapsed);
+
+		return new ChessGameState(
+			PlayerState: startState.PlayerState with
+			{
+				CurrentTurn = OtherPlayer(player),
+			},
+			RemainingTime: newRemainingTime,
+			PlayerPieces: newPlayerPieces
+		);
 	}
 
 	private static Player OtherPlayer(Player player) =>
