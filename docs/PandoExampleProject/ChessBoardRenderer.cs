@@ -1,5 +1,7 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using CommunityToolkit.HighPerformance;
 
 namespace PandoExampleProject;
 
@@ -24,22 +26,20 @@ internal static class ChessBoardRenderer
 
 	public static string RenderBoard(ChessGameState gameState)
 	{
-		char[][] boardChars = new char[Rank.Eight - Rank.One + 1][];
+		var boardChars = new char[Rank.Eight - Rank.One + 1, File.H - File.A + 1];
+		var boardSpan = new Span2D<char>(boardChars);
 
-		for (Rank rank = Rank.One; rank <= Rank.Eight; rank++)
+		for (var rank = Rank.One; rank <= Rank.Eight; rank++)
 		{
 			var rankIndex = rank - Rank.One;
-			boardChars[rankIndex] = new char[File.H - File.A + 1];
-			for (File file = File.A; file <= File.H; file++)
+			for (var file = File.A; file <= File.H; file++)
 			{
 				var fileIndex = file - File.A;
-				boardChars[rankIndex][fileIndex] = (rankIndex + fileIndex) % 2 == 0 ? DARK_SQUARE : LIGHT_SQUARE;
+				boardSpan[rankIndex, fileIndex] = (rankIndex + fileIndex) % 2 == 0 ? DARK_SQUARE : LIGHT_SQUARE;
 			}
 		}
 
-		List<ChessPiece> allPieces = new List<ChessPiece>(32);
-		allPieces.AddRange(gameState.PlayerPieces.WhiteValue);
-		allPieces.AddRange(gameState.PlayerPieces.BlackValue);
+		var allPieces = gameState.PlayerPieces.WhiteValue.Concat(gameState.PlayerPieces.BlackValue);
 		foreach (var piece in allPieces)
 		{
 			if (piece.State == ChessPieceState.Captured)
@@ -47,20 +47,20 @@ internal static class ChessBoardRenderer
 
 			var rankIndex = piece.CurrentRank - Rank.One;
 			var fileIndex = piece.CurrentFile - File.A;
-			boardChars[rankIndex][fileIndex] = GetPieceChar(piece);
+			boardSpan[rankIndex, fileIndex] = GetPieceChar(piece);
 		}
 
-		List<string> lines = new List<string>(9);
+		var output = new StringBuilder();
 
-		for (Rank rank = Rank.Eight; rank >= Rank.One; rank--)
+		for (var rank = Rank.Eight; rank >= Rank.One; rank--)
 		{
 			var rankIndex = rank - Rank.One;
-			lines.Add($"{string.Join("", boardChars[rankIndex])} {(int)rank}");
+			output.AppendLine($"{boardSpan.GetRowSpan(rankIndex)} {(int)rank}");
 		}
 
-		lines.Add("ＡＢＣＤＥＦＧＨ");
+		output.Append("ＡＢＣＤＥＦＧＨ");
 
-		return string.Join(Environment.NewLine, lines);
+		return output.ToString();
 	}
 
 	private static char GetPieceChar(ChessPiece piece) =>
