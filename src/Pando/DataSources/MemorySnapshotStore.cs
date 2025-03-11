@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
@@ -39,30 +40,18 @@ public class MemorySnapshotStore : ISnapshotDataStore
 
 	public bool HasSnapshot(SnapshotId snapshotId) => _snapshotIndex.ContainsKey(snapshotId);
 
-	public NodeId GetSnapshotRootNodeId(SnapshotId snapshotId)
-	{
-		if (_snapshotIndex.TryGetValue(snapshotId, out var entry))
-			return entry.RootNodeId;
-
-		throw new SnapshotIdNotFoundException(snapshotId, nameof(snapshotId));
-	}
+	public NodeId GetSnapshotRootNodeId(SnapshotId snapshotId) => GetEntry(snapshotId).RootNodeId;
 
 	public SnapshotData GetSnapshotData(SnapshotId snapshotId)
 	{
-		if (_snapshotIndex.TryGetValue(snapshotId, out var entry))
-		{
-			return new SnapshotData(snapshotId, entry.SourceParentId, entry.TargetParentId, entry.RootNodeId);
-		}
-
-		throw new SnapshotIdNotFoundException(snapshotId, nameof(snapshotId));
+		var entry = GetEntry(snapshotId);
+		return new SnapshotData(snapshotId, entry.SourceParentId, entry.TargetParentId, entry.RootNodeId);
 	}
 
 	public IEnumerable<SnapshotId> GetSnapshotChildren(SnapshotId snapshotId)
 	{
-		if (_snapshotIndex.TryGetValue(snapshotId, out var entry))
-			return entry.Children ?? Enumerable.Empty<SnapshotId>();
-
-		throw new SnapshotIdNotFoundException(snapshotId, nameof(snapshotId));
+		var entry = GetEntry(snapshotId);
+		return entry.Children ?? Enumerable.Empty<SnapshotId>();
 	}
 
 	public SnapshotId GetSnapshotLeastCommonAncestor(SnapshotId id1, SnapshotId id2)
@@ -145,19 +134,8 @@ public class MemorySnapshotStore : ISnapshotDataStore
 
 	public SnapshotId AddSnapshot(NodeId rootNodeId, SnapshotId sourceSnapshotId, SnapshotId targetSnapshotId = default)
 	{
-		if (!_snapshotIndex.TryGetValue(sourceSnapshotId, out var sourceParentEntry))
-		{
-			throw new SnapshotIdNotFoundException(sourceSnapshotId, nameof(sourceSnapshotId));
-		}
-
-		TreeEntry? targetParentEntry = null;
-		if (targetSnapshotId != SnapshotId.None)
-		{
-			if (!_snapshotIndex.TryGetValue(targetSnapshotId, out targetParentEntry))
-			{
-				throw new SnapshotIdNotFoundException(targetSnapshotId, nameof(targetSnapshotId));
-			}
-		}
+		var sourceParentEntry = GetEntry(sourceSnapshotId);
+		var targetParentEntry = targetSnapshotId != SnapshotId.None ? GetEntry(targetSnapshotId) : null;
 
 		var snapshotId = HashUtils.ComputeSnapshotHash(rootNodeId, sourceSnapshotId, targetSnapshotId);
 
@@ -175,5 +153,16 @@ public class MemorySnapshotStore : ISnapshotDataStore
 		}
 
 		return snapshotId;
+	}
+
+	private TreeEntry GetEntry(
+		SnapshotId snapshotId,
+		[CallerArgumentExpression(nameof(snapshotId))] string? paramName = null
+	)
+	{
+		if (!_snapshotIndex.TryGetValue(snapshotId, out var entry))
+			throw new SnapshotIdNotFoundException(snapshotId, paramName!);
+
+		return entry;
 	}
 }
