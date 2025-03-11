@@ -33,3 +33,33 @@ internal class ChessPieceSerializer : IPandoSerializer<ChessPiece>
 		);
 	}
 }
+
+/// An example chess piece serializer with better storage size characteristics than the basic one provided above
+internal class OptimizedChessPieceSerializer : IPandoSerializer<ChessPiece>
+{
+	public int SerializedSize => 2;
+
+	public void Serialize(ChessPiece value, Span<byte> buffer, INodeDataStore dataStore)
+	{
+		// pack owner (1 bit), state (1 bit), and piece type (3 bits) into 1 byte
+		buffer[0] = (byte)value.Owner;
+		buffer[0] |= (byte)((int)value.State << 1);
+		buffer[0] |= (byte)((int)value.Type << 4);
+
+		// pack rank (3 bits) and file (3 bits) into the top and bottom halves of one byte
+		buffer[1] = (byte)((int)value.CurrentRank << 4);
+		buffer[1] |= value.CurrentFile - File.A;
+	}
+
+	public ChessPiece Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
+	{
+		var owner = (Player)(buffer[0] & 0b0000_0001);
+		var state = (ChessPieceState)((buffer[0] & 0b0000_0010) >> 1);
+		var type = (PieceType)((buffer[0] & 0b1111_0000) >> 4);
+
+		var rank = (Rank)((buffer[1] & 0b1111_0000) >> 4);
+		var file = (File)((buffer[1] & 0b0000_1111) + (byte)File.A);
+
+		return new ChessPiece(owner, type, rank, file, state);
+	}
+}
