@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Pando.DataSources;
-using Pando.DataSources.Utils;
 using Pando.Serialization.Collections;
 using Pando.Serialization.Primitives;
+using Pando.Vaults;
+using Pando.Vaults.Utils;
 using PandoTests.Utils;
 
 namespace PandoTests.Tests.Serialization.Collections.ListSerializerTests;
@@ -19,9 +19,9 @@ public static class ListSerializerTests
 
 			var listSerializer = new ListSerializer<int>(Int32LittleEndianSerializer.Default);
 			var nodeData = new SpannableList<byte>();
-			var dataSource = new MemoryNodeStore(null, nodeData);
+			var vault = new MemoryNodeVault(null, nodeData);
 
-			listSerializer.Serialize(list, stackalloc byte[8], dataSource);
+			listSerializer.Serialize(list, stackalloc byte[8], vault);
 
 			var actual = nodeData.ToArray();
 			byte[] expected = [0x39, 0x5, 0, 0, 0x2A, 0, 0, 0];
@@ -34,12 +34,12 @@ public static class ListSerializerTests
 			List<int> list = [1337, 42];
 
 			var listSerializer = new ListSerializer<int>(Int32LittleEndianSerializer.Default);
-			var dataSource = new MemoryNodeStore();
+			var vault = new MemoryNodeVault();
 
 			Span<byte> hashSpan = stackalloc byte[8];
-			listSerializer.Serialize(list, hashSpan, dataSource);
+			listSerializer.Serialize(list, hashSpan, vault);
 
-			var newList = listSerializer.Deserialize(hashSpan, dataSource);
+			var newList = listSerializer.Deserialize(hashSpan, vault);
 
 			await Assert.That(newList).IsNotSameReferenceAs(list).And.IsEquivalentTo(list);
 		}

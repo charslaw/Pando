@@ -1,8 +1,8 @@
 using System;
-using Pando.DataSources;
-using Pando.DataSources.Utils;
 using Pando.Serialization.Collections;
 using Pando.Serialization.Primitives;
+using Pando.Vaults;
+using Pando.Vaults.Utils;
 using PandoTests.Utils;
 
 namespace PandoTests.Tests.Serialization.Collections.ArraySerializerTests;
@@ -18,9 +18,9 @@ public static partial class ArraySerializerTests
 
 			var arraySerializer = new ArraySerializer<int>(Int32LittleEndianSerializer.Default);
 			var nodeData = new SpannableList<byte>();
-			var dataSource = new MemoryNodeStore(null, nodeData);
+			var vault = new MemoryNodeVault(null, nodeData);
 
-			arraySerializer.Serialize(array, stackalloc byte[8], dataSource);
+			arraySerializer.Serialize(array, stackalloc byte[8], vault);
 
 			var actual = nodeData.ToArray();
 			byte[] expected = [0x39, 0x5, 0, 0, 0x2A, 0, 0, 0];
@@ -33,12 +33,12 @@ public static partial class ArraySerializerTests
 			int[] array = [1337, 42];
 
 			var arraySerializer = new ArraySerializer<int>(Int32LittleEndianSerializer.Default);
-			var dataSource = new MemoryNodeStore();
+			var vault = new MemoryNodeVault();
 
 			Span<byte> hashSpan = stackalloc byte[8];
-			arraySerializer.Serialize(array, hashSpan, dataSource);
+			arraySerializer.Serialize(array, hashSpan, vault);
 
-			var newArray = arraySerializer.Deserialize(hashSpan, dataSource);
+			var newArray = arraySerializer.Deserialize(hashSpan, vault);
 
 			await Assert.That(newArray).IsNotSameReferenceAs(array).And.IsEquivalentTo(array);
 		}

@@ -1,26 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
+using Pando.Vaults.Utils;
 
-namespace Pando.DataSources;
+namespace Pando.Vaults;
 
-public class MemoryNodeStore : INodeDataStore
+public class MemoryNodeVault : INodeVault
 {
 	private readonly Dictionary<NodeId, Range> _nodeIndex;
 	private readonly SpannableList<byte> _nodeData;
 	private readonly INodePersistor? _persistor;
 
-	public MemoryNodeStore()
+	public MemoryNodeVault()
 	{
 		_nodeIndex = new Dictionary<NodeId, Range>();
 		_nodeData = new SpannableList<byte>();
 		_persistor = null;
 	}
 
-	public MemoryNodeStore(INodePersistor persistor)
+	public MemoryNodeVault(INodePersistor persistor)
 	{
 		ArgumentNullException.ThrowIfNull(persistor);
 
@@ -29,7 +29,7 @@ public class MemoryNodeStore : INodeDataStore
 		_nodeData = new SpannableList<byte>(data);
 	}
 
-	internal MemoryNodeStore(Dictionary<NodeId, Range>? nodeIndex = null, SpannableList<byte>? nodeData = null)
+	internal MemoryNodeVault(Dictionary<NodeId, Range>? nodeIndex = null, SpannableList<byte>? nodeData = null)
 	{
 		_nodeIndex = nodeIndex ?? new Dictionary<NodeId, Range>();
 		_nodeData = nodeData ?? new SpannableList<byte>();

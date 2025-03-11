@@ -1,9 +1,9 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using Pando.DataSources;
 using Pando.Repositories;
 using Pando.Serialization.Utils;
+using Pando.Vaults;
 
 namespace Pando.Serialization.Collections;
 
@@ -18,9 +18,9 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 
 	public int SerializedSize => NodeId.SIZE;
 
-	public void Serialize(TCollection collection, Span<byte> buffer, INodeDataStore dataStore)
+	public void Serialize(TCollection collection, Span<byte> buffer, INodeVault nodeVault)
 	{
-		ArgumentNullException.ThrowIfNull(dataStore);
+		ArgumentNullException.ThrowIfNull(nodeVault);
 
 		var elementSize = ElementSerializer.SerializedSize;
 		var elementBytesSize = collection.Count * elementSize;
@@ -33,11 +33,11 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 			var currentByte = 0;
 			foreach (var el in collection)
 			{
-				ElementSerializer.Serialize(el, elementBytes.Slice(currentByte, elementSize), dataStore);
+				ElementSerializer.Serialize(el, elementBytes.Slice(currentByte, elementSize), nodeVault);
 				currentByte += elementSize;
 			}
 
-			dataStore.AddNode(elementBytes, buffer);
+			nodeVault.AddNode(elementBytes, buffer);
 		}
 		finally
 		{
@@ -45,19 +45,19 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 		}
 	}
 
-	public TCollection Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
+	public TCollection Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault)
 	{
-		ArgumentNullException.ThrowIfNull(dataStore);
+		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		var nodeDataSize = dataStore.GetSizeOfNode(buffer);
+		var nodeDataSize = nodeVault.GetSizeOfNode(buffer);
 		var elementBytesArr = ArrayPool<byte>.Shared.Rent(nodeDataSize);
 
 		try
 		{
 			Span<byte> elementBytes = elementBytesArr.AsSpan(0, nodeDataSize);
-			dataStore.CopyNodeBytesTo(buffer, elementBytes);
+			nodeVault.CopyNodeBytesTo(buffer, elementBytes);
 
-			return CreateCollection(elementBytes, ElementSerializer.SerializedSize, dataStore);
+			return CreateCollection(elementBytes, ElementSerializer.SerializedSize, nodeVault);
 		}
 		finally
 		{
@@ -69,19 +69,19 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 		Span<byte> baseBuffer,
 		ReadOnlySpan<byte> targetBuffer,
 		ReadOnlySpan<byte> sourceBuffer,
-		INodeDataStore dataStore
+		INodeVault nodeVault
 	)
 	{
-		ArgumentNullException.ThrowIfNull(dataStore);
+		ArgumentNullException.ThrowIfNull(nodeVault);
 
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer))
 			return;
 		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer))
 			return;
 
-		var baseBytesSize = dataStore.GetSizeOfNode(baseBuffer);
-		var targetBytesSize = dataStore.GetSizeOfNode(targetBuffer);
-		var sourceBytesSize = dataStore.GetSizeOfNode(sourceBuffer);
+		var baseBytesSize = nodeVault.GetSizeOfNode(baseBuffer);
+		var targetBytesSize = nodeVault.GetSizeOfNode(targetBuffer);
+		var sourceBytesSize = nodeVault.GetSizeOfNode(sourceBuffer);
 		var mergedBytesSize = Math.Max(targetBytesSize, sourceBytesSize);
 		var sharedBytesSize = Math.Max(mergedBytesSize, baseBytesSize); // the size of the buffer shared by the base data and the merged result
 		var totalBytesSize = sharedBytesSize + targetBytesSize + sourceBytesSize;
@@ -95,11 +95,11 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 			Span<byte> totalBytesBuffer = totalBytesArr.AsSpan(0, totalBytesSize);
 
 			var sharedBytesBuffer = totalBytesBuffer[..sharedBytesSize];
-			dataStore.CopyNodeBytesTo(baseBuffer, sharedBytesBuffer[..baseBytesSize]);
+			nodeVault.CopyNodeBytesTo(baseBuffer, sharedBytesBuffer[..baseBytesSize]);
 			var targetBytesBuffer = totalBytesBuffer.Slice(sharedBytesSize, targetBytesSize);
-			dataStore.CopyNodeBytesTo(targetBuffer, targetBytesBuffer);
+			nodeVault.CopyNodeBytesTo(targetBuffer, targetBytesBuffer);
 			var sourceBytesBuffer = totalBytesBuffer.Slice(sharedBytesSize + targetBytesSize, sourceBytesSize);
-			dataStore.CopyNodeBytesTo(sourceBuffer, sourceBytesBuffer);
+			nodeVault.CopyNodeBytesTo(sourceBuffer, sourceBytesBuffer);
 
 			for (int i = 0; i < mergedBytesSize; i += elementSize)
 			{
@@ -122,11 +122,11 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 					sharedBytesBuffer.Slice(i, elementSize),
 					targetBytesBuffer.Slice(i, elementSize),
 					sourceBytesBuffer.Slice(i, elementSize),
-					dataStore
+					nodeVault
 				);
 			}
 
-			dataStore.AddNode(sharedBytesBuffer[..mergedBytesSize], baseBuffer);
+			nodeVault.AddNode(sharedBytesBuffer[..mergedBytesSize], baseBuffer);
 		}
 		finally
 		{
@@ -137,6 +137,6 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 	protected abstract TCollection CreateCollection(
 		ReadOnlySpan<byte> elementBytes,
 		int elementSize,
-		IReadOnlyNodeDataStore dataSource
+		IReadOnlyNodeVault nodeVault
 	);
 }

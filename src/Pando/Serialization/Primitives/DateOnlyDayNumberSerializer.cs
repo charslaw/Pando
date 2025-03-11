@@ -1,5 +1,5 @@
 using System;
-using Pando.DataSources;
+using Pando.Vaults;
 
 namespace Pando.Serialization.Primitives;
 
@@ -14,9 +14,9 @@ public class DateOnlyDayNumberSerializer(IPandoSerializer<int> innerSerializer) 
 
 	public int SerializedSize { get; } = innerSerializer.SerializedSize;
 
-	public void Serialize(DateOnly value, Span<byte> buffer, INodeDataStore dataStore) =>
-		innerSerializer.Serialize(value.DayNumber, buffer, dataStore);
+	public void Serialize(DateOnly value, Span<byte> buffer, INodeVault nodeVault) =>
+		innerSerializer.Serialize(value.DayNumber, buffer, nodeVault);
 
-	public DateOnly Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) =>
-		DateOnly.FromDayNumber(innerSerializer.Deserialize(buffer, dataStore));
+	public DateOnly Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault) =>
+		DateOnly.FromDayNumber(innerSerializer.Deserialize(buffer, nodeVault));
 }

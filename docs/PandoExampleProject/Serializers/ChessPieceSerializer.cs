@@ -1,6 +1,6 @@
 using System;
-using Pando.DataSources;
 using Pando.Serialization;
+using Pando.Vaults;
 
 namespace PandoExampleProject.Serializers;
 
@@ -10,7 +10,7 @@ internal class ChessPieceSerializer : IPandoSerializer<ChessPiece>
 	public int SerializedSize => 5;
 
 	/// Sequentially writes each enum member of the chess piece into a buffer and submits the node to the data sink.
-	public void Serialize(ChessPiece obj, Span<byte> buffer, INodeDataStore dataStore)
+	public void Serialize(ChessPiece obj, Span<byte> buffer, INodeVault nodeVault)
 	{
 		// We *could* use an EnumSerializer for each of these enums, though I think in this case that would be less readable
 		// when writing the serializer manually since the enums can just be directly cast to the underlying type
@@ -22,7 +22,7 @@ internal class ChessPieceSerializer : IPandoSerializer<ChessPiece>
 	}
 
 	/// Gets the sequential byte values and converts them to their enum values, then creates a chess piece.
-	public ChessPiece Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
+	public ChessPiece Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault)
 	{
 		return new ChessPiece(
 			(Player)buffer[0],
@@ -39,7 +39,7 @@ internal class OptimizedChessPieceSerializer : IPandoSerializer<ChessPiece>
 {
 	public int SerializedSize => 2;
 
-	public void Serialize(ChessPiece value, Span<byte> buffer, INodeDataStore dataStore)
+	public void Serialize(ChessPiece value, Span<byte> buffer, INodeVault nodeVault)
 	{
 		// pack owner (1 bit), state (1 bit), and piece type (3 bits) into 1 byte
 		buffer[0] = (byte)value.Owner;
@@ -51,7 +51,7 @@ internal class OptimizedChessPieceSerializer : IPandoSerializer<ChessPiece>
 		buffer[1] |= value.CurrentFile - File.A;
 	}
 
-	public ChessPiece Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
+	public ChessPiece Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault)
 	{
 		var owner = (Player)(buffer[0] & 0b0000_0001);
 		var state = (ChessPieceState)((buffer[0] & 0b0000_0010) >> 1);

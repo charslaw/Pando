@@ -1,6 +1,6 @@
 using System;
-using Pando.DataSources;
 using Pando.Serialization.Utils;
+using Pando.Vaults;
 
 namespace Pando.Serialization;
 
@@ -18,23 +18,23 @@ public interface IPandoSerializer<T>
 	/// <remarks>
 	///     <p>The implementation of Serialize is inherently recursive, because each node must delegate to serialize its child nodes.</p>
 	///     <p>For a node with children, the implementation should serialize its children into an inner buffer that is saved as a node in the
-	///     <paramref name="dataStore"/>, then copy the returned node hash to the given <paramref name="buffer"/>.</p>
+	///     <paramref name="nodeVault"/>, then copy the returned node hash to the given <paramref name="buffer"/>.</p>
 	///     <p>For a primitive (leaf node), it should copy a binary representation of the primitive data into the given <paramref name="buffer"/>.</p>
 	/// </remarks>
 	/// <example>
 	///     Example 1: Basic implementation of <c>Serialize</c> for a node with two child nodes, <c>A</c> and <c>B</c>.
 	///     <code language="cs">
-	///     ulong Serialize(MyNode obj, Span&lt;byte&gt; buffer, INodeDataSink dataSink)
+	///     ulong Serialize(MyNode obj, Span&lt;byte&gt; buffer, INodeVault nodeVault)
 	///     {
 	///	        // Allocate a child buffer to store our children's data
 	///         Span&lt;byte&gt; childBuffer = stackalloc byte[aSerializer.SerializedSize + bSerializer.SerializedSize];
 	///
 	///	        // Serialize children into the allocated buffer
-	///         aSerializer.Serialize(obj.A, childBuffer, dataSink);
-	///         bSerializer.Serialize(obj.B, childBuffer[aSerializer.SerializedSize..], dataSink);
+	///         aSerializer.Serialize(obj.A, childBuffer, nodeVault);
+	///         bSerializer.Serialize(obj.B, childBuffer[aSerializer.SerializedSize..], nodeVault);
 	///
 	///	        // Save serialized children in a node in the data sink
-	///         var hash = dataSink.AddNode(childBuffer);
+	///         var hash = nodeVault.AddNode(childBuffer);
 	///
 	///	        // Write the saved node hash to the given parent buffer
 	///	        BinaryPrimitives.WriteUInt64LittleEndian(buffer, hash);
@@ -44,14 +44,14 @@ public interface IPandoSerializer<T>
 	/// <example>
 	///     Example 2: Basic implementation of Serialize for a primitive type, <see cref="DateOnly"/>.
 	///     <code language="cs">
-	///     ulong Serialize(DateOnly obj, Span&lt;byte&gt; buffer, INodeDataSink dataSink)
+	///     ulong Serialize(DateOnly obj, Span&lt;byte&gt; buffer, INodeVault nodeVault)
 	///     {
 	///         // Since this is a primitive, we can just serialize directly into the given buffer.
 	///	        BinaryPrimitives.WriteInt32LittleEndian(buffer, obj.DayNumber);
 	///     }
 	///     </code>
 	/// </example>
-	void Serialize(T value, Span<byte> buffer, INodeDataStore dataStore);
+	void Serialize(T value, Span<byte> buffer, INodeVault nodeVault);
 
 	/// <summary>Converts a binary representation of a node into an instance of that node.</summary>
 	/// <returns>An instance of type T that is represented by the given binary representation.</returns>
@@ -63,18 +63,18 @@ public interface IPandoSerializer<T>
 	/// <example>
 	///     Example 1: Basic implementation of Deserialize for a node with two child nodes, <c>A</c> and <c>B</c>.
 	///     <code>
-	///     MyNode Deserialize(ReadOnlySpan&lt;byte&gt; buffer, INodeDataSource dataSource)
+	///     MyNode Deserialize(ReadOnlySpan&lt;byte&gt; buffer, IReadOnlyNodeVault nodeVault)
 	///     {
 	///         // Read the hash for this node from the buffer
 	///	        var hash = BinaryPrimitives.ReadUInt64LittleEndian(buffer);
 	///
 	///         // Load node data
 	///         Span&lt;byte&gt; childBuffer = stackalloc byte[aSerializer.SerializedSize + bSerializer.SerializedSize];
-	///         dataSource.CopyNodeBytesTo(hash, childBuffer);
+	///         nodeVault.CopyNodeBytesTo(hash, childBuffer);
 	///
 	///         // Deserialize child values
-	///         var a = aSerializer.Deserialize(childBuffer, dataSource);
-	///         var b = bSerializer.Deserialize(childBuffer[aSerializer.SerializedSize..], dataSource);
+	///         var a = aSerializer.Deserialize(childBuffer, nodeVault);
+	///         var b = bSerializer.Deserialize(childBuffer[aSerializer.SerializedSize..], nodeVault);
 	///
 	///	        return new MyNode(a, b);
 	///     }
@@ -83,13 +83,13 @@ public interface IPandoSerializer<T>
 	/// <example>
 	///     Example 2: Basic implementation of Serialize for a primitive type, <see cref="DateOnly"/>.
 	///     <code>
-	///     DateOnly Deserialize(ReadOnlySpan&lt;byte&gt; buffer, INodeDataSource dataSource)
+	///     DateOnly Deserialize(ReadOnlySpan&lt;byte&gt; buffer, IReadOnlyNodeVault nodeVault)
 	///     {
 	///	        return DateOnly.FromDayNumber(BinaryPrimitives.ReadInt32LittleEndian(buffer));
 	///     }
 	///     </code>
 	/// </example>
-	T Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore);
+	T Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault);
 
 	/// <summary>Perform a 3-way merge from source buffer onto target buffer, with the result being output in base buffer.</summary>
 	/// <remarks>
@@ -98,11 +98,11 @@ public interface IPandoSerializer<T>
 	/// <param name="baseBuffer">The common ancestor data of the 3-way merge and the destination of the output.</param>
 	/// <param name="targetBuffer">The target of the 3-way merge.</param>
 	/// <param name="sourceBuffer">The source of the 3-way merge.</param>
-	/// <param name="dataStore"></param>
+	/// <param name="nodeVault"></param>
 	void Merge(
 		Span<byte> baseBuffer,
 		ReadOnlySpan<byte> targetBuffer,
 		ReadOnlySpan<byte> sourceBuffer,
-		INodeDataStore dataStore
+		INodeVault nodeVault
 	) => MergeUtils.MergeInline(baseBuffer, targetBuffer, sourceBuffer);
 }

@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Pando.Repositories;
 
-namespace Pando.DataSources;
+namespace Pando.Vaults;
 
 [JsonSourceGenerationOptions(
 	Converters = [typeof(NodeIdConverter), typeof(ByteArrayJsonArrayConverter)],

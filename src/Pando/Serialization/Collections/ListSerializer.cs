@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Pando.DataSources;
+using Pando.Vaults;
 
 namespace Pando.Serialization.Collections;
 
@@ -13,13 +13,13 @@ public class ListSerializer<TElement>(IPandoSerializer<TElement> elementSerializ
 	protected override List<TElement> CreateCollection(
 		ReadOnlySpan<byte> elementBytes,
 		int elementSize,
-		IReadOnlyNodeDataStore dataSource
+		IReadOnlyNodeVault nodeVault
 	)
 	{
 		var list = new List<TElement>(elementBytes.Length / elementSize);
 		for (int i = 0; i < elementBytes.Length; i += elementSize)
 		{
-			var element = ElementSerializer.Deserialize(elementBytes.Slice(i, elementSize), dataSource);
+			var element = ElementSerializer.Deserialize(elementBytes.Slice(i, elementSize), nodeVault);
 			list.Add(element);
 		}
 

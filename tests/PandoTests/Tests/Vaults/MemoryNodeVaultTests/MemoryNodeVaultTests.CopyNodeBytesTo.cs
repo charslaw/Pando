@@ -1,12 +1,12 @@
 using System;
-using Pando.DataSources;
-using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
+using Pando.Vaults;
+using Pando.Vaults.Utils;
 
-namespace PandoTests.Tests.DataSources.MemoryNodeStoreTests;
+namespace PandoTests.Tests.Vaults.MemoryNodeVaultTests;
 
-public static partial class MemoryNodeStoreTests
+public static partial class MemoryNodeVaultTests
 {
 	public class CopyNodeBytesTo
 	{
@@ -16,11 +16,11 @@ public static partial class MemoryNodeStoreTests
 			byte[] nodeData = [0, 1, 2, 3];
 			var nodeId = HashUtils.ComputeNodeHash(nodeData);
 
-			var dataSource = new MemoryNodeStore();
-			dataSource.AddNode([.. nodeData]);
+			var vault = new MemoryNodeVault();
+			vault.AddNode([.. nodeData]);
 
 			var actual = new byte[4];
-			dataSource.CopyNodeBytesTo(nodeId, actual);
+			vault.CopyNodeBytesTo(nodeId, actual);
 
 			await Assert.That(actual).IsEquivalentTo(nodeData);
 		}
@@ -33,13 +33,13 @@ public static partial class MemoryNodeStoreTests
 			byte[] nodeData3 = [8, 9, 10, 11];
 			var node2Id = HashUtils.ComputeNodeHash(nodeData2);
 
-			var dataSource = new MemoryNodeStore();
-			dataSource.AddNode([.. nodeData1]);
-			dataSource.AddNode([.. nodeData2]);
-			dataSource.AddNode([.. nodeData3]);
+			var vault = new MemoryNodeVault();
+			vault.AddNode([.. nodeData1]);
+			vault.AddNode([.. nodeData2]);
+			vault.AddNode([.. nodeData3]);
 
 			var actual = new byte[4];
-			dataSource.CopyNodeBytesTo(node2Id, actual);
+			vault.CopyNodeBytesTo(node2Id, actual);
 
 			await Assert.That(actual).IsEquivalentTo(nodeData2);
 		}
@@ -47,13 +47,13 @@ public static partial class MemoryNodeStoreTests
 		[Test]
 		public async Task Should_throw_if_called_with_nonexistent_hash()
 		{
-			var dataSource = new MemoryNodeStore();
+			var vault = new MemoryNodeVault();
 
 			await Assert
 				.That(() =>
 				{
 					Span<byte> buffer = [];
-					dataSource.CopyNodeBytesTo(NodeId.None, buffer);
+					vault.CopyNodeBytesTo(NodeId.None, buffer);
 				})
 				.ThrowsExactly<NodeIdNotFoundException>();
 		}

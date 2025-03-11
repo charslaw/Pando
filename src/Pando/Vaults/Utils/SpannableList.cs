@@ -1,6 +1,6 @@
 using System;
 
-namespace Pando.DataSources.Utils;
+namespace Pando.Vaults.Utils;
 
 /// A collection that you can add a span of items to, and copy data to a span.
 internal class SpannableList<T>

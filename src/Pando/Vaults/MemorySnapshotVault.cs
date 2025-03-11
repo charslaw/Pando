@@ -3,13 +3,13 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
+using Pando.Vaults.Utils;
 
-namespace Pando.DataSources;
+namespace Pando.Vaults;
 
-public class MemorySnapshotStore : ISnapshotDataStore
+public class MemorySnapshotVault : ISnapshotVault
 {
 	private readonly Dictionary<SnapshotId, TreeEntry> _snapshotIndex;
 
@@ -26,10 +26,10 @@ public class MemorySnapshotStore : ISnapshotDataStore
 		public HashSet<SnapshotId>? Children { get; set; } = children;
 	}
 
-	public MemorySnapshotStore()
+	public MemorySnapshotVault()
 		: this(new Dictionary<SnapshotId, TreeEntry>()) { }
 
-	internal MemorySnapshotStore(Dictionary<SnapshotId, TreeEntry> snapshotIndex)
+	internal MemorySnapshotVault(Dictionary<SnapshotId, TreeEntry> snapshotIndex)
 	{
 		_snapshotIndex = snapshotIndex;
 	}

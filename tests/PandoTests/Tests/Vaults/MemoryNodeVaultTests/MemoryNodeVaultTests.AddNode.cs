@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using Pando.DataSources;
-using Pando.DataSources.Utils;
 using Pando.Repositories;
+using Pando.Vaults;
+using Pando.Vaults.Utils;
 
-namespace PandoTests.Tests.DataSources.MemoryNodeStoreTests;
+namespace PandoTests.Tests.Vaults.MemoryNodeVaultTests;
 
-public static partial class MemoryNodeStoreTests
+public static partial class MemoryNodeVaultTests
 {
 	public class AddNode
 	{
@@ -17,9 +17,9 @@ public static partial class MemoryNodeStoreTests
 
 			var nodeIndex = new Dictionary<NodeId, Range>();
 			var nodeDataList = new SpannableList<byte>();
-			var dataSource = new MemoryNodeStore(nodeIndex: nodeIndex, nodeData: nodeDataList);
+			var vault = new MemoryNodeVault(nodeIndex: nodeIndex, nodeData: nodeDataList);
 
-			dataSource.AddNode([.. nodeData]);
+			vault.AddNode([.. nodeData]);
 
 			using (Assert.Multiple())
 			{
@@ -33,13 +33,13 @@ public static partial class MemoryNodeStoreTests
 		{
 			byte[] nodeData = [0, 1, 2, 3];
 
-			var dataSource = new MemoryNodeStore();
+			var vault = new MemoryNodeVault();
 
 			await Assert
 				.That(() =>
 				{
-					dataSource.AddNode([.. nodeData]);
-					dataSource.AddNode([.. nodeData]);
+					vault.AddNode([.. nodeData]);
+					vault.AddNode([.. nodeData]);
 				})
 				.ThrowsNothing();
 		}
@@ -50,11 +50,11 @@ public static partial class MemoryNodeStoreTests
 			byte[] nodeData = [0, 1, 2, 3];
 
 			var nodeDataList = new SpannableList<byte>();
-			var dataSource = new MemoryNodeStore(nodeData: nodeDataList);
+			var vault = new MemoryNodeVault(nodeData: nodeDataList);
 
-			dataSource.AddNode([.. nodeData]);
+			vault.AddNode([.. nodeData]);
 			var preNodeDataListBytes = nodeDataList.Count;
-			dataSource.AddNode([.. nodeData]);
+			vault.AddNode([.. nodeData]);
 			var postNodeDataListBytes = nodeDataList.Count;
 
 			await Assert.That(postNodeDataListBytes - preNodeDataListBytes).IsZero();

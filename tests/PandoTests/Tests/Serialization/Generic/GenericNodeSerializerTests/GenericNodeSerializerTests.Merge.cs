@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Pando.DataSources;
 using Pando.Serialization;
 using Pando.Serialization.Generic;
 using Pando.Serialization.Primitives;
+using Pando.Vaults;
 
 namespace PandoTests.Tests.Serialization.Generic.GenericNodeSerializerTests;
 
@@ -24,7 +24,7 @@ public static partial class GenericNodeSerializerTests
 				Int32LittleEndianSerializer.Default,
 				Int32LittleEndianSerializer.Default
 			);
-			var dataSource = new MemoryNodeStore();
+			var vault = new MemoryNodeVault();
 
 			Span<byte> buffer = stackalloc byte[sizeof(ulong) * 3];
 
@@ -32,13 +32,13 @@ public static partial class GenericNodeSerializerTests
 			var targetBuffer = buffer.Slice(sizeof(ulong), sizeof(ulong));
 			var sourceBuffer = buffer.Slice(sizeof(ulong) * 2, sizeof(ulong));
 
-			serializer.Serialize(new Node(100, 100), baseBuffer, dataSource);
-			serializer.Serialize(new Node(200, 100), targetBuffer, dataSource);
-			serializer.Serialize(new Node(100, 300), sourceBuffer, dataSource);
+			serializer.Serialize(new Node(100, 100), baseBuffer, vault);
+			serializer.Serialize(new Node(200, 100), targetBuffer, vault);
+			serializer.Serialize(new Node(100, 300), sourceBuffer, vault);
 
-			serializer.Merge(baseBuffer, targetBuffer, sourceBuffer, dataSource);
+			serializer.Merge(baseBuffer, targetBuffer, sourceBuffer, vault);
 
-			var actual = serializer.Deserialize(baseBuffer, dataSource);
+			var actual = serializer.Deserialize(baseBuffer, vault);
 
 			await Assert.That(actual).IsEqualTo(new Node(200, 300));
 		}
@@ -50,7 +50,7 @@ public static partial class GenericNodeSerializerTests
 				Int32LittleEndianSerializer.Default,
 				Int32LittleEndianSerializer.Default
 			);
-			var dataSource = new MemoryNodeStore();
+			var vault = new MemoryNodeVault();
 
 			Span<byte> buffer = stackalloc byte[sizeof(ulong) * 3];
 
@@ -58,13 +58,13 @@ public static partial class GenericNodeSerializerTests
 			var targetBuffer = buffer.Slice(sizeof(ulong), sizeof(ulong));
 			var sourceBuffer = buffer.Slice(sizeof(ulong) * 2, sizeof(ulong));
 
-			serializer.Serialize(new Node(100, 100), baseBuffer, dataSource);
-			serializer.Serialize(new Node(200, 300), targetBuffer, dataSource);
-			serializer.Serialize(new Node(400, 100), sourceBuffer, dataSource);
+			serializer.Serialize(new Node(100, 100), baseBuffer, vault);
+			serializer.Serialize(new Node(200, 300), targetBuffer, vault);
+			serializer.Serialize(new Node(400, 100), sourceBuffer, vault);
 
-			serializer.Merge(baseBuffer, targetBuffer, sourceBuffer, dataSource);
+			serializer.Merge(baseBuffer, targetBuffer, sourceBuffer, vault);
 
-			var actual = serializer.Deserialize(baseBuffer, dataSource);
+			var actual = serializer.Deserialize(baseBuffer, vault);
 
 			await Assert.That(actual).IsEqualTo(new Node(400, 300));
 		}

@@ -1,6 +1,6 @@
 using System;
-using Pando.DataSources;
 using Pando.Serialization;
+using Pando.Vaults;
 
 namespace PandoExampleProject.Serializers;
 
@@ -21,8 +21,8 @@ internal class ChessStateTreeSerializer(
 	/// <param name="buffer">
 	///     The buffer into which to write the binary representation of the given <paramref name="state" />
 	/// </param>
-	/// <param name="dataStore"></param>
-	public void Serialize(ChessGameState state, Span<byte> buffer, INodeDataStore dataStore)
+	/// <param name="nodeVault"></param>
+	public void Serialize(ChessGameState state, Span<byte> buffer, INodeVault nodeVault)
 	{
 		var childrenSize =
 			playerStateSerializer.SerializedSize
@@ -35,37 +35,37 @@ internal class ChessStateTreeSerializer(
 		var remainingTimeStart = playerStateSerializer.SerializedSize;
 		var playerPiecesStart = remainingTimeStart + remainingTimeSerializer.SerializedSize;
 
-		playerStateSerializer.Serialize(chessPlayerState, childrenBuffer[..remainingTimeStart], dataStore);
+		playerStateSerializer.Serialize(chessPlayerState, childrenBuffer[..remainingTimeStart], nodeVault);
 		remainingTimeSerializer.Serialize(
 			whiteBlackPair,
 			childrenBuffer[remainingTimeStart..playerPiecesStart],
-			dataStore
+			nodeVault
 		);
-		playerPiecesSerializer.Serialize(playerPieces, childrenBuffer[playerPiecesStart..childrenSize], dataStore);
+		playerPiecesSerializer.Serialize(playerPieces, childrenBuffer[playerPiecesStart..childrenSize], nodeVault);
 
-		dataStore.AddNode(childrenBuffer, buffer);
+		nodeVault.AddNode(childrenBuffer, buffer);
 	}
 
 	/// <param name="buffer">The raw byte data of this branch node</param>
-	/// <param name="dataStore"></param>
-	public ChessGameState Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
+	/// <param name="nodeVault"></param>
+	public ChessGameState Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault)
 	{
 		// load node data into buffer
-		var nodeDataSize = dataStore.GetSizeOfNode(buffer);
+		var nodeDataSize = nodeVault.GetSizeOfNode(buffer);
 		Span<byte> childrenBuffer = stackalloc byte[nodeDataSize];
-		dataStore.CopyNodeBytesTo(buffer, childrenBuffer);
+		nodeVault.CopyNodeBytesTo(buffer, childrenBuffer);
 
 		var remainingTimeStart = playerStateSerializer.SerializedSize;
 		var playerPiecesStart = remainingTimeStart + remainingTimeSerializer.SerializedSize;
 		var bufferEnd = playerPiecesStart + playerPiecesSerializer.SerializedSize;
 
 		// Deserialize children from buffer
-		var playerState = playerStateSerializer.Deserialize(childrenBuffer[..remainingTimeStart], dataStore);
+		var playerState = playerStateSerializer.Deserialize(childrenBuffer[..remainingTimeStart], nodeVault);
 		var remainingTime = remainingTimeSerializer.Deserialize(
 			childrenBuffer[remainingTimeStart..playerPiecesStart],
-			dataStore
+			nodeVault
 		);
-		var playerPieces = playerPiecesSerializer.Deserialize(childrenBuffer[playerPiecesStart..bufferEnd], dataStore);
+		var playerPieces = playerPiecesSerializer.Deserialize(childrenBuffer[playerPiecesStart..bufferEnd], nodeVault);
 
 		return new ChessGameState(playerState, remainingTime, playerPieces);
 	}

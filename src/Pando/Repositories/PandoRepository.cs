@@ -1,40 +1,37 @@
 ﻿using System;
-using Pando.DataSources;
 using Pando.Exceptions;
 using Pando.Serialization;
+using Pando.Vaults;
 
 namespace Pando.Repositories;
 
-public class PandoRepository<T>(
-	INodeDataStore nodeDataStore,
-	ISnapshotDataStore snapshotDataStore,
-	IPandoSerializer<T> serializer
-) : IPandoRepository<T>
+public class PandoRepository<T>(INodeVault nodeVault, ISnapshotVault snapshotVault, IPandoSerializer<T> serializer)
+	: IPandoRepository<T>
 {
-	public INodeDataStore NodeDataStore { get; } = nodeDataStore;
-	public ISnapshotDataStore SnapshotDataStore { get; } = snapshotDataStore;
+	public INodeVault NodeVault { get; } = nodeVault;
+	public ISnapshotVault SnapshotVault { get; } = snapshotVault;
 
 	public PandoRepository(IPandoSerializer<T> serializer)
-		: this(new MemoryNodeStore(), new MemorySnapshotStore(), serializer) { }
+		: this(new MemoryNodeVault(), new MemorySnapshotVault(), serializer) { }
 
 	public SnapshotId SaveRootSnapshot(T tree)
 	{
-		if (SnapshotDataStore.RootSnapshot is not null)
+		if (SnapshotVault.RootSnapshot is not null)
 			throw new AlreadyHasRootSnapshotException();
 
 		var rootNodeId = SerializeToNodeId(tree);
-		return SnapshotDataStore.AddRootSnapshot(rootNodeId);
+		return SnapshotVault.AddRootSnapshot(rootNodeId);
 	}
 
 	public SnapshotId SaveSnapshot(T tree, SnapshotId parentSnapshotId)
 	{
-		if (!SnapshotDataStore.HasSnapshot(parentSnapshotId))
+		if (!SnapshotVault.HasSnapshot(parentSnapshotId))
 		{
 			throw new SnapshotIdNotFoundException(parentSnapshotId, nameof(parentSnapshotId));
 		}
 
 		var rootNodeId = SerializeToNodeId(tree);
-		return SnapshotDataStore.AddSnapshot(rootNodeId, parentSnapshotId);
+		return SnapshotVault.AddSnapshot(rootNodeId, parentSnapshotId);
 	}
 
 	/// Merges the two snapshots identified by the given hashes, returning the hash of the merged result snapshot.
@@ -44,7 +41,7 @@ public class PandoRepository<T>(
 		if (sourceSnapshotId == targetSnapshotId)
 			throw new InvalidMergeException($"cannot merge a snapshot with itself ({sourceSnapshotId})");
 
-		var baseSnapshotHash = SnapshotDataStore.GetSnapshotLeastCommonAncestor(sourceSnapshotId, targetSnapshotId);
+		var baseSnapshotHash = SnapshotVault.GetSnapshotLeastCommonAncestor(sourceSnapshotId, targetSnapshotId);
 
 		if (baseSnapshotHash == targetSnapshotId)
 			throw new InvalidMergeException("cannot merge a snapshot into one of its ancestors");
@@ -55,34 +52,34 @@ public class PandoRepository<T>(
 		var baseNodeIdBuffer = idBuffer.Slice(0, NodeId.SIZE);
 		var targetNodeIdBuffer = idBuffer.Slice(NodeId.SIZE, NodeId.SIZE);
 		var sourceNodeIdBuffer = idBuffer.Slice(NodeId.SIZE * 2, NodeId.SIZE);
-		SnapshotDataStore.GetSnapshotData(baseSnapshotHash).RootNodeId.CopyTo(baseNodeIdBuffer);
-		SnapshotDataStore.GetSnapshotData(targetSnapshotId).RootNodeId.CopyTo(targetNodeIdBuffer);
-		SnapshotDataStore.GetSnapshotData(sourceSnapshotId).RootNodeId.CopyTo(sourceNodeIdBuffer);
+		SnapshotVault.GetSnapshotData(baseSnapshotHash).RootNodeId.CopyTo(baseNodeIdBuffer);
+		SnapshotVault.GetSnapshotData(targetSnapshotId).RootNodeId.CopyTo(targetNodeIdBuffer);
+		SnapshotVault.GetSnapshotData(sourceSnapshotId).RootNodeId.CopyTo(sourceNodeIdBuffer);
 
-		serializer.Merge(baseNodeIdBuffer, targetNodeIdBuffer, sourceNodeIdBuffer, NodeDataStore);
+		serializer.Merge(baseNodeIdBuffer, targetNodeIdBuffer, sourceNodeIdBuffer, NodeVault);
 
 		var mergedNodeId = NodeId.FromBuffer(baseNodeIdBuffer);
 
-		var mergeSnapshotId = SnapshotDataStore.AddSnapshot(mergedNodeId, sourceSnapshotId, targetSnapshotId);
+		var mergeSnapshotId = SnapshotVault.AddSnapshot(mergedNodeId, sourceSnapshotId, targetSnapshotId);
 		return mergeSnapshotId;
 	}
 
 	public void WalkSnapshots(SnapshotVisitor<T> visitor) =>
-		SnapshotDataStore.WalkTree(
+		SnapshotVault.WalkTree(
 			(snapshotId, sourceSnapshotId, targetSnapshotId, nodeId) =>
 				visitor(snapshotId, DeserializeFromNodeId(nodeId), sourceSnapshotId, targetSnapshotId)
 		);
 
 	public T GetSnapshot(SnapshotId snapshotId)
 	{
-		var nodeId = SnapshotDataStore.GetSnapshotData(snapshotId).RootNodeId;
+		var nodeId = SnapshotVault.GetSnapshotData(snapshotId).RootNodeId;
 		return DeserializeFromNodeId(nodeId);
 	}
 
 	private NodeId SerializeToNodeId(T tree)
 	{
 		Span<byte> idBuffer = stackalloc byte[NodeId.SIZE];
-		serializer.Serialize(tree, idBuffer, NodeDataStore);
+		serializer.Serialize(tree, idBuffer, NodeVault);
 		return NodeId.FromBuffer(idBuffer);
 	}
 
@@ -90,6 +87,6 @@ public class PandoRepository<T>(
 	{
 		Span<byte> idBuffer = stackalloc byte[sizeof(ulong)];
 		nodeId.CopyTo(idBuffer);
-		return serializer.Deserialize(idBuffer, NodeDataStore);
+		return serializer.Deserialize(idBuffer, NodeVault);
 	}
 }

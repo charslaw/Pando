@@ -1,6 +1,6 @@
 using System;
 using System.Runtime.CompilerServices;
-using Pando.DataSources;
+using Pando.Vaults;
 
 namespace Pando.Serialization.Primitives;
 
@@ -29,15 +29,15 @@ public sealed class EnumSerializer<TEnum, TUnderlying> : IPandoSerializer<TEnum>
 		SerializedSize = underlyingSerializer.SerializedSize;
 	}
 
-	public void Serialize(TEnum value, Span<byte> buffer, INodeDataStore dataStore)
+	public void Serialize(TEnum value, Span<byte> buffer, INodeVault nodeVault)
 	{
 		var underlying = ToUnderlying(ref value);
-		_underlyingSerializer.Serialize(underlying, buffer, dataStore);
+		_underlyingSerializer.Serialize(underlying, buffer, nodeVault);
 	}
 
-	public TEnum Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
+	public TEnum Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault)
 	{
-		var underlying = _underlyingSerializer.Deserialize(buffer, dataStore);
+		var underlying = _underlyingSerializer.Deserialize(buffer, nodeVault);
 		return ToEnum(ref underlying);
 	}
 

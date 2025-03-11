@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Pando.DataSources;
-using Pando.DataSources.Utils;
 using Pando.Serialization.Collections;
+using Pando.Vaults;
+using Pando.Vaults.Utils;
 using PandoTests.Utils;
 
 namespace PandoTests.Tests.Serialization.Collections.StringSerializerTests;
@@ -48,9 +48,9 @@ public static class StringSerializerTests
 		{
 			var arraySerializer = new StringSerializer(encoding);
 			var nodeData = new SpannableList<byte>();
-			var dataSource = new MemoryNodeStore(null, nodeData);
+			var vault = new MemoryNodeVault(null, nodeData);
 
-			arraySerializer.Serialize(value, stackalloc byte[8], dataSource);
+			arraySerializer.Serialize(value, stackalloc byte[8], vault);
 
 			var actual = nodeData.ToArray();
 
@@ -63,12 +63,12 @@ public static class StringSerializerTests
 		public async Task Should_be_able_to_deserialize_serialized_node_data(string value)
 		{
 			var stringSerializer = new StringSerializer(Encoding.UTF8);
-			var dataSource = new MemoryNodeStore();
+			var vault = new MemoryNodeVault();
 
 			Span<byte> hashSpan = stackalloc byte[8];
-			stringSerializer.Serialize(value, hashSpan, dataSource);
+			stringSerializer.Serialize(value, hashSpan, vault);
 
-			var newString = stringSerializer.Deserialize(hashSpan, dataSource);
+			var newString = stringSerializer.Deserialize(hashSpan, vault);
 
 			await Assert.That(newString).IsEquivalentTo(value);
 		}

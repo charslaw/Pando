@@ -1,17 +1,17 @@
 using System.Collections.Generic;
-using Pando.DataSources;
 using Pando.Repositories;
+using Pando.Vaults;
 
-namespace PandoTests.Tests.DataSources.MemorySnapshotStoreTests;
+namespace PandoTests.Tests.Vaults.MemorySnapshotVaultTests;
 
-public static partial class MemorySnapshotStoreTests
+public static partial class MemorySnapshotVaultTests
 {
 	public class WalkTree
 	{
 		[Test]
 		public async Task Should_enumerate_descendants_depth_first_in_order_of_insertion()
 		{
-			var snapshotTree = new MemorySnapshotStore();
+			var snapshotTree = new MemorySnapshotVault();
 
 			var root = snapshotTree.AddRootSnapshot(new NodeId(1));
 			var s2 = snapshotTree.AddSnapshot(new NodeId(2), root);

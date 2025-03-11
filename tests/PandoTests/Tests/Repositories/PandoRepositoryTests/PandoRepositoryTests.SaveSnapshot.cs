@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Pando.DataSources;
-using Pando.DataSources.Utils;
 using Pando.Exceptions;
 using Pando.Repositories;
+using Pando.Vaults;
+using Pando.Vaults.Utils;
 using PandoTests.Tests.Repositories.TestStateTrees;
 
 namespace PandoTests.Tests.Repositories.PandoRepositoryTests;
@@ -39,8 +39,8 @@ public static partial class PandoRepositoryTests
 			var nodeIndex = new Dictionary<NodeId, Range>();
 			var nodeData = new SpannableList<byte>();
 			var repository = new PandoRepository<TestTree>(
-				new MemoryNodeStore(nodeIndex: nodeIndex, nodeData: nodeData),
-				new MemorySnapshotStore(),
+				new MemoryNodeVault(nodeIndex: nodeIndex, nodeData: nodeData),
+				new MemorySnapshotVault(),
 				TestTree.GenericSerializer()
 			);
 
@@ -59,8 +59,8 @@ public static partial class PandoRepositoryTests
 				new TestTree.B(new DateTime(1970, 01, 01), 1000)
 			);
 
-			var source = new MemorySnapshotStore();
-			var repository = new PandoRepository<TestTree>(new MemoryNodeStore(), source, TestTree.GenericSerializer());
+			var source = new MemorySnapshotVault();
+			var repository = new PandoRepository<TestTree>(new MemoryNodeVault(), source, TestTree.GenericSerializer());
 
 			using (Assert.Multiple())
 			{

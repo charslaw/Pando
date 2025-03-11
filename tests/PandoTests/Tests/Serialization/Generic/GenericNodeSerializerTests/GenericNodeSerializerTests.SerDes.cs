@@ -1,9 +1,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using Pando.DataSources;
-using Pando.DataSources.Utils;
 using Pando.Serialization.Generic;
 using Pando.Serialization.Primitives;
+using Pando.Vaults;
+using Pando.Vaults.Utils;
 using PandoTests.Utils;
 
 namespace PandoTests.Tests.Serialization.Generic.GenericNodeSerializerTests;
@@ -28,9 +28,9 @@ public static partial class GenericNodeSerializerTests
 				Int32LittleEndianSerializer.Default
 			);
 			var nodeData = new SpannableList<byte>();
-			var dataSource = new MemoryNodeStore(null, nodeData);
+			var vault = new MemoryNodeVault(null, nodeData);
 
-			pairSerializer.Serialize(pair, stackalloc byte[8], dataSource);
+			pairSerializer.Serialize(pair, stackalloc byte[8], vault);
 
 			var actual = nodeData.ToArray();
 			byte[] expected = [0x39, 0x5, 0, 0, 0x2A, 0, 0, 0];
@@ -46,12 +46,12 @@ public static partial class GenericNodeSerializerTests
 				Int32LittleEndianSerializer.Default,
 				Int32LittleEndianSerializer.Default
 			);
-			var dataSource = new MemoryNodeStore();
+			var vault = new MemoryNodeVault();
 
 			Span<byte> hashSpan = stackalloc byte[8];
-			pairSerializer.Serialize(pair, hashSpan, dataSource);
+			pairSerializer.Serialize(pair, hashSpan, vault);
 
-			var newPair = pairSerializer.Deserialize(hashSpan, dataSource);
+			var newPair = pairSerializer.Deserialize(hashSpan, vault);
 
 			await Assert.That(newPair).IsNotSameReferenceAs(pair).And.IsEqualTo(pair);
 		}

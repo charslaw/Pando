@@ -1,5 +1,5 @@
 using System;
-using Pando.DataSources;
+using Pando.Vaults;
 
 namespace Pando.Serialization.Collections;
 
@@ -12,14 +12,14 @@ public class ArraySerializer<TElement>(IPandoSerializer<TElement> elementSeriali
 	protected override TElement[] CreateCollection(
 		ReadOnlySpan<byte> elementBytes,
 		int elementSize,
-		IReadOnlyNodeDataStore dataSource
+		IReadOnlyNodeVault nodeVault
 	)
 	{
 		var arr = new TElement[elementBytes.Length / elementSize];
 		var currentByte = 0;
 		for (int i = 0; i < arr.Length; i++)
 		{
-			var element = ElementSerializer.Deserialize(elementBytes.Slice(currentByte, elementSize), dataSource);
+			var element = ElementSerializer.Deserialize(elementBytes.Slice(currentByte, elementSize), nodeVault);
 			arr[i] = element;
 			currentByte += elementSize;
 		}

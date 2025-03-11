@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Pando.DataSources;
 using Pando.Repositories;
 using Pando.Serialization;
 using Pando.Serialization.Collections;
 using Pando.Serialization.Primitives;
+using Pando.Vaults;
 using PandoExampleProject.Serializers;
 
 namespace PandoExampleProject;
@@ -27,8 +27,8 @@ public class ChessTests
 	{
 		// Initialize a pando repository that stores data in memory and uses our serializer
 		var pandoRepository = new PandoRepository<ChessGameState>(
-			new MemoryNodeStore(),
-			new MemorySnapshotStore(),
+			new MemoryNodeVault(),
+			new MemorySnapshotVault(),
 			MakeSerializer()
 		);
 
@@ -79,8 +79,8 @@ public class ChessTests
 		var jsonPersistor = JsonNodePersistor.CreateFromStream(stream);
 
 		var repository = new PandoRepository<ChessGameState>(
-			new MemoryNodeStore(jsonPersistor),
-			new MemorySnapshotStore(),
+			new MemoryNodeVault(jsonPersistor),
+			new MemorySnapshotVault(),
 			MakeSerializer()
 		);
 

@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text;
-using Pando.DataSources;
-using Pando.DataSources.Utils;
+using Pando.Vaults;
+using Pando.Vaults.Utils;
 
-namespace PandoTests.Tests.DataSources.JsonNodePersistorTests;
+namespace PandoTests.Tests.Vaults.JsonNodePersistorTests;
 
 public static partial class JsonNodePersistorTests
 {
@@ -15,10 +15,10 @@ public static partial class JsonNodePersistorTests
 			byte[] nodeData = [0, 1, 2, 3];
 
 			var stream = new MemoryStream();
-			var dataStore = JsonNodePersistor.CreateFromStream(stream);
+			var persistor = JsonNodePersistor.CreateFromStream(stream);
 
 			var nodeId = HashUtils.ComputeNodeHash(nodeData);
-			dataStore.PersistNode(nodeId, nodeData);
+			persistor.PersistNode(nodeId, nodeData);
 
 			var expected = """
 				{
@@ -36,11 +36,11 @@ public static partial class JsonNodePersistorTests
 			byte[] nodeData = [55, 161, 83, 255];
 
 			var stream = new MemoryStream();
-			var dataStore = JsonNodePersistor.CreateFromStream(stream);
+			var persistor = JsonNodePersistor.CreateFromStream(stream);
 
 			var nodeId = HashUtils.ComputeNodeHash(nodeData);
-			dataStore.PersistNode(nodeId, nodeData);
-			dataStore.PersistNode(nodeId, nodeData);
+			persistor.PersistNode(nodeId, nodeData);
+			persistor.PersistNode(nodeId, nodeData);
 
 			var expected = """
 				{

@@ -1,6 +1,6 @@
 using System;
 using System.Buffers.Binary;
-using Pando.DataSources;
+using Pando.Vaults;
 
 namespace Pando.Serialization.Primitives;
 
@@ -12,9 +12,9 @@ public class Int32LittleEndianSerializer : IPandoSerializer<int>
 
 	public int SerializedSize => sizeof(int);
 
-	public void Serialize(int value, Span<byte> buffer, INodeDataStore dataStore) =>
+	public void Serialize(int value, Span<byte> buffer, INodeVault nodeVault) =>
 		BinaryPrimitives.WriteInt32LittleEndian(buffer, value);
 
-	public int Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) =>
+	public int Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault) =>
 		BinaryPrimitives.ReadInt32LittleEndian(buffer);
 }

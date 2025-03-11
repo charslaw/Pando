@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using Pando.Exceptions;
 using Pando.Repositories;
 
-namespace Pando.DataSources;
+namespace Pando.Vaults;
 
-public interface IReadOnlySnapshotDataStore
+public interface IReadOnlySnapshotVault
 {
 	/// The total number of snapshots in this data source.
 	int SnapshotCount { get; }
@@ -36,7 +36,7 @@ public delegate void TreeEntryVisitor(
 	NodeId rootNodeId
 );
 
-public interface ISnapshotDataStore : IReadOnlySnapshotDataStore
+public interface ISnapshotVault : IReadOnlySnapshotVault
 {
 	/// Adds a root snapshot to the tree.
 	/// <exception cref="AlreadyHasRootSnapshotException">if a root snapshot already exists in the tree.</exception>

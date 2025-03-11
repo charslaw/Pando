@@ -1,5 +1,5 @@
 using System;
-using Pando.DataSources;
+using Pando.Vaults;
 
 namespace Pando.Serialization.Primitives;
 
@@ -11,13 +11,13 @@ public class BooleanSerializer : IPandoSerializer<bool>
 
 	public int SerializedSize => sizeof(byte);
 
-	public void Serialize(bool value, Span<byte> buffer, INodeDataStore dataStore)
+	public void Serialize(bool value, Span<byte> buffer, INodeVault nodeVault)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(buffer.Length, nameof(buffer));
 		buffer[0] = (byte)(value ? 1 : 0);
 	}
 
-	public bool Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
+	public bool Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault)
 	{
 		ArgumentOutOfRangeException.ThrowIfNegativeOrZero(buffer.Length, nameof(buffer));
 		return buffer[0] != 0;

@@ -1,6 +1,6 @@
 using System;
-using Pando.DataSources;
 using Pando.Serialization;
+using Pando.Vaults;
 
 namespace PandoExampleProject.Serializers;
 
@@ -9,16 +9,16 @@ internal class WhiteBlackPairSerializer<T>(IPandoSerializer<T> tSerializer) : IP
 	private readonly int _tSize = tSerializer.SerializedSize;
 	public int SerializedSize { get; } = tSerializer.SerializedSize * 2;
 
-	public void Serialize(WhiteBlackPair<T> value, Span<byte> buffer, INodeDataStore dataStore)
+	public void Serialize(WhiteBlackPair<T> value, Span<byte> buffer, INodeVault nodeVault)
 	{
-		tSerializer.Serialize(value.WhiteValue, buffer[.._tSize], dataStore);
-		tSerializer.Serialize(value.BlackValue, buffer[_tSize..SerializedSize], dataStore);
+		tSerializer.Serialize(value.WhiteValue, buffer[.._tSize], nodeVault);
+		tSerializer.Serialize(value.BlackValue, buffer[_tSize..SerializedSize], nodeVault);
 	}
 
-	public WhiteBlackPair<T> Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore)
+	public WhiteBlackPair<T> Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault)
 	{
-		var whiteValue = tSerializer.Deserialize(buffer[.._tSize], dataStore);
-		var blackValue = tSerializer.Deserialize(buffer[_tSize..SerializedSize], dataStore);
+		var whiteValue = tSerializer.Deserialize(buffer[.._tSize], nodeVault);
+		var blackValue = tSerializer.Deserialize(buffer[_tSize..SerializedSize], nodeVault);
 
 		return new WhiteBlackPair<T>(whiteValue, blackValue);
 	}

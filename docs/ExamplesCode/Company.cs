@@ -1,8 +1,8 @@
 using System;
-using Pando.DataSources;
 using Pando.Repositories;
 using Pando.Serialization;
 using Pando.Serialization.Collections;
+using Pando.Vaults;
 
 namespace ExamplesCode;
 
@@ -25,7 +25,7 @@ internal class CompanySerializer : IPandoSerializer<Company>
 	public int SerializedSize => NodeId.SIZE;
 
 	/// Writes the serialized value of the company name and employee array into a node and returns the hash of that node to the parent buffer.
-	public void Serialize(Company obj, Span<byte> buffer, INodeDataStore dataStore)
+	public void Serialize(Company obj, Span<byte> buffer, INodeVault nodeVault)
 	{
 		// Allocate a buffer of the appropriate size to fit the company name and employees
 		var employeesStart = _companyNameSerializer.SerializedSize;
@@ -34,32 +34,32 @@ internal class CompanySerializer : IPandoSerializer<Company>
 		Span<byte> childBuffer = stackalloc byte[totalSize];
 
 		// Serialize the company name. The default StringSerializer will save the name as a node and add the node's hash to childBuffer.
-		_companyNameSerializer.Serialize(obj.CompanyName, childBuffer[..employeesStart], dataStore);
+		_companyNameSerializer.Serialize(obj.CompanyName, childBuffer[..employeesStart], nodeVault);
 		// Serialize the company employees. The ArraySerializer will call the PersonSerializer for each person in the array, then save the returned
 		// person node hashes into its own node, then add that node's hash to childBuffer.
-		_employeesSerializer.Serialize(obj.Employees, childBuffer[employeesStart..totalSize], dataStore);
+		_employeesSerializer.Serialize(obj.Employees, childBuffer[employeesStart..totalSize], nodeVault);
 
 		// Add the serialized children to the data sink, copying the resulting node id into the input buffer.
-		dataStore.AddNode(childBuffer, buffer);
+		nodeVault.AddNode(childBuffer, buffer);
 	}
 
 	/// Converts a company's binary representation to a Company instance.
 	/// The name is deserialized via the string serializer.
 	/// The ID of the employees array is read from the buffer, then the DeserializeFromHash extension method is called to retrieve the employees
 	/// array binary representation from the data source and deserialize it into an array instance.
-	public Company Deserialize(ReadOnlySpan<byte> readBuffer, IReadOnlyNodeDataStore dataStore)
+	public Company Deserialize(ReadOnlySpan<byte> readBuffer, IReadOnlyNodeVault nodeVault)
 	{
 		var employeesStart = _companyNameSerializer.SerializedSize;
 		var totalSize = employeesStart + _employeesSerializer.SerializedSize;
 
 		// Retrieve the node data for this node
 		Span<byte> nodeData = stackalloc byte[totalSize];
-		dataStore.CopyNodeBytesTo(readBuffer, nodeData);
+		nodeVault.CopyNodeBytesTo(readBuffer, nodeData);
 
 		// Deserialize company name
-		var companyName = _companyNameSerializer.Deserialize(nodeData[..employeesStart], dataStore);
+		var companyName = _companyNameSerializer.Deserialize(nodeData[..employeesStart], nodeVault);
 		// Deserialize Employees
-		var employees = _employeesSerializer.Deserialize(nodeData[employeesStart..totalSize], dataStore);
+		var employees = _employeesSerializer.Deserialize(nodeData[employeesStart..totalSize], nodeVault);
 
 		return new Company(companyName, employees);
 	}

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Pando.Repositories;
 
-namespace Pando.DataSources;
+namespace Pando.Vaults;
 
 public class CompositeNodePersistor : INodePersistor
 {

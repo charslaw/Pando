@@ -5,11 +5,11 @@ using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Pando.Repositories;
 
-namespace Pando.DataSources;
+namespace Pando.Vaults;
 
 /// Stores an index of nodes in JSON format.
 /// <remarks>
-/// This <see cref="INodeDataStore"/> is intended for debugging usage only,
+/// This <see cref="INodeVault"/> is intended for debugging usage only,
 /// as it is not fully optimized in memory usage or speed.
 /// </remarks>
 public sealed class JsonNodePersistor : INodePersistor, IDisposable

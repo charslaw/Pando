@@ -2,11 +2,11 @@ using System;
 using Pando.Exceptions;
 using Pando.Repositories;
 
-namespace Pando.DataSources;
+namespace Pando.Vaults;
 
-public interface INodeDataStore : IWriteOnlyNodeDataStore, IReadOnlyNodeDataStore;
+public interface INodeVault : IWriteOnlyNodeVault, IReadOnlyNodeVault;
 
-public interface IWriteOnlyNodeDataStore
+public interface IWriteOnlyNodeVault
 {
 	/// Adds a node to the data store and returns a <see cref="NodeId"/> that can be used to retrieve the node.
 	NodeId AddNode(ReadOnlySpan<byte> bytes);
@@ -16,7 +16,7 @@ public interface IWriteOnlyNodeDataStore
 	bool TryAddNode(ReadOnlySpan<byte> bytes, out NodeId nodeId);
 }
 
-public interface IReadOnlyNodeDataStore
+public interface IReadOnlyNodeVault
 {
 	/// Returns whether a node identified by the given <see cref="NodeId"/> exists in the data source.
 	bool HasNode(NodeId nodeId);

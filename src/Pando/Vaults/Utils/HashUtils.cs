@@ -2,7 +2,7 @@ using System;
 using Pando.Repositories;
 using Standart.Hash.xxHash;
 
-namespace Pando.DataSources.Utils;
+namespace Pando.Vaults.Utils;
 
 internal static class HashUtils
 {

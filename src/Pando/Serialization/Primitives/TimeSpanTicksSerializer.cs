@@ -1,5 +1,5 @@
 using System;
-using Pando.DataSources;
+using Pando.Vaults;
 
 namespace Pando.Serialization.Primitives;
 
@@ -14,9 +14,9 @@ public class TimeSpanTicksSerializer(IPandoSerializer<long> innerSerializer) : I
 
 	public int SerializedSize { get; } = innerSerializer.SerializedSize;
 
-	public void Serialize(TimeSpan value, Span<byte> buffer, INodeDataStore dataStore) =>
-		innerSerializer.Serialize(value.Ticks, buffer, dataStore);
+	public void Serialize(TimeSpan value, Span<byte> buffer, INodeVault nodeVault) =>
+		innerSerializer.Serialize(value.Ticks, buffer, nodeVault);
 
-	public TimeSpan Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeDataStore dataStore) =>
-		TimeSpan.FromTicks(innerSerializer.Deserialize(buffer, dataStore));
+	public TimeSpan Deserialize(ReadOnlySpan<byte> buffer, IReadOnlyNodeVault nodeVault) =>
+		TimeSpan.FromTicks(innerSerializer.Deserialize(buffer, nodeVault));
 }
