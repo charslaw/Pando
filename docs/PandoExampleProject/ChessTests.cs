@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Pando.Persistors;
 using Pando.Repositories;
 using Pando.Serialization;
 using Pando.Serialization.Collections;

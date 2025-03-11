@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Pando.Repositories;
 
-namespace Pando.Vaults;
+namespace Pando.Persistors;
 
 public interface INodePersistor
 {

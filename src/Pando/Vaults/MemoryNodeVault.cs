@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Pando.Exceptions;
+using Pando.Persistors;
 using Pando.Repositories;
 using Pando.Vaults.Utils;
 

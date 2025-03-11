@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text;
-using Pando.Vaults;
+using Pando.Persistors;
 using Pando.Vaults.Utils;
 
-namespace PandoTests.Tests.Vaults.JsonNodePersistorTests;
+namespace PandoTests.Tests.Persistors.JsonNodePersistorTests;
 
 public static partial class JsonNodePersistorTests
 {

@@ -4,8 +4,9 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Pando.Repositories;
+using Pando.Vaults;
 
-namespace Pando.Vaults;
+namespace Pando.Persistors;
 
 /// Stores an index of nodes in JSON format.
 /// <remarks>
