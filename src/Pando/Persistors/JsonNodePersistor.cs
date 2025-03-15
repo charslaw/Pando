@@ -36,29 +36,14 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 		}
 	}
 
-	/// <summary>
 	/// Creates a new <see cref="JsonNodePersistor"/> that writes data to the file at the given path.
-	/// </summary>
 	public static JsonNodePersistor CreateFromFile(string indexFilePath)
 	{
-		ArgumentException.ThrowIfNullOrWhiteSpace(indexFilePath);
-
-		if (!File.Exists(indexFilePath))
-		{
-			var directoryName = Path.GetDirectoryName(indexFilePath);
-			if (!string.IsNullOrWhiteSpace(directoryName))
-			{
-				Directory.CreateDirectory(directoryName);
-			}
-		}
-
-		var stream = File.Open(indexFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+		var stream = StreamExtensions.OpenOrCreate(indexFilePath);
 		return new JsonNodePersistor(stream);
 	}
 
-	/// <summary>
 	/// Creates a new <see cref="JsonNodePersistor"/> that writes data to the given stream.
-	/// </summary>
 	/// <remarks>
 	/// The stream must be writable and seekable. If the stream is *not* readable,
 	/// the contents will be overwritten when a node is added to the store.
@@ -66,7 +51,7 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 	public static JsonNodePersistor CreateFromStream(Stream indexStream)
 	{
 		ArgumentNullException.ThrowIfNull(indexStream);
-		ThrowIfNotWritable(indexStream);
+		StreamExtensions.ThrowIfNotWritable(indexStream);
 		return new JsonNodePersistor(indexStream);
 	}
 
