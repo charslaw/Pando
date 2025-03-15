@@ -7,10 +7,11 @@ using Pando.Repositories;
 namespace Pando.Persistors;
 
 [JsonSourceGenerationOptions(
-	Converters = [typeof(NodeIdConverter), typeof(ByteArrayJsonArrayConverter)],
+	Converters = [typeof(NodeIdConverter), typeof(SnapshotIdConverter), typeof(ByteArrayJsonArrayConverter)],
 	WriteIndented = true
 )]
 [JsonSerializable(typeof(Dictionary<NodeId, byte[]>))]
+[JsonSerializable(typeof(Dictionary<SnapshotId, (SnapshotId, SnapshotId, NodeId)>))]
 internal partial class JsonContext : JsonSerializerContext;
 
 internal class NodeIdConverter : JsonConverter<NodeId>
@@ -41,6 +42,39 @@ internal class NodeIdConverter : JsonConverter<NodeId>
 	public override void Write(Utf8JsonWriter writer, NodeId value, JsonSerializerOptions options)
 	{
 		Span<char> buffer = stackalloc char[NodeId.SIZE * 2]; // hex representation is 2 chars per byte
+		value.CopyHashStringTo(ref buffer);
+		writer.WriteStringValue(buffer);
+	}
+}
+
+internal class SnapshotIdConverter : JsonConverter<SnapshotId>
+{
+	public override SnapshotId ReadAsPropertyName(
+		ref Utf8JsonReader reader,
+		Type typeToConvert,
+		JsonSerializerOptions options
+	)
+	{
+		return Read(ref reader, typeToConvert, options);
+	}
+
+	public override void WriteAsPropertyName(Utf8JsonWriter writer, SnapshotId value, JsonSerializerOptions options)
+	{
+		Span<char> buffer = stackalloc char[SnapshotId.SIZE * 2]; // hex representation is 2 chars per byte
+		value.CopyHashStringTo(ref buffer);
+		writer.WritePropertyName(buffer);
+	}
+
+	public override SnapshotId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+	{
+		Span<char> buffer = stackalloc char[SnapshotId.SIZE * 2]; // hex representation is 2 chars per byte
+		reader.CopyString(buffer);
+		return SnapshotId.FromHashString(buffer);
+	}
+
+	public override void Write(Utf8JsonWriter writer, SnapshotId value, JsonSerializerOptions options)
+	{
+		Span<char> buffer = stackalloc char[SnapshotId.SIZE * 2]; // hex representation is 2 chars per byte
 		value.CopyHashStringTo(ref buffer);
 		writer.WriteStringValue(buffer);
 	}
