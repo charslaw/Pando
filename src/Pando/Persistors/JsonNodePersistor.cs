@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Pando.Repositories;
 using Pando.Vaults;
@@ -16,24 +15,13 @@ namespace Pando.Persistors;
 public sealed class JsonNodePersistor : INodePersistor, IDisposable
 {
 	private readonly Stream _nodeIndexStream;
-	private readonly Dictionary<NodeId, byte[]> _nodeIndex;
+	private Dictionary<NodeId, byte[]> _nodeIndex;
 	internal IReadOnlyDictionary<NodeId, byte[]> NodeIndex => _nodeIndex;
 
-	private JsonNodePersistor(Stream indexFileStream)
+	private JsonNodePersistor(Stream indexJsonStream)
 	{
-		_nodeIndexStream = indexFileStream;
-		if (indexFileStream is { Length: > 0, CanRead: true })
-		{
-			_nodeIndex =
-				JsonSerializer.Deserialize<Dictionary<NodeId, byte[]>>(
-					indexFileStream,
-					JsonContext.Default.DictionaryNodeIdByteArray
-				) ?? new Dictionary<NodeId, byte[]>();
-		}
-		else
-		{
-			_nodeIndex = new Dictionary<NodeId, byte[]>();
-		}
+		_nodeIndexStream = indexJsonStream;
+		_nodeIndex = new Dictionary<NodeId, byte[]>(Load(indexJsonStream));
 	}
 
 	/// Creates a new <see cref="JsonNodePersistor"/> that writes data to the file at the given path.
@@ -64,19 +52,22 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 		JsonSerializer.Serialize(_nodeIndexStream, _nodeIndex, JsonContext.Default.DictionaryNodeIdByteArray);
 	}
 
-	public (Dictionary<NodeId, Range>, byte[]) LoadNodeData()
+	public (IEnumerable<KeyValuePair<NodeId, Range>>, IEnumerable<byte>) LoadNodeData()
 	{
+		_nodeIndex = new Dictionary<NodeId, byte[]>(Load(_nodeIndexStream));
 		var resultIndex = new Dictionary<NodeId, Range>();
 		var resultData = new List<byte>();
 
+		var length = 0;
 		foreach (var (nodeId, bytes) in _nodeIndex)
 		{
-			var current = resultData.Count;
 			resultData.AddRange(bytes);
-			resultIndex[nodeId] = current..resultData.Count;
+			var newLength = length + bytes.Length;
+			resultIndex[nodeId] = length..newLength;
+			length = newLength;
 		}
 
-		return (resultIndex, resultData.ToArray());
+		return (resultIndex, resultData);
 	}
 
 	public void Dispose()
@@ -84,14 +75,18 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 		_nodeIndexStream.Dispose();
 	}
 
-	private static void ThrowIfNotWritable(
-		Stream stream,
-		[CallerArgumentExpression(nameof(stream))] string? paramName = null
-	)
+	private static IEnumerable<KeyValuePair<NodeId, byte[]>> Load(Stream stream)
 	{
-		if (!stream.CanWrite)
-			throw new ArgumentException("Given stream must be writable.", paramName);
-		if (!stream.CanSeek)
-			throw new ArgumentException("Given stream must be seekable.", paramName);
+		IEnumerable<KeyValuePair<NodeId, byte[]>>? result = null;
+		if (stream is { Length: > 0, CanRead: true })
+		{
+			stream.Seek(0, SeekOrigin.Begin);
+			result = JsonSerializer.Deserialize<Dictionary<NodeId, byte[]>>(
+				stream,
+				JsonContext.Default.DictionaryNodeIdByteArray
+			);
+		}
+
+		return result ?? [];
 	}
 }

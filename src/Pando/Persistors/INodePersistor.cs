@@ -10,5 +10,5 @@ public interface INodePersistor
 	void PersistNode(NodeId nodeId, ReadOnlySpan<byte> data);
 
 	/// Loads the node index and data from the persistence method and returns it
-	(Dictionary<NodeId, Range>, byte[]) LoadNodeData();
+	(IEnumerable<KeyValuePair<NodeId, Range>>, IEnumerable<byte>) LoadNodeData();
 }

@@ -24,7 +24,7 @@ public class CompositeNodePersistor : INodePersistor
 		}
 	}
 
-	public (Dictionary<NodeId, Range>, byte[]) LoadNodeData()
+	public (IEnumerable<KeyValuePair<NodeId, Range>>, IEnumerable<byte>) LoadNodeData()
 	{
 		return _primaryPersistor.LoadNodeData();
 	}

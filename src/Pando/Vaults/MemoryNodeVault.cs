@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using Pando.Exceptions;
 using Pando.Persistors;
@@ -26,8 +27,9 @@ public class MemoryNodeVault : INodeVault
 		ArgumentNullException.ThrowIfNull(persistor);
 
 		_persistor = persistor;
-		(_nodeIndex, var data) = persistor.LoadNodeData();
-		_nodeData = new SpannableList<byte>(data);
+		var (index, data) = persistor.LoadNodeData();
+		_nodeIndex = new Dictionary<NodeId, Range>(index);
+		_nodeData = new SpannableList<byte>(data.ToArray());
 	}
 
 	internal MemoryNodeVault(Dictionary<NodeId, Range>? nodeIndex = null, SpannableList<byte>? nodeData = null)
