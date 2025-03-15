@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Pando.Exceptions;
+using Pando.Persistors;
 using Pando.Repositories;
 using Pando.Vaults.Utils;
 
@@ -11,6 +12,7 @@ namespace Pando.Vaults;
 
 public class MemorySnapshotVault : ISnapshotVault
 {
+	private readonly ISnapshotPersistor? _persistor;
 	private readonly Dictionary<SnapshotId, TreeEntry> _snapshotIndex;
 
 	internal class TreeEntry(
@@ -32,6 +34,17 @@ public class MemorySnapshotVault : ISnapshotVault
 	internal MemorySnapshotVault(Dictionary<SnapshotId, TreeEntry> snapshotIndex)
 	{
 		_snapshotIndex = snapshotIndex;
+	}
+
+	public MemorySnapshotVault(ISnapshotPersistor persistor)
+	{
+		ArgumentNullException.ThrowIfNull(persistor);
+		_persistor = persistor;
+		_snapshotIndex = new Dictionary<SnapshotId, TreeEntry>();
+		foreach (var (snapshotId, entry) in persistor.LoadSnapshotIndex())
+		{
+			AddEntry(snapshotId, new TreeEntry(entry.sourceParentId, entry.targetParentId, entry.rootNodeId, null));
+		}
 	}
 
 	public int SnapshotCount => _snapshotIndex.Count;
@@ -128,31 +141,41 @@ public class MemorySnapshotVault : ISnapshotVault
 		{
 			throw new AlreadyHasRootSnapshotException();
 		}
+
+		_persistor?.PersistSnapshot(rootSnapshotId, SnapshotId.None, SnapshotId.None, rootNodeId);
+
 		RootSnapshot = rootSnapshotId;
 		return rootSnapshotId;
 	}
 
 	public SnapshotId AddSnapshot(NodeId rootNodeId, SnapshotId sourceSnapshotId, SnapshotId targetSnapshotId = default)
 	{
-		var sourceParentEntry = GetEntry(sourceSnapshotId);
-		var targetParentEntry = targetSnapshotId != SnapshotId.None ? GetEntry(targetSnapshotId) : null;
-
 		var snapshotId = HashUtils.ComputeSnapshotHash(rootNodeId, sourceSnapshotId, targetSnapshotId);
 
 		if (_snapshotIndex.ContainsKey(snapshotId))
 			return snapshotId;
 
-		_snapshotIndex.Add(snapshotId, new TreeEntry(sourceSnapshotId, targetSnapshotId, rootNodeId, null));
+		AddEntry(snapshotId, new TreeEntry(sourceSnapshotId, targetSnapshotId, rootNodeId, null));
+
+		_persistor?.PersistSnapshot(snapshotId, sourceSnapshotId, targetSnapshotId, rootNodeId);
+
+		return snapshotId;
+	}
+
+	internal void AddEntry(SnapshotId snapshotId, TreeEntry entry)
+	{
+		var sourceParentEntry = GetEntry(entry.SourceParentId);
+		var targetParentEntry = entry.TargetParentId != SnapshotId.None ? GetEntry(entry.TargetParentId) : null;
+
+		_snapshotIndex.Add(snapshotId, entry);
 		sourceParentEntry.Children ??= [];
 		sourceParentEntry.Children.Add(snapshotId);
 
-		if (targetParentEntry is not null)
-		{
-			targetParentEntry.Children ??= [];
-			targetParentEntry.Children.Add(snapshotId);
-		}
+		if (targetParentEntry is null)
+			return;
 
-		return snapshotId;
+		targetParentEntry.Children ??= [];
+		targetParentEntry.Children.Add(snapshotId);
 	}
 
 	private TreeEntry GetEntry(
