@@ -26,7 +26,7 @@ public static partial class JsonNodePersistorTests
 				}
 				""";
 
-			var actual = Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
+			var actual = Encoding.UTF8.GetString(stream.ToArray());
 			await Assert.That(actual).IsEqualTo(expected);
 		}
 
@@ -48,7 +48,7 @@ public static partial class JsonNodePersistorTests
 				}
 				""";
 
-			var actual = Encoding.UTF8.GetString(stream.GetBuffer(), 0, (int)stream.Length);
+			var actual = Encoding.UTF8.GetString(stream.ToArray());
 			await Assert.That(actual).IsEqualTo(expected);
 		}
 	}
