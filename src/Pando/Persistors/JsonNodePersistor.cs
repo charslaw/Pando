@@ -16,7 +16,6 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 {
 	private readonly Stream _nodeIndexStream;
 	private Dictionary<NodeId, byte[]> _nodeIndex;
-	internal IReadOnlyDictionary<NodeId, byte[]> NodeIndex => _nodeIndex;
 
 	private JsonNodePersistor(Stream indexJsonStream)
 	{
