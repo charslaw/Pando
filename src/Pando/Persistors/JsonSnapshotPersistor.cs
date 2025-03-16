@@ -1,22 +1,27 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using Pando.Repositories;
 
 namespace Pando.Persistors;
 
-using IndexEntry = (SnapshotId sourceParentId, SnapshotId targetParentId, NodeId rootNodeId);
-
 public sealed class JsonSnapshotPersistor : ISnapshotPersistor, IDisposable
 {
+	internal record struct IndexEntry(SnapshotId? SourceParentId, SnapshotId? TargetParentId, NodeId RootNodeId)
+	{
+		public (SnapshotId, SnapshotId, NodeId) ToTuple() =>
+			(SourceParentId ?? SnapshotId.None, TargetParentId ?? SnapshotId.None, RootNodeId);
+	}
+
 	private readonly Stream _snapshotIndexStream;
 	private Dictionary<SnapshotId, IndexEntry> _snapshotIndex;
 
 	private JsonSnapshotPersistor(Stream snapshotIndexStream)
 	{
 		_snapshotIndexStream = snapshotIndexStream;
-		_snapshotIndex = new Dictionary<SnapshotId, IndexEntry>(Load(_snapshotIndexStream));
+		_snapshotIndex = Load(_snapshotIndexStream);
 	}
 
 	/// Creates a new <see cref="JsonSnapshotPersistor"/> that writes data to the file at the given path.
@@ -45,31 +50,36 @@ public sealed class JsonSnapshotPersistor : ISnapshotPersistor, IDisposable
 		NodeId rootNodeId
 	)
 	{
-		_snapshotIndex[snapshotId] = (sourceParentId, targetParentId, rootNodeId);
+		SnapshotId? nullableSourceParent = sourceParentId == SnapshotId.None ? null : sourceParentId;
+		SnapshotId? nullableTargetParent = targetParentId == SnapshotId.None ? null : targetParentId;
+		_snapshotIndex[snapshotId] = new IndexEntry(nullableSourceParent, nullableTargetParent, rootNodeId);
 
 		_snapshotIndexStream.SetLength(0);
 		_snapshotIndexStream.Seek(0, SeekOrigin.Begin);
 		JsonSerializer.Serialize(
 			_snapshotIndexStream,
 			_snapshotIndex,
-			JsonContext.Default.DictionarySnapshotIdValueTupleSnapshotIdSnapshotIdNodeId
+			JsonContext.Default.DictionarySnapshotIdIndexEntry
 		);
 	}
 
-	public IEnumerable<KeyValuePair<SnapshotId, IndexEntry>> LoadSnapshotIndex()
+	public IEnumerable<KeyValuePair<SnapshotId, (SnapshotId, SnapshotId, NodeId)>> LoadSnapshotIndex()
 	{
-		_snapshotIndex = new Dictionary<SnapshotId, IndexEntry>(Load(_snapshotIndexStream));
-		return _snapshotIndex;
+		_snapshotIndex = Load(_snapshotIndexStream);
+		return _snapshotIndex.Select(kvp => new KeyValuePair<SnapshotId, (SnapshotId, SnapshotId, NodeId)>(
+			kvp.Key,
+			kvp.Value.ToTuple()
+		));
 	}
 
-	private IEnumerable<KeyValuePair<SnapshotId, IndexEntry>> Load(Stream stream)
+	private static Dictionary<SnapshotId, IndexEntry> Load(Stream stream)
 	{
-		IEnumerable<KeyValuePair<SnapshotId, IndexEntry>>? result = null;
+		Dictionary<SnapshotId, IndexEntry>? result = null;
 		if (stream is { Length: > 0, CanRead: true })
 		{
 			result = JsonSerializer.Deserialize<Dictionary<SnapshotId, IndexEntry>>(
-				_snapshotIndexStream,
-				JsonContext.Default.DictionarySnapshotIdValueTupleSnapshotIdSnapshotIdNodeId
+				stream,
+				JsonContext.Default.DictionarySnapshotIdIndexEntry
 			);
 		}
 

@@ -11,7 +11,7 @@ namespace Pando.Persistors;
 	WriteIndented = true
 )]
 [JsonSerializable(typeof(Dictionary<NodeId, byte[]>))]
-[JsonSerializable(typeof(Dictionary<SnapshotId, (SnapshotId, SnapshotId, NodeId)>))]
+[JsonSerializable(typeof(Dictionary<SnapshotId, JsonSnapshotPersistor.IndexEntry>))]
 internal partial class JsonContext : JsonSerializerContext;
 
 internal class NodeIdConverter : JsonConverter<NodeId>
