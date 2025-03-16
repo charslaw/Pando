@@ -21,7 +21,7 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 	private JsonNodePersistor(Stream indexJsonStream)
 	{
 		_nodeIndexStream = indexJsonStream;
-		_nodeIndex = new Dictionary<NodeId, byte[]>(Load(indexJsonStream));
+		_nodeIndex = Load(indexJsonStream);
 	}
 
 	/// Creates a new <see cref="JsonNodePersistor"/> that writes data to the file at the given path.
@@ -54,7 +54,7 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 
 	public (IEnumerable<KeyValuePair<NodeId, Range>>, IEnumerable<byte>) LoadNodeData()
 	{
-		_nodeIndex = new Dictionary<NodeId, byte[]>(Load(_nodeIndexStream));
+		_nodeIndex = Load(_nodeIndexStream);
 		var resultIndex = new Dictionary<NodeId, Range>();
 		var resultData = new List<byte>();
 
@@ -70,14 +70,9 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 		return (resultIndex, resultData);
 	}
 
-	public void Dispose()
+	private static Dictionary<NodeId, byte[]> Load(Stream stream)
 	{
-		_nodeIndexStream.Dispose();
-	}
-
-	private static IEnumerable<KeyValuePair<NodeId, byte[]>> Load(Stream stream)
-	{
-		IEnumerable<KeyValuePair<NodeId, byte[]>>? result = null;
+		Dictionary<NodeId, byte[]>? result = null;
 		if (stream is { Length: > 0, CanRead: true })
 		{
 			stream.Seek(0, SeekOrigin.Begin);
@@ -88,5 +83,10 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 		}
 
 		return result ?? [];
+	}
+
+	public void Dispose()
+	{
+		_nodeIndexStream.Dispose();
 	}
 }
