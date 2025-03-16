@@ -77,6 +77,7 @@ public sealed class JsonSnapshotPersistor : ISnapshotPersistor, IDisposable
 		Dictionary<SnapshotId, IndexEntry>? result = null;
 		if (stream is { Length: > 0, CanRead: true })
 		{
+			stream.Seek(0, SeekOrigin.Begin);
 			result = JsonSerializer.Deserialize<Dictionary<SnapshotId, IndexEntry>>(
 				stream,
 				JsonContext.Default.DictionarySnapshotIdIndexEntry
