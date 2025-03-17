@@ -1,68 +1,57 @@
+![Pando Logo](./docs/pando-logo.svg)
+
 # Pando
 
-<img style="float: right" width="160px" height="160px" src="docs/noun-tree-4494965.svg" alt="Tree by Diky Setiawan from NounProject.com">
+Pando is a tool for serializing snapshots of data.
+It is based on the same data structure git uses to keep track of the history of snapshots: [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree).
+This allows it to store a full history of saved data while minimizing data duplication,
+and allows for rewinding to a previous point in history, branching into different timelines, and merging timelines.
 
-Pando is a history-aware state tree serialization system.
-Using a Pando Repository, you can save a snapshot of your tree hierarchy,
-and Pando will keep track of the history of snapshots,
-including branching histories and backtracking.
+Pando serialization relies on breaking down the data into nodes in a tree and serializing each node separately.
+This allows it to avoid storing duplicate copies of nodes that have already been serialized.
+Each discrete instance of saving data to the repository is known as a snapshot,
+and each snapshot refers to a tree of serialized nodes, as well as its parent snapshot(s).
+A tree of trees (or rather a DAG of trees).
 
-Pando is intended for use cases where all of the data you want to save is stored in a single tree hierarchy.
-
-It uses [Merkle trees](https://en.wikipedia.org/wiki/Merkle_tree)
-to store a complete history of a tree over a series of snapshots while avoiding data duplication
-(each unique blob is stored only once and referenced by hash).
+Pando is designed to be fast and well optimized.
+Pando serializers write and read directly to and from `Span<byte>` buffers,
+and persisting the data to disk is lightning fast because the data structures are append-only.
 
 ## Usage
 
 The entry point to Pando is the `PandoRepository<T>` class,
 where `T` is the type of the tree that you want to save in this repository.
-The public interface surface is defined in
-[`Pando.Repositories.IRepository<T>`](src/Pando/Repositories/IRepository.cs).
+The public interface is defined in
+[`Pando.Repositories.IPandoRepository<T>`](src/Pando/Repositories/IPandoRepository.cs).
 
-### Creating a `PandoRepository`
+Working with a `PandoRepository` is simple:
 
-In order to create a `PandoRepository`, you must define a *data source* and a *serializer*.
-The *data source* determines the destination to which data will be saved,
-while the *serializer* defines how to convert the tree into binary data.
+```csharp
+// Save some initial data
+MyStateTreeType initialStateTree = new MyStateTreeType(...);
+SnapshotId initialSnapshot = pandoRepository.SaveRootSnapshot(stateTree);
 
-The *data source* is of type `IDataSource`
-and the Pando library offers two built in options to fulfill this dependency
-(see [data sources](docs/data-sources.md)).
+// Update the state and save a new child snapshot of the initial
+var newStateTree = ChangeStateTree(initialStateTree);
+SnapshotId newSnapshot = pandoRepository.SaveSnapshot(newStateTree, initialSnapshot);
 
-The *serializer* must be user defined (or source generated)
-as the logic will be specific to the type that you are serializing
-(see [serializers](docs/serializers.md)).
-
-### Saving to a `PandoRepository`
-
-Save a snapshot of your state tree:
-
-```c#
-ulong snapshotHash = myPandoRepository.SaveSnapshot(myTreeRoot);
+// Later, retrieve the state of a previous snapshot using its ID.
+MyStateTreeType originalStateTree = pandoRepository.GetSnapshot(initialSnapshot);
 ```
 
-The returned hash can be used to identify and retrieve the snapshot at a later time.
+## What's in a Repository?
 
-### Getting data from a `PandoRepository`
+A `PandoRepository` has 3 dependencies:
 
-Get a previously saved snapshot:
-
-```c#
-var myTreeRootAtSnapshot = myPandoRepository.GetSnapshot(snapshotHash);
-```
-
-### Getting the full history from a `PandoRepository`
-
-Get a tree representation of the full history of all snapshots:
-
-```c#
-SnapshotTree history = myPandoRepository.GetSnapshotTree();
-```
-
-`SnapshotTree` is a recursive data structure that contains the hash of a snapshot,
-and a set of child `SnapshotTree`s.
-
-# Credits
-
-- [Tree](https://thenounproject.com/icon/tree-4494965/) by Diky Setiawan from NounProject.com
+- `INodeVault`: this dependency is responsible for storing the state tree nodes and retrieving them.
+  - Pando provides a built in `INodeVault` implementation: `MemoryNodeVault`.
+    This implementation stores data in memory, but can also optionally take a `INodePersistor` which writes and reads data to disk. 
+- `ISnapshotVault`: this dependency is responsible for storing the tree of snapshots and their relationships to one another.
+  - Similar to `INodeVault`, `ISnapshotVault` has a built-in `MemorySnapshotVault` implementation,
+    which can optionally use a `ISnapshotPersistor`.
+- `IPandoSerializer<T>`: this dependency is responsible for converting your C# objects into raw bytes.
+  - Pando provides fast generic implementations designed for serializing general-purpose nodes
+    and optimized serializers for primitive data,
+    but you can also provide your own custom implementations to optimize for your specific data and requirements.
+  - While it is not strictly necessary, serialization in Pando is often itself performed by a tree of serializers.
+    The built-in Pando serializers are all implemented to use composition of sub-serializers in a tree structure.
