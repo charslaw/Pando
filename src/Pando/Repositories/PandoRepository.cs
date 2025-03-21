@@ -85,7 +85,7 @@ public class PandoRepository<T>(INodeVault nodeVault, ISnapshotVault snapshotVau
 
 	private T DeserializeFromNodeId(NodeId nodeId)
 	{
-		Span<byte> idBuffer = stackalloc byte[sizeof(ulong)];
+		Span<byte> idBuffer = stackalloc byte[NodeId.SIZE];
 		nodeId.CopyTo(idBuffer);
 		return serializer.Deserialize(idBuffer, NodeVault);
 	}
