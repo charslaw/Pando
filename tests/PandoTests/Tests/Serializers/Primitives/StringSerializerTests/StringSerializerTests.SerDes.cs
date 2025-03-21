@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Pando.Serializers.Collections;
+using Pando.Serializers.Primitives;
 using Pando.Vaults;
 using Pando.Vaults.Utils;
 using PandoTests.Utils;
 
-namespace PandoTests.Tests.Serializers.Collections.StringSerializerTests;
+namespace PandoTests.Tests.Serializers.Primitives.StringSerializerTests;
 
 public static class StringSerializerTests
 {

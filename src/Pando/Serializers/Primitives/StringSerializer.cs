@@ -3,7 +3,7 @@ using System.Text;
 using Pando.Repositories;
 using Pando.Vaults;
 
-namespace Pando.Serializers.Collections;
+namespace Pando.Serializers.Primitives;
 
 /// Serializes a string using a given encoding
 public class StringSerializer(Encoding encoding) : IPandoSerializer<string>
