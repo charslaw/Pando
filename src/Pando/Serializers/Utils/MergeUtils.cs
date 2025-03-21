@@ -15,9 +15,14 @@ public static class MergeUtils
 		ReadOnlySpan<byte> sourceBuffer
 	)
 	{
-		if (MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer))
-			return;
-		sourceBuffer.CopyTo(baseBuffer);
+		if (baseBuffer.SequenceEqual(sourceBuffer))
+		{
+			targetBuffer.CopyTo(baseBuffer);
+		}
+		else
+		{
+			sourceBuffer.CopyTo(baseBuffer);
+		}
 	}
 
 	/// Overwrites contents of <paramref name="baseBuffer"/> with contents of <paramref name="mergeBuffer"/>
@@ -28,10 +33,12 @@ public static class MergeUtils
 		ReadOnlySpan<byte> mergeBuffer
 	)
 	{
-		if (!baseBuffer.SequenceEqual(cmpBuffer))
-			return false;
+		if (baseBuffer.SequenceEqual(cmpBuffer))
+		{
+			mergeBuffer.CopyTo(baseBuffer);
+			return true;
+		}
 
-		mergeBuffer.CopyTo(baseBuffer);
-		return true;
+		return false;
 	}
 }
