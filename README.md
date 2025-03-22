@@ -147,12 +147,63 @@ When it comes to the structure of nodes to use, use the following guidelines:
     However, if they often change independent of one another, it makes sense to store them in separate nodes, so that
     changing the position does not also save a copy of the rotation and vice versa.
 
+### Built-In Serializers
+
+Pando comes with many serializers already implemented for you.
+
+- `Pando.Serializers.Generic`
+  - `GenericNodeSerializer`: a set of 16 generic serializers that serialize values that implement `IGenericSerializable` 
+    as a node.
+  - `GenericInlineSerializer`: coming soon.
+- `Pando.Serializers.Collections`:
+  - `ArraySerializer<T>`: Serializes a `T[]` using a given element serializer.
+  - `ListSerializer<T>`: Serializes a `List<T>` using a given element serializer.
+  - `HashSetSerializer<T>`: Serializes a `HashSet<T>` using a given element serializer.
+  - `CollectionSerializer<T>`: Abstract base class for different types of `ICollection<T>`.
+    Implement for your own collections by overriding `CreateCollection`.
+- `Pando.Serializers.Primitives`:
+  - `StringSerializer`: Serializes strings.
+    Construct your own, providing an `Encoding` to use, or use `StringSerializer.UTF8` or `StringSerializer.ASCII`.
+  - `BooleanSerializer`: Serializes `bool`/`Boolean` values. Construct your own or use `BooleanSerializer.Default`.
+  - `ByteSerializer`: Serializes `byte`/`Byte` values. Construct your own or use `ByteSerializer.Default`.
+  - `SByteSerializer`: Serializes `sbyte`/`SByte` values. Construct your own or use `SByteSerializer.Default`.
+  - `Int16LittleEndianSerializer`: Serializes `short`/`Int16` values in little endian byte order (least significant byte first).
+    Construct your own or use `Int16LittleEndianSerializer.Default`.
+  - `UInt16LittleEndianSerializer`: Serializes `ushort`/`UInt16` values in little endian byte order.
+    Construct your own or use `UInt16LittleEndianSerializer.Default`.
+  - `Int32LittleEndianSerializer`: Serializes `int`/`Int32` values in little endian byte order.
+    Construct your own or use `Int32LittleEndianSerializer.Default`.
+  - `UInt32LittleEndianSerializer`: Serializes `uint`/`UInt32` values in little endian byte order.
+    Construct your own or use `UInt32LittleEndianSerializer.Default`.
+  - `Int64LittleEndianSerializer`: Serializes `long`/`Int64` values in little endian byte order.
+    Construct your own or use `Int64LittleEndianSerializer.Default`.
+  - `UInt64LittleEndianSerializer`: Serializes `ulong`/`UInt64` values in little endian byte order.
+    Construct your own or use `UInt64LittleEndianSerializer.Default`.
+  - `HalfLittleEndianSerializer`: Serializes `Half` values in little endian byte order.
+    Construct your own or use `HalfLittleEndianSerializer.Default`.
+  - `SingleLittleEndianSerializer`: Serializes `float`/`Single` values in little endian byte order.
+    Construct your own or use `SingleLittleEndianSerializer.Default`.
+  - `DoubleLittleEndianSerializer`: Serializes `double`/`Double` values in little endian byte order.
+    Construct your own or use `DoubleLittleEndianSerializer.Default`.
+  - `EnumSerializer<TEnum, TUnderlying>`: Serializes values of type `TEnum` using their underlying type.
+    You can construct an `EnumSerializer` using the factory methods `EnumSerializer.SerializerFor<TEnum>()` or
+    `EnumSerializer.SerializerFor<TEnum, TUnderlying>(IPandoSerializer<TUnderlying> underlyingSerializer)`.
+  - `DateTimeToBinarySerializer`: Serializes a `DateTime` using the `ToBinary` method.
+    Construct your own by passing a `IPandoSerializer<long>` or use `DateTimeToBinarySerializer.Default`.
+  - `DateOnlyDayNumberSerializer`: Serializes a `DateOnly` using the `DayNumber` property.
+    Construct your own by passing a `IPandoSerializer<int>` or use `DateOnlyDayNumberSerializer.Default`.
+  - `TimeOnlyTicksSerializer`: Serializes a `TimeOnly` using the `Ticks` property.
+    Construct your own by passing a `IPandoSerializer<long>` or use `TimeOnlyTicksSerializer.Default`.
+  - `TimeSpanTicksSerializer`: Serializes a `TimeSpan` using the `Ticks` property.
+    Construct your own by passing a `IPandoSerializer<long>` or use `TimeSpanTicksSerializer.Default`.
+  - `NullableSerializer<T>`: Serialize a `T?` using a given `IPandoSerializer<T>`.
+    Uses 1 byte for whether the value exists and the appropriate number of bytes for the content.
+    Construct by providing an inner serializer to serialize the contents.
+
 <!--
 TODO
 - Configuration
 - Describe Serializers in more detail
-  - Provide overview of built-in serializers
-  - When to serialize as a node vs inline
   - Writing your own serializers
   - How do the NodeVault and Serializers interact
 -->
