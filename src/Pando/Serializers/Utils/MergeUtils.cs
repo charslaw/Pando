@@ -25,17 +25,35 @@ public static class MergeUtils
 		}
 	}
 
-	/// Overwrites contents of <paramref name="baseBuffer"/> with contents of <paramref name="mergeBuffer"/>
-	/// if the existing contents match <paramref name="cmpBuffer"/>.
-	public static bool MergeIfUnchanged(
+	/// Merges two nodes if a fast-forward merge can be performed.
+	/// If <paramref name="targetBuffer"/> is unchanged from <paramref name="baseBuffer"/>, take <paramref name="sourceBuffer"/>.
+	/// If <paramref name="sourceBuffer"/> is unchanged from <paramref name="baseBuffer"/>, take <paramref name="targetBuffer"/>.
+	/// If <paramref name="targetBuffer"/> and <paramref name="sourceBuffer"/> are the same, take their value.
+	/// <returns>Whether a fast-forward merge was performed.</returns>
+	public static bool TryMergeFastForward(
 		Span<byte> baseBuffer,
-		ReadOnlySpan<byte> cmpBuffer,
-		ReadOnlySpan<byte> mergeBuffer
+		ReadOnlySpan<byte> targetBuffer,
+		ReadOnlySpan<byte> sourceBuffer
 	)
 	{
-		if (baseBuffer.SequenceEqual(cmpBuffer))
+		// if target is unchanged from base, merged value is source
+		if (targetBuffer.SequenceEqual(baseBuffer))
 		{
-			mergeBuffer.CopyTo(baseBuffer);
+			sourceBuffer.CopyTo(baseBuffer);
+			return true;
+		}
+
+		// if source is unchanged from base, merged value is target
+		if (sourceBuffer.SequenceEqual(baseBuffer))
+		{
+			targetBuffer.CopyTo(baseBuffer);
+			return true;
+		}
+
+		// if source and target are the same, merged value is both
+		if (sourceBuffer.SequenceEqual(targetBuffer))
+		{
+			sourceBuffer.CopyTo(baseBuffer);
 			return true;
 		}
 
