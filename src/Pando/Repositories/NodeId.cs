@@ -9,6 +9,12 @@ public readonly record struct NodeId(ulong Hash)
 	public const int SIZE = sizeof(ulong);
 	public static readonly NodeId None = new(0);
 
+	public static bool BufferIsNone(ReadOnlySpan<byte> buffer)
+	{
+		Span<byte> span = stackalloc byte[SIZE];
+		return buffer.SequenceEqual(span);
+	}
+
 	public static NodeId FromBuffer(ReadOnlySpan<byte> buffer) => new(BinaryPrimitives.ReadUInt64LittleEndian(buffer));
 
 	public static NodeId FromHashString(ReadOnlySpan<char> hashString)
