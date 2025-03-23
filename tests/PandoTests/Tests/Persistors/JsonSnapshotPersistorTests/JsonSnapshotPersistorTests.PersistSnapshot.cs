@@ -23,13 +23,8 @@ public static partial class JsonSnapshotPersistorTests
 			persistor.PersistSnapshot(snapshotId, SnapshotId.None, SnapshotId.None, nodeId);
 
 			var expected = """
-				{
-				  "5a42614c6a14f5a7": {
-				    "SourceParentId": null,
-				    "TargetParentId": null,
-				    "RootNodeId": "1ecc534460d8ceff"
-				  }
-				}
+				{"SnapshotId":"5a42614c6a14f5a7","SourceParentId":null,"TargetParentId":null,"RootNodeId":"1ecc534460d8ceff"}
+
 				""";
 
 			var actual = Encoding.UTF8.GetString(stream.ToArray());
@@ -51,18 +46,9 @@ public static partial class JsonSnapshotPersistorTests
 			persistor.PersistSnapshot(childSnapshotId, rootSnapshotId, SnapshotId.None, nodeId);
 
 			var expected = """
-				{
-				  "5a42614c6a14f5a7": {
-				    "SourceParentId": null,
-				    "TargetParentId": null,
-				    "RootNodeId": "1ecc534460d8ceff"
-				  },
-				  "8e1961e8cb887c7d": {
-				    "SourceParentId": "5a42614c6a14f5a7",
-				    "TargetParentId": null,
-				    "RootNodeId": "1ecc534460d8ceff"
-				  }
-				}
+				{"SnapshotId":"5a42614c6a14f5a7","SourceParentId":null,"TargetParentId":null,"RootNodeId":"1ecc534460d8ceff"}
+				{"SnapshotId":"8e1961e8cb887c7d","SourceParentId":"5a42614c6a14f5a7","TargetParentId":null,"RootNodeId":"1ecc534460d8ceff"}
+
 				""";
 
 			var actual = Encoding.UTF8.GetString(stream.ToArray());
@@ -83,13 +69,8 @@ public static partial class JsonSnapshotPersistorTests
 			persistor.PersistSnapshot(snapshotId, sourceParentId, targetParentId, nodeId);
 
 			var expected = """
-				{
-				  "6133e13323a211f3": {
-				    "SourceParentId": "5a42614c6a14f5a7",
-				    "TargetParentId": "8e1961e8cb887c7d",
-				    "RootNodeId": "1ecc534460d8ceff"
-				  }
-				}
+				{"SnapshotId":"6133e13323a211f3","SourceParentId":"5a42614c6a14f5a7","TargetParentId":"8e1961e8cb887c7d","RootNodeId":"1ecc534460d8ceff"}
+
 				""";
 
 			var actual = Encoding.UTF8.GetString(stream.ToArray());

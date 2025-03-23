@@ -7,31 +7,14 @@ using Pando.Repositories;
 namespace Pando.Persistors;
 
 [JsonSourceGenerationOptions(
-	Converters = [typeof(NodeIdConverter), typeof(SnapshotIdConverter), typeof(ByteArrayJsonArrayConverter)],
-	WriteIndented = true
+	Converters = [typeof(NodeIdConverter), typeof(SnapshotIdConverter), typeof(ByteArrayJsonArrayConverter)]
 )]
-[JsonSerializable(typeof(Dictionary<NodeId, byte[]>))]
-[JsonSerializable(typeof(Dictionary<SnapshotId, JsonSnapshotPersistor.IndexEntry>))]
+[JsonSerializable(typeof(JsonNodePersistor.NodeEntry))]
+[JsonSerializable(typeof(JsonSnapshotPersistor.SnapshotEntry))]
 internal partial class JsonContext : JsonSerializerContext;
 
 internal class NodeIdConverter : JsonConverter<NodeId>
 {
-	public override NodeId ReadAsPropertyName(
-		ref Utf8JsonReader reader,
-		Type typeToConvert,
-		JsonSerializerOptions options
-	)
-	{
-		return Read(ref reader, typeToConvert, options);
-	}
-
-	public override void WriteAsPropertyName(Utf8JsonWriter writer, NodeId value, JsonSerializerOptions options)
-	{
-		Span<char> buffer = stackalloc char[NodeId.SIZE * 2]; // hex representation is 2 chars per byte
-		value.CopyHashStringTo(ref buffer);
-		writer.WritePropertyName(buffer);
-	}
-
 	public override NodeId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
 		Span<char> buffer = stackalloc char[NodeId.SIZE * 2]; // hex representation is 2 chars per byte
@@ -49,22 +32,6 @@ internal class NodeIdConverter : JsonConverter<NodeId>
 
 internal class SnapshotIdConverter : JsonConverter<SnapshotId>
 {
-	public override SnapshotId ReadAsPropertyName(
-		ref Utf8JsonReader reader,
-		Type typeToConvert,
-		JsonSerializerOptions options
-	)
-	{
-		return Read(ref reader, typeToConvert, options);
-	}
-
-	public override void WriteAsPropertyName(Utf8JsonWriter writer, SnapshotId value, JsonSerializerOptions options)
-	{
-		Span<char> buffer = stackalloc char[SnapshotId.SIZE * 2]; // hex representation is 2 chars per byte
-		value.CopyHashStringTo(ref buffer);
-		writer.WritePropertyName(buffer);
-	}
-
 	public override SnapshotId Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
 		Span<char> buffer = stackalloc char[SnapshotId.SIZE * 2]; // hex representation is 2 chars per byte

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Pando.Repositories;
 
 namespace Pando.Persistors;
@@ -12,7 +13,7 @@ public interface ISnapshotPersistor
 		NodeId rootNodeId
 	);
 
-	IEnumerable<
-		KeyValuePair<SnapshotId, (SnapshotId sourceParentId, SnapshotId targetParentId, NodeId rootNodeId)>
+	Task<
+		IEnumerable<KeyValuePair<SnapshotId, (SnapshotId sourceParentId, SnapshotId targetParentId, NodeId rootNodeId)>>
 	> LoadSnapshotIndex();
 }

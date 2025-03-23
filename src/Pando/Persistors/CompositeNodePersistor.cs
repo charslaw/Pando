@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Pando.Repositories;
 
 namespace Pando.Persistors;
@@ -24,8 +25,8 @@ public class CompositeNodePersistor : INodePersistor
 		}
 	}
 
-	public (IEnumerable<KeyValuePair<NodeId, Range>>, IEnumerable<byte>) LoadNodeData()
+	public async Task<(IEnumerable<KeyValuePair<NodeId, Range>>, IEnumerable<byte>)> LoadNodeData()
 	{
-		return _primaryPersistor.LoadNodeData();
+		return await _primaryPersistor.LoadNodeData().ConfigureAwait(false);
 	}
 }

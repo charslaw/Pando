@@ -3,6 +3,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Pando.Exceptions;
 using Pando.Persistors;
 using Pando.Repositories;
@@ -36,15 +37,25 @@ public class MemorySnapshotVault : ISnapshotVault
 		_snapshotIndex = snapshotIndex;
 	}
 
-	public MemorySnapshotVault(ISnapshotPersistor persistor)
+	private MemorySnapshotVault(ISnapshotPersistor persistor)
 	{
-		ArgumentNullException.ThrowIfNull(persistor);
 		_persistor = persistor;
 		_snapshotIndex = new Dictionary<SnapshotId, TreeEntry>();
-		foreach (var (snapshotId, entry) in persistor.LoadSnapshotIndex())
+	}
+
+	public static async Task<MemorySnapshotVault> Create(ISnapshotPersistor persistor)
+	{
+		ArgumentNullException.ThrowIfNull(persistor);
+		var vault = new MemorySnapshotVault(persistor);
+		foreach (var (snapshotId, entry) in await persistor.LoadSnapshotIndex().ConfigureAwait(false))
 		{
-			AddEntry(snapshotId, new TreeEntry(entry.sourceParentId, entry.targetParentId, entry.rootNodeId, null));
+			vault.AddEntry(
+				snapshotId,
+				new TreeEntry(entry.sourceParentId, entry.targetParentId, entry.rootNodeId, null)
+			);
 		}
+
+		return vault;
 	}
 
 	public int SnapshotCount => _snapshotIndex.Count;

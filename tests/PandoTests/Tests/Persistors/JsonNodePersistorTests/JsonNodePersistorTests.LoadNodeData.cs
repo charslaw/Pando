@@ -29,9 +29,8 @@ public static partial class JsonNodePersistorTests
 		public async Task Should_return_data_from_pre_populated_stream()
 		{
 			var json = """
-				{
-				  "1ecc534460d8ceff": "00010203"
-				}
+				{"NodeId":"1ecc534460d8ceff","Bytes":"00010203"}
+
 				""";
 
 			var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
@@ -53,9 +52,8 @@ public static partial class JsonNodePersistorTests
 			var persistor = JsonNodePersistor.CreateFromStream(stream);
 
 			var json = """
-				{
-				  "1ecc534460d8ceff": "00010203"
-				}
+				{"NodeId":"1ecc534460d8ceff","Bytes":"00010203"}
+
 				""";
 
 			stream.Write(Encoding.UTF8.GetBytes(json));

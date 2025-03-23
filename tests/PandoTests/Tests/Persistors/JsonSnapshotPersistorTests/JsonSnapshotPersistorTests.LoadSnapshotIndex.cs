@@ -28,13 +28,8 @@ public static partial class JsonSnapshotPersistorTests
 		public async Task Should_return_data_from_pre_populated_stream()
 		{
 			var json = """
-				{
-				  "5a42614c6a14f5a7": {
-				    "SourceParentId": null,
-				    "TargetParentId": null,
-				    "RootNodeId": "1ecc534460d8ceff"
-				  }
-				}
+				{"SnapshotId":"5a42614c6a14f5a7","SourceParentId":null,"TargetParentId":null,"RootNodeId":"1ecc534460d8ceff"}
+
 				""";
 
 			var stream = new MemoryStream(Encoding.UTF8.GetBytes(json));
@@ -60,13 +55,8 @@ public static partial class JsonSnapshotPersistorTests
 			var persistor = JsonSnapshotPersistor.CreateFromStream(stream);
 
 			var json = """
-				{
-				  "5a42614c6a14f5a7": {
-				    "SourceParentId": null,
-				    "TargetParentId": null,
-				    "RootNodeId": "1ecc534460d8ceff"
-				  }
-				}
+				{"SnapshotId":"5a42614c6a14f5a7","SourceParentId":null,"TargetParentId":null,"RootNodeId":"1ecc534460d8ceff"}
+
 				""";
 
 			stream.Write(Encoding.UTF8.GetBytes(json));

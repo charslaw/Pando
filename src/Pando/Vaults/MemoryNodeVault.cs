@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Pando.Exceptions;
 using Pando.Persistors;
 using Pando.Repositories;
@@ -22,14 +23,23 @@ public class MemoryNodeVault : INodeVault
 		_persistor = null;
 	}
 
-	public MemoryNodeVault(INodePersistor persistor)
+	private MemoryNodeVault(INodePersistor persistor, Dictionary<NodeId, Range> nodeIndex, SpannableList<byte> nodeData)
+	{
+		_persistor = persistor;
+		_nodeIndex = nodeIndex;
+		_nodeData = nodeData;
+	}
+
+	public static async Task<MemoryNodeVault> Create(INodePersistor persistor)
 	{
 		ArgumentNullException.ThrowIfNull(persistor);
 
-		_persistor = persistor;
-		var (index, data) = persistor.LoadNodeData();
-		_nodeIndex = new Dictionary<NodeId, Range>(index);
-		_nodeData = new SpannableList<byte>(data.ToArray());
+		var (index, data) = await persistor.LoadNodeData().ConfigureAwait(false);
+
+		var nodeIndex = index as Dictionary<NodeId, Range> ?? index.ToDictionary();
+		var nodeData = new SpannableList<byte>(data as byte[] ?? data.ToArray());
+
+		return new MemoryNodeVault(persistor, nodeIndex, nodeData);
 	}
 
 	internal MemoryNodeVault(Dictionary<NodeId, Range>? nodeIndex = null, SpannableList<byte>? nodeData = null)

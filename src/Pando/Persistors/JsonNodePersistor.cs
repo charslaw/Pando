@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using Pando.Repositories;
 using Pando.Vaults;
 
@@ -14,13 +16,13 @@ namespace Pando.Persistors;
 /// </remarks>
 public sealed class JsonNodePersistor : INodePersistor, IDisposable
 {
+	internal record struct NodeEntry(NodeId NodeId, byte[] Bytes);
+
 	private readonly Stream _nodeIndexStream;
-	private Dictionary<NodeId, byte[]> _nodeIndex;
 
 	private JsonNodePersistor(Stream indexJsonStream)
 	{
 		_nodeIndexStream = indexJsonStream;
-		_nodeIndex = Load(indexJsonStream);
 	}
 
 	/// Creates a new <see cref="JsonNodePersistor"/> that writes data to the file at the given path.
@@ -44,44 +46,28 @@ public sealed class JsonNodePersistor : INodePersistor, IDisposable
 
 	public void PersistNode(NodeId nodeId, ReadOnlySpan<byte> data)
 	{
-		_nodeIndex[nodeId] = data.ToArray();
+		var entry = new NodeEntry(nodeId, data.ToArray());
+		JsonSerializer.Serialize(_nodeIndexStream, entry, JsonContext.Default.NodeEntry);
+		_nodeIndexStream.WriteByte((byte)'\n');
+	}
 
-		_nodeIndexStream.SetLength(0);
+	public async Task<(IEnumerable<KeyValuePair<NodeId, Range>>, IEnumerable<byte>)> LoadNodeData()
+	{
 		_nodeIndexStream.Seek(0, SeekOrigin.Begin);
-		JsonSerializer.Serialize(_nodeIndexStream, _nodeIndex, JsonContext.Default.DictionaryNodeIdByteArray);
-	}
+		using var reader = new StreamReader(_nodeIndexStream, Encoding.UTF8, true, -1, true);
 
-	public (IEnumerable<KeyValuePair<NodeId, Range>>, IEnumerable<byte>) LoadNodeData()
-	{
-		_nodeIndex = Load(_nodeIndexStream);
-		var resultIndex = new Dictionary<NodeId, Range>();
-		var resultData = new List<byte>();
+		var indexDict = new Dictionary<NodeId, Range>();
+		var dataList = new List<byte>();
 
-		var length = 0;
-		foreach (var (nodeId, bytes) in _nodeIndex)
+		while (await reader.ReadLineAsync().ConfigureAwait(false) is { } line)
 		{
-			resultData.AddRange(bytes);
-			var newLength = length + bytes.Length;
-			resultIndex[nodeId] = length..newLength;
-			length = newLength;
+			var (nodeId, bytes) = JsonSerializer.Deserialize(line, JsonContext.Default.NodeEntry);
+			var range = dataList.Count..(dataList.Count + bytes.Length);
+			indexDict.Add(nodeId, range);
+			dataList.AddRange(bytes);
 		}
 
-		return (resultIndex, resultData);
-	}
-
-	private static Dictionary<NodeId, byte[]> Load(Stream stream)
-	{
-		Dictionary<NodeId, byte[]>? result = null;
-		if (stream is { Length: > 0, CanRead: true })
-		{
-			stream.Seek(0, SeekOrigin.Begin);
-			result = JsonSerializer.Deserialize<Dictionary<NodeId, byte[]>>(
-				stream,
-				JsonContext.Default.DictionaryNodeIdByteArray
-			);
-		}
-
-		return result ?? [];
+		return (indexDict, dataList);
 	}
 
 	public void Dispose()
