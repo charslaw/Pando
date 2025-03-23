@@ -55,9 +55,13 @@ public class GenericNodeSerializer<TNode, T1> : IPandoSerializer<TNode>
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t1EndOffset * 3];
 
@@ -133,9 +137,13 @@ public class GenericNodeSerializer<TNode, T1, T2> : IPandoSerializer<TNode>
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t2EndOffset * 3];
 
@@ -219,9 +227,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3> : IPandoSerializer<TNode>
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t3EndOffset * 3];
 
@@ -313,9 +325,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4> : IPandoSerializer<TNo
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t4EndOffset * 3];
 
@@ -415,9 +431,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5> : IPandoSerializer
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t5EndOffset * 3];
 
@@ -525,9 +545,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6> : IPandoSerial
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t6EndOffset * 3];
 
@@ -643,9 +667,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7> : IPandoSe
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t7EndOffset * 3];
 
@@ -769,9 +797,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8> : IPan
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t8EndOffset * 3];
 
@@ -903,9 +935,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9> : 
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t9EndOffset * 3];
 
@@ -1045,9 +1081,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t10EndOffset * 3];
 
@@ -1195,9 +1235,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t11EndOffset * 3];
 
@@ -1353,9 +1397,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t12EndOffset * 3];
 
@@ -1519,9 +1567,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t13EndOffset * 3];
 
@@ -1693,9 +1745,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t14EndOffset * 3];
 
@@ -1875,9 +1931,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t15EndOffset * 3];
 
@@ -2065,9 +2125,13 @@ public class GenericNodeSerializer<TNode, T1, T2, T3, T4, T5, T6, T7, T8, T9, T1
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;
 
+		InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);
+	}
+
+	private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)
+	{
 		// allocate a buffer to contain the children data of base, target, and source
 		Span<byte> childrenBuffer = stackalloc byte[_t16EndOffset * 3];
 

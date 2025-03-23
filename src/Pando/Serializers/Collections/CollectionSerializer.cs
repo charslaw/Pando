@@ -74,9 +74,7 @@ public abstract class CollectionSerializer<TCollection, TElement>(IPandoSerializ
 	{
 		ArgumentNullException.ThrowIfNull(nodeVault);
 
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer))
-			return;
-		if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer))
+		if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer))
 			return;
 
 		var baseBytesSize = nodeVault.GetSizeOfNode(baseBuffer);

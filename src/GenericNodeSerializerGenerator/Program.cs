@@ -169,13 +169,19 @@ command.SetHandler(
 							writer.WriteLine("ArgumentNullException.ThrowIfNull(nodeVault);");
 							writer.WriteLineNoTabs(null);
 							writer.WriteLine(
-								"if (MergeUtils.MergeIfUnchanged(baseBuffer, targetBuffer, sourceBuffer)) return;"
-							);
-							writer.WriteLine(
-								"if (MergeUtils.MergeIfUnchanged(baseBuffer, sourceBuffer, targetBuffer)) return;"
+								"if (MergeUtils.TryMergeFastForward(baseBuffer, targetBuffer, sourceBuffer)) return;"
 							);
 							writer.WriteLineNoTabs(null);
 
+							writer.WriteLine("InnerMerge(baseBuffer, targetBuffer, sourceBuffer, nodeVault);");
+						}
+					);
+
+					writeMethod(
+						writer,
+						"private void InnerMerge(Span<byte> baseBuffer, ReadOnlySpan<byte> targetBuffer, ReadOnlySpan<byte> sourceBuffer, INodeVault nodeVault)",
+						() =>
+						{
 							writer.WriteLine(
 								"// allocate a buffer to contain the children data of base, target, and source"
 							);
@@ -206,6 +212,7 @@ command.SetHandler(
 										+ $"nodeVault);"
 								);
 							}
+
 							writer.WriteLineNoTabs(null);
 
 							writer.WriteLine("nodeVault.AddNode(baseChildrenBuffer, baseBuffer);");
